@@ -64,7 +64,7 @@ export function CartPage() {
 			<div className="cart-layout">
 				<div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 					{cartItems.map(({ cartId, quantity, product }) => (
-						<div key={cartId} className="cart-item">
+						<div key={cartId} className="card cart-item">
 							<div className="cart-item-image">
 								<img src={product.image} alt={product.name} className="w-full h-full object-cover mix-blend-multiply dark:mix-blend-normal" />
 							</div>
@@ -96,7 +96,7 @@ export function CartPage() {
 				</div>
 
 				<div>
-					<div className="summary-card">
+					<div className="card summary-card">
 						<h2 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem' }}>Order Summary</h2>
 
 						<div className="summary-row">

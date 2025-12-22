@@ -1,0 +1,57 @@
+# Open E-Commerce Project Rules
+
+> [!IMPORTANT]
+> Always reference these rules before making any changes.
+
+## Tech Stack
+
+- **Build Tool**: Vite
+- **Framework**: React 19
+- **Language**: TypeScript
+- **State Management**: React Context / Hooks (and Dexie for local DB)
+- **Styling**: Vanilla CSS
+- **Icons**: lucide-react
+- **Routing**: react-router-dom
+
+## Project Structure
+
+- `src/components/`: Reusable UI components.
+- `src/pages/`: Route components/pages.
+- `src/db/`: Database configuration and logic (Dexie).
+- `src/assets/`: Static assets.
+- `src/index.css`: Global styles and CSS variables.
+
+## Styling Guidelines
+
+1.  **Vanilla CSS Only**:
+    - Do not use Tailwind, Sass, or styled-components.
+    - All styles should go in `src/index.css` or component-specific CSS files if needed (but `index.css` seems to be the current pattern for this size).
+2.  **CSS Variables**:
+    - Use the defined CSS variables in `:root` and `[data-theme="dark"]` for colors, spacing, and border radius.
+    - Example: `var(--bg-primary)`, `var(--text-secondary)`, `var(--accent)`.
+3.  **Naming Convention**:
+    - Use BEM-like naming for classes: `.block__element--modifier` or simple `.component-name` and `.component-name-child`.
+    - Example: `.product-card`, `.product-image`, `.btn-primary`.
+4.  **Dark Mode**:
+    - Ensure all color definitions support dark mode via the `[data-theme="dark"]` selector overrides in `index.css`.
+5.  **Responsiveness**:
+    - Use media queries for responsive design (mobile-first preferred, though current CSS has desktop-first overrides like `@media (min-width: 768px)`).
+    - ensure layouts break down gracefully on smaller screens.
+
+## Coding Practices
+
+1.  **TypeScript**:
+    - Use strict types. Avoid `any`.
+    - Define interfaces/types for props and data structures.
+2.  **React Components**:
+    - Use Functional Components with Hooks.
+    - Keep components small and focused.
+    - Place complex logic in custom hooks.
+3.  **Database**:
+    - Use `dexie` and `dexie-react-hooks` for IndexedDB interactions.
+    - Ensure offline-first capability where possible.
+
+## Linting
+
+- Follow the rules defined in `eslint.config.js`.
+- Run `npm run lint` to verify.

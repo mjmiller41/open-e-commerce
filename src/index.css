@@ -259,6 +259,7 @@ img {
   margin: 0 0 1rem 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -422,9 +423,6 @@ img {
   display: flex;
   gap: 1.5rem;
   padding: 1.5rem;
-  background-color: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
   margin-bottom: 1rem;
   align-items: center;
 }
@@ -460,32 +458,6 @@ img {
   gap: 1rem;
 }
 
-.qty-control {
-  display: flex;
-  align-items: center;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-}
-
-.qty-btn {
-  padding: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.qty-btn:hover {
-  background-color: var(--bg-secondary);
-}
-
-.qty-val {
-  width: 2rem;
-  text-align: center;
-  font-weight: 500;
-  font-size: 0.875rem;
-}
-
 .remove-btn {
   color: #ef4444;
   font-size: 0.875rem;
@@ -499,9 +471,6 @@ img {
 }
 
 .summary-card {
-  background-color: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
   padding: 1.5rem;
   position: sticky;
   top: 6rem;
@@ -599,6 +568,7 @@ img {
     var(--text-secondary)
   );
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
