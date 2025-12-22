@@ -1,5 +1,6 @@
 import { Outlet, Link } from 'react-router-dom';
-import { ShoppingCart, Store } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
+import { LogoIcon } from './LogoIcon';
 import { ThemeToggle } from './ThemeToggle';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
@@ -13,8 +14,8 @@ export function Layout() {
 			<header className="app-header">
 				<div className="container header-inner">
 					<Link to="/" className="logo">
-						<Store />
-						<span>OpenStore</span>
+						<LogoIcon />
+						<span>Open E-Commerce</span>
 					</Link>
 
 					<div className="header-actions">

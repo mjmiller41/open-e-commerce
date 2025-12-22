@@ -1,6 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
-import { Trash2, Minus, Plus, ArrowRight, ShoppingBag } from 'lucide-react';
+import { Trash2, ArrowRight, ShoppingBag } from 'lucide-react';
+import { QuantityControl } from '../components/QuantityControl';
 import { Link } from 'react-router-dom';
 
 export function CartPage() {
@@ -77,23 +78,12 @@ export function CartPage() {
 							</div>
 
 							<div className="cart-controls">
-								<div className="qty-control">
-									<button
-										onClick={() => handleUpdate(cartId, quantity, -1)}
-										className="qty-btn"
-										aria-label="Decrease quantity"
-									>
-										<Minus size={16} />
-									</button>
-									<span className="qty-val">{quantity}</span>
-									<button
-										onClick={() => handleUpdate(cartId, quantity, 1)}
-										className="qty-btn"
-										aria-label="Increase quantity"
-									>
-										<Plus size={16} />
-									</button>
-								</div>
+								<QuantityControl
+									quantity={quantity}
+									onDecrease={() => handleUpdate(cartId, quantity, -1)}
+									onIncrease={() => handleUpdate(cartId, quantity, 1)}
+									maxQuantity={product.onHand}
+								/>
 								<button
 									onClick={() => removeItem(cartId)}
 									className="remove-btn"
