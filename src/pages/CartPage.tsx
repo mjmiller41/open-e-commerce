@@ -1,42 +1,59 @@
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../db';
 import { Trash2, ArrowRight, ShoppingBag } from 'lucide-react';
 import { QuantityControl } from '../components/QuantityControl';
 import { Link } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
+import { useEffect, useState } from 'react';
+import { supabase, type Product } from '../lib/supabase';
 
 export function CartPage() {
-	const cartItems = useLiveQuery(async () => {
-		const items = await db.cart.toArray();
-		const productIds = items.map(i => i.productId);
-		const products = await db.products.bulkGet(productIds);
+	const { cartItems, updateQuantity, removeFromCart } = useCart();
+	const [products, setProducts] = useState<Map<number, Product>>(new Map());
+	const [loading, setLoading] = useState(true);
 
-		return items.map((item, idx) => {
-			const product = products[idx];
-			if (!product) return null;
-			return {
-				cartId: item.id!,
-				quantity: item.quantity,
-				product
-			};
-		}).filter((i): i is NonNullable<typeof i> => i !== null);
-	}, []);
+	useEffect(() => {
+		async function fetchCartProducts() {
+			if (cartItems.length === 0) {
+				setLoading(false);
+				return;
+			}
 
-	const handleUpdate = async (id: number, currentQty: number, delta: number) => {
+			const productIds = cartItems.map(item => item.productId);
+			const { data, error } = await supabase.from('products').select('*').in('id', productIds);
+
+			if (error) {
+				console.error('Error fetching cart products:', error);
+			} else if (data) {
+				const productMap = new Map();
+				data.forEach(p => productMap.set(p.id, p));
+				setProducts(productMap);
+			}
+			setLoading(false);
+		}
+		fetchCartProducts();
+	}, [cartItems]); // Re-fetch if new items added that we might not have info for. Optimization could be better but this is simple.
+
+	const handleUpdate = (productId: number, currentQty: number, delta: number) => {
 		const newQty = currentQty + delta;
 		if (newQty <= 0) {
-			await db.cart.delete(id);
+			removeFromCart(productId);
 		} else {
-			await db.cart.update(id, { quantity: newQty });
+			updateQuantity(productId, delta);
 		}
 	};
 
-	const removeItem = (id: number) => db.cart.delete(id);
+	const removeItem = (productId: number) => removeFromCart(productId);
 
-	if (!cartItems) return <div className="empty-cart">Loading cart...</div>;
+	if (loading) return <div className="empty-cart">Loading cart...</div>;
 
-	const total = cartItems.reduce((acc, item) => acc + (item.product.price * item.quantity), 0);
+	// Enhance cart items with product data
+	const enrichedCartItems = cartItems.map(item => {
+		const product = products.get(item.productId);
+		return product ? { ...item, product } : null;
+	}).filter((item): item is NonNullable<typeof item> => item !== null);
 
-	if (cartItems.length === 0) {
+	const total = enrichedCartItems.reduce((acc, item) => acc + (item.product.price * item.quantity), 0);
+
+	if (enrichedCartItems.length === 0) {
 		return (
 			<div className="empty-cart fade-in">
 				<div className="empty-icon">
@@ -58,13 +75,13 @@ export function CartPage() {
 			<div className="cart-header">
 				<ShoppingBag className="text-[var(--accent)]" size={32} />
 				<h1 className="cart-title">Shopping Cart</h1>
-				<span className="cart-count">({cartItems.length} items)</span>
+				<span className="cart-count">({enrichedCartItems.length} items)</span>
 			</div>
 
 			<div className="cart-layout">
 				<div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-					{cartItems.map(({ cartId, quantity, product }) => (
-						<div key={cartId} className="card cart-item">
+					{enrichedCartItems.map(({ productId, quantity, product }) => (
+						<div key={productId} className="card cart-item">
 							<div className="cart-item-image">
 								<img src={product.image} alt={product.name} className="w-full h-full object-cover mix-blend-multiply dark:mix-blend-normal" />
 							</div>
@@ -80,12 +97,12 @@ export function CartPage() {
 							<div className="cart-controls">
 								<QuantityControl
 									quantity={quantity}
-									onDecrease={() => handleUpdate(cartId, quantity, -1)}
-									onIncrease={() => handleUpdate(cartId, quantity, 1)}
-									maxQuantity={product.onHand}
+									onDecrease={() => handleUpdate(productId, quantity, -1)}
+									onIncrease={() => handleUpdate(productId, quantity, 1)}
+									maxQuantity={product.on_hand}
 								/>
 								<button
-									onClick={() => removeItem(cartId)}
+									onClick={() => removeItem(productId)}
 									className="remove-btn"
 								>
 									<Trash2 size={16} /> Remove

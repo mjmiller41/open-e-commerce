@@ -1,37 +1,30 @@
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db, type Product } from '../db';
+import { useEffect, useState } from 'react';
+import { supabase, type Product } from '../lib/supabase';
 import { ProductCard } from '../components/ProductCard';
+import { useCart } from '../context/CartContext';
 
 export function ProductList() {
-	const products = useLiveQuery(() => db.products.toArray());
-	const cartItems = useLiveQuery(() => db.cart.toArray());
+	const [products, setProducts] = useState<Product[] | null>(null);
+	const [loading, setLoading] = useState(true);
+	const { cartItems, addToCart, updateQuantity } = useCart();
 
-	const cartMap = new Map(cartItems?.map(item => [item.productId, item.quantity]));
+	const cartMap = new Map(cartItems.map(item => [item.productId, item.quantity]));
 
-	const addToCart = async (product: Product) => {
-		if (!product.id) return;
-		try {
-			await db.cart.add({ productId: product.id, quantity: 1 });
-		} catch (error) {
-			console.error("Failed to add to cart:", error);
-		}
-	};
-
-	const updateQuantity = async (productId: number, delta: number) => {
-		const currentQty = cartMap.get(productId) || 0;
-		const newQty = currentQty + delta;
-		const cartItem = await db.cart.where({ productId }).first();
-
-		if (cartItem) {
-			if (newQty <= 0) {
-				await db.cart.delete(cartItem.id!);
+	useEffect(() => {
+		async function fetchProducts() {
+			const { data, error } = await supabase.from('products').select('*');
+			if (error) {
+				console.error('Error fetching products:', error);
 			} else {
-				await db.cart.update(cartItem.id!, { quantity: newQty });
+				setProducts(data);
 			}
+			setLoading(false);
 		}
-	};
+		fetchProducts();
+	}, []);
 
-	if (!products) return <div className="empty-cart">Loading products...</div>;
+	if (loading) return <div className="empty-cart">Loading products...</div>;
+	if (!products) return <div className="empty-cart">No products found.</div>;
 
 	return (
 		<div className="fade-in">
@@ -59,12 +52,6 @@ export function ProductList() {
 			{products.length === 0 && (
 				<div className="empty-cart" style={{ border: '1px dashed var(--border)', borderRadius: 'var(--radius)' }}>
 					<p style={{ marginBottom: '1rem' }}>No products found in the database.</p>
-					<button
-						onClick={() => window.location.reload()}
-						className="btn btn-primary"
-					>
-						Refresh to Seed Data
-					</button>
 				</div>
 			)}
 		</div>

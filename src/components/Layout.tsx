@@ -2,12 +2,10 @@ import { Outlet, Link } from 'react-router-dom';
 import { ShoppingCart } from 'lucide-react';
 import { LogoIcon } from './LogoIcon';
 import { ThemeToggle } from './ThemeToggle';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../db';
+import { useCart } from '../context/CartContext';
 
 export function Layout() {
-	const cartItems = useLiveQuery(() => db.cart.toArray());
-	const cartCount = cartItems?.reduce((acc, item) => acc + item.quantity, 0) || 0;
+	const { cartCount } = useCart();
 
 	return (
 		<div className="app-container">

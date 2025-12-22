@@ -1,47 +1,49 @@
 import { useParams, Link } from 'react-router-dom';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../db';
+import { supabase, type Product } from '../lib/supabase';
 import { ShoppingCart, ArrowLeft, Package, Truck, ShieldCheck } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { QuantityControl } from '../components/QuantityControl';
+import { useCart } from '../context/CartContext';
 
 export function ProductDetail() {
 	const { id } = useParams<{ id: string }>();
 	const productId = parseInt(id || '0');
+	const [product, setProduct] = useState<Product | null>(null);
+	const [loading, setLoading] = useState(true);
 
-	const product = useLiveQuery(() => db.products.get(productId), [productId]);
-	const cartItem = useLiveQuery(
-		async () => {
-			if (!product?.id) return undefined;
-			return await db.cart.where({ productId: product.id }).first();
-		},
-		[product?.id]
-	);
+	const { cartItems, addToCart, updateQuantity, removeFromCart } = useCart();
+	const cartItem = cartItems.find(item => item.productId === productId);
+
+	useEffect(() => {
+		async function fetchProduct() {
+			if (!productId) return;
+			const { data, error } = await supabase.from('products').select('*').eq('id', productId).single();
+			if (error) {
+				console.error('Error fetching product:', error);
+			} else {
+				setProduct(data);
+			}
+			setLoading(false);
+		}
+		fetchProduct();
+	}, [productId]);
 
 	const [isAdding, setIsAdding] = useState(false);
 
-	const addToCart = async () => {
-		if (!product?.id) return;
+	const handleAddToCart = () => {
+		if (!product) return;
 		setIsAdding(true);
-		try {
-			await db.cart.add({ productId: product.id, quantity: 1 });
-			setTimeout(() => setIsAdding(false), 500);
-		} catch (error) {
-			console.error(error);
-			setIsAdding(false);
-		}
+		addToCart(product);
+		setTimeout(() => setIsAdding(false), 500);
 	};
 
-	const updateQuantity = async (id: number, delta: number) => {
-		const item = await db.cart.get(id);
-		if (item) {
-			await db.cart.update(id, { quantity: item.quantity + delta });
-		}
-	};
-
-	if (productId === 0 || !product) {
-		if (product === undefined) return <div className="empty-cart">Loading...</div>;
+	if (productId === 0 || (!product && !loading)) {
+		if (loading) return <div className="empty-cart">Loading...</div>;
 		return <div className="empty-cart">Product not found</div>;
+	}
+
+	if (loading || !product) {
+		return <div className="empty-cart">Loading...</div>;
 	}
 
 	return (
@@ -67,7 +69,7 @@ export function ProductDetail() {
 					<div className="detail-actions">
 						<div className="stock-indicator">
 							<Package size={18} />
-							<span>{product.onHand > 0 ? `In Stock (${product.onHand} available)` : 'Out of Stock'}</span>
+							<span>{product.on_hand > 0 ? `In Stock (${product.on_hand} available)` : 'Out of Stock'}</span>
 						</div>
 
 						{cartItem ? (
@@ -75,19 +77,19 @@ export function ProductDetail() {
 								quantity={cartItem.quantity}
 								onDecrease={() => {
 									if (cartItem.quantity > 1) {
-										updateQuantity(cartItem.id!, -1);
+										updateQuantity(productId, -1);
 									} else {
-										db.cart.delete(cartItem.id!);
+										removeFromCart(productId);
 									}
 								}}
-								onIncrease={() => updateQuantity(cartItem.id!, 1)}
-								maxQuantity={product.onHand}
+								onIncrease={() => updateQuantity(productId, 1)}
+								maxQuantity={product.on_hand}
 								className="w-full"
 							/>
 						) : (
 							<button
-								onClick={addToCart}
-								disabled={product.onHand <= 0 || isAdding}
+								onClick={handleAddToCart}
+								disabled={product.on_hand <= 0 || isAdding}
 								className={`btn btn-primary btn-full ${isAdding ? 'opacity-80' : ''}`}
 							>
 								{isAdding ? 'Added!' : (
