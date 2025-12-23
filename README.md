@@ -1,73 +1,99 @@
-# React + TypeScript + Vite
+# Open E-Commerce
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, open-source e-commerce starter template built with React, TypeScript, and Vite.
 
-Currently, two official plugins are available:
+## 🚀 Getting Started
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Follow these steps to get the project up and running on your local machine.
 
-## React Compiler
+### Prerequisites
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- [Node.js](https://nodejs.org/) (version 18 or higher recommended)
+- npm (usually comes with Node.js)
 
-## Expanding the ESLint configuration
+### Installation
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1.  Clone the repository:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+    ```bash
+    git clone https://github.com/mjmiller41/open-e-commerce.git
+    cd open-e-commerce
+    ```
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Running Locally
+
+Start the development server:
+
+```bash
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Open [http://localhost:5173](http://localhost:5173) to view it in your browser.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 🛠️ Configuration
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+This project uses a central configuration file to manage global settings.
+
+### Editing Global Config
+
+You can modify site-wide settings in `site.config.jsonc` located in the root directory. This file supports comments.
+
+**Available settings include:**
+
+- `siteTitle`: The name of the site (displayed in header and browser tab).
+- `siteDescription`: SEO description.
+- `siteUrl`: Base URL for SEO/OG tags.
+- `themeColor`: Primary browser theme color.
+- `footer`: Footer text.
+
+Changes to this file require restarting the dev server (`npm run dev`) to take effect.
+
+The TypeScript interface for the configuration is located at `src/lib/config.ts`.
+
+## 📦 Scripts
+
+- `npm run dev`: Starts the development server.
+- `npm run build`: Type-checks and builds the app for production to the `dist` folder.
+- `npm run preview`: Locally preview the production build.
+- `npm run lint`: Runs ESLint to check for code quality issues.
+- `npm run deploy`: Deploys the project to GitHub Pages.
+
+## 🚀 Deployment
+
+### GitHub Pages
+
+This project is configured to deploy directly to GitHub Pages using the `gh-pages` package.
+
+1.  **Configure Base Path (if needed):**
+    If you are deploying to a user page (e.g., `username.github.io`), you may need to adjust the `base` property in `vite.config.ts`.
+    Currently configured base: `/open-e-commerce/` (repo name).
+
+2.  **Deploy:**
+    Run the deployment script:
+
+    ```bash
+    npm run deploy
+    ```
+
+    This script will:
+
+    - Run `npm run build` to create a production bundle.
+    - Push the `dist` folder to the `gh-pages` branch of your repository.
+
+3.  **GitHub Settings:**
+    Go to your repository settings on GitHub -> Pages -> Build and deployment > Source, and ensure it is set to deploy from the `gh-pages` branch.
+
+## 📁 Project Structure
+
+- `src/`: Source code
+  - `components/`: React components
+  - `pages/`: Page components and routing
+  - `lib/`: Utility functions and configuration
+  - `context/`: React Context providers
+- `public/`: Static assets
+- `site.config.jsonc`: Global configuration file
