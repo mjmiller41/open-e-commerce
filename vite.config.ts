@@ -19,6 +19,7 @@ export default defineConfig(() => {
   }
 
   return {
+    base: "/open-e-commerce/",
     plugins: [
       react(),
       {
