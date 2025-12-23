@@ -48,15 +48,7 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 						<QuantityControl
 							quantity={cartQuantity}
 							onIncrease={() => onUpdateQuantity(product.id, 1)}
-							onDecrease={() => {
-								if (cartQuantity === 1) {
-									if (window.confirm('Remove from cart?')) {
-										onUpdateQuantity(product.id!, -1);
-									}
-								} else {
-									onUpdateQuantity(product.id!, -1);
-								}
-							}}
+							onDecrease={() => onUpdateQuantity(product.id, -1)}
 							maxQuantity={product.on_hand}
 							className="w-full justify-between"
 						/>
