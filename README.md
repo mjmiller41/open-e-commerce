@@ -97,3 +97,16 @@ This project is configured to deploy directly to GitHub Pages using the `gh-page
   - `context/`: React Context providers
 - `public/`: Static assets
 - `site.config.jsonc`: Global configuration file
+
+## 🗺️ Roadmap
+
+Here's what's planned for the future of Open E-Commerce:
+
+- [ ] **User Authentication & Roles**: Secure login/signup and role management (Admin vs. Customer).
+- [ ] **Admin Dashboard**: A dedicated interface for managing products, inventory, and viewing orders.
+- [ ] **Payment Processing**: Integration with providers like Stripe or PayPal for real transactions.
+- [ ] **Backend Integration**: Connect to a robust backend (e.g., Supabase) for data persistence.
+- [ ] **Product Reviews**: Allow customers to rate and review products.
+- [ ] **Wishlist**: Save functionality for products.
+- [ ] **Order History**: User profile section to view past purchases.
+- [ ] **Advanced Search & Filtering**: Faceted search for better product discovery.
