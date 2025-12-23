@@ -1,6 +1,7 @@
 import { type Product } from '../lib/supabase';
-import { ShoppingCart, Plus, Minus } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { QuantityControl } from './QuantityControl';
 
 /**
  * Props for the ProductCard component.
@@ -44,39 +45,21 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 
 				<div className="mt-4 pt-4 border-t border-[var(--border)] flex items-center justify-between" onClick={e => e.preventDefault()}>
 					{cartQuantity > 0 ? (
-						<div className="flex items-center gap-3 bg-[var(--background)] border border-[var(--border)] rounded-full px-1 py-1 w-full justify-between">
-							<button
-								onClick={(e) => {
-									e.preventDefault();
-									if (cartQuantity === 1) {
-										// If quantity is 1, decrementing should remove it (handled by parent logic usually, 
-										// but here we just pass -1)
-										// We might want separate handler for remove vs decrement, but standardizing on delta is fine
-										if (window.confirm('Remove from cart?')) {
-											onUpdateQuantity(product.id!, -1);
-										}
-									} else {
+						<QuantityControl
+							quantity={cartQuantity}
+							onIncrease={() => onUpdateQuantity(product.id, 1)}
+							onDecrease={() => {
+								if (cartQuantity === 1) {
+									if (window.confirm('Remove from cart?')) {
 										onUpdateQuantity(product.id!, -1);
 									}
-								}}
-								className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--secondary)] text-[var(--foreground)] transition-colors"
-								aria-label="Decrease quantity"
-							>
-								<Minus size={14} />
-							</button>
-							<span className="font-medium text-sm tabular-nums">{cartQuantity}</span>
-							<button
-								onClick={(e) => {
-									e.preventDefault();
-									onUpdateQuantity(product.id!, 1);
-								}}
-								disabled={cartQuantity >= product.on_hand}
-								className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--secondary)] text-[var(--foreground)] disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
-								aria-label="Increase quantity"
-							>
-								<Plus size={14} />
-							</button>
-						</div>
+								} else {
+									onUpdateQuantity(product.id!, -1);
+								}
+							}}
+							maxQuantity={product.on_hand}
+							className="w-full justify-between"
+						/>
 					) : (
 						<button
 							onClick={(e) => {
