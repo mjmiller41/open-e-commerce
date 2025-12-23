@@ -15,6 +15,8 @@ interface ProductCardProps {
 	onAddToCart: (product: Product) => void;
 	/** Callback to update the quantity of the product in the cart. */
 	onUpdateQuantity: (productId: number, delta: number) => void;
+	/** Callback to remove the product from the cart. */
+	onRemoveFromCart: (productId: number) => void;
 }
 
 /**
@@ -24,7 +26,7 @@ interface ProductCardProps {
  * @param props - The component props.
  * @returns The rendered product card.
  */
-export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuantity }: ProductCardProps) {
+export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuantity, onRemoveFromCart }: ProductCardProps) {
 	return (
 		<Link to={`/product/${product.id}`} className="card product-card group">
 			<div className="product-image-container">
@@ -48,7 +50,13 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 						<QuantityControl
 							quantity={cartQuantity}
 							onIncrease={() => onUpdateQuantity(product.id, 1)}
-							onDecrease={() => onUpdateQuantity(product.id, -1)}
+							onDecrease={() => {
+								if (cartQuantity > 1) {
+									onUpdateQuantity(product.id!, -1);
+								} else {
+									onRemoveFromCart(product.id!);
+								}
+							}}
 							maxQuantity={product.on_hand}
 							className="w-full justify-between"
 						/>

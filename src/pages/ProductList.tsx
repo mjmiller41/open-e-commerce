@@ -12,7 +12,7 @@ import { useCart } from '../context/useCart';
 export function ProductList() {
 	const [products, setProducts] = useState<Product[] | null>(null);
 	const [loading, setLoading] = useState(true);
-	const { cartItems, addToCart, updateQuantity } = useCart();
+	const { cartItems, addToCart, updateQuantity, removeFromCart } = useCart();
 
 	const cartMap = new Map(cartItems.map(item => [item.productId, item.quantity]));
 
@@ -51,6 +51,7 @@ export function ProductList() {
 						cartQuantity={cartMap.get(product.id!) || 0}
 						onAddToCart={addToCart}
 						onUpdateQuantity={updateQuantity}
+						onRemoveFromCart={removeFromCart}
 					/>
 				))}
 			</div>
