@@ -1,4 +1,8 @@
 import { createLucideIcon } from "lucide-react";
+/**
+ * The custom SVG logo icon for the application.
+ * Created using lucide-react's createLucideIcon utility.
+ */
 export const LogoIcon = createLucideIcon("logo", [
   [
     "path",

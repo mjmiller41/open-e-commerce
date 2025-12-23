@@ -2,8 +2,15 @@ import { Outlet, Link } from 'react-router-dom';
 import { ShoppingCart } from 'lucide-react';
 import { LogoIcon } from './LogoIcon';
 import { ThemeToggle } from './ThemeToggle';
-import { useCart } from '../context/CartContext';
+import { useCart } from '../context/useCart';
+import { appConfig } from '../lib/config';
 
+/**
+ * The shared layout component for the application.
+ * Renders the header (with logo and theme toggle), the main content outlet, and the footer.
+ *
+ * @returns The rendered layout structure.
+ */
 export function Layout() {
 	const { cartCount } = useCart();
 
@@ -13,7 +20,7 @@ export function Layout() {
 				<div className="container header-inner">
 					<Link to="/" className="logo">
 						<LogoIcon />
-						<span>Open E-Commerce</span>
+						<span>{appConfig.siteTitle}</span>
 					</Link>
 
 					<div className="header-actions">
@@ -38,7 +45,7 @@ export function Layout() {
 
 			<footer className="app-footer">
 				<div className="container">
-					<p>&copy; {new Date().getFullYear()} Open E-Commerce. Built with Vite, React & Dexie.</p>
+					<p>&copy; {new Date().getFullYear()} {appConfig.footer?.text || appConfig.siteTitle}</p>
 				</div>
 			</footer>
 		</div>

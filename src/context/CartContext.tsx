@@ -1,27 +1,19 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import type { Product } from '../lib/supabase';
-
-export interface CartItem {
-	id: string; // generated uuid for cart item logic or just product id mapping? simplest is product id based
-	productId: number;
-	quantity: number;
-	product?: Product; // Optimistic or joined data
-}
-
-interface CartContextType {
-	cartItems: CartItem[];
-	addToCart: (product: Product) => void;
-	updateQuantity: (productId: number, delta: number) => void;
-	removeFromCart: (productId: number) => void;
-	clearCart: () => void;
-	cartCount: number;
-}
-
-const CartContext = createContext<CartContextType | undefined>(undefined);
+import { CartContext, type CartItem } from './useCart';
 
 const CART_STORAGE_KEY = 'open-ecommerce-cart';
 
-export function CartProvider({ children }: { children: ReactNode }) {
+/**
+ * Provides the cart context to its children.
+ * Manages cart state including adding, updating, and removing items, as well as persistence to local storage.
+ *
+ * @param props - The component props.
+
+ * @returns The provider component.
+ */
+export function CartProvider(props: { children: ReactNode }) {
+	const { children } = props;
 	const [cartItems, setCartItems] = useState<CartItem[]>(() => {
 		const stored = localStorage.getItem(CART_STORAGE_KEY);
 		return stored ? JSON.parse(stored) : [];
@@ -72,12 +64,4 @@ export function CartProvider({ children }: { children: ReactNode }) {
 			{children}
 		</CartContext.Provider>
 	);
-}
-
-export function useCart() {
-	const context = useContext(CartContext);
-	if (context === undefined) {
-		throw new Error('useCart must be used within a CartProvider');
-	}
-	return context;
 }

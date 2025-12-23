@@ -1,8 +1,14 @@
 import { useEffect, useState } from 'react';
 import { supabase, type Product } from '../lib/supabase';
 import { ProductCard } from '../components/ProductCard';
-import { useCart } from '../context/CartContext';
+import { useCart } from '../context/useCart';
 
+/**
+ * The product listing page (Home page).
+ * Fetches and displays a grid of products available for purchase.
+ *
+ * @returns The rendered product list.
+ */
 export function ProductList() {
 	const [products, setProducts] = useState<Product[] | null>(null);
 	const [loading, setLoading] = useState(true);

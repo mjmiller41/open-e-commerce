@@ -2,13 +2,27 @@ import { type Product } from '../lib/supabase';
 import { ShoppingCart, Plus, Minus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+/**
+ * Props for the ProductCard component.
+ */
 interface ProductCardProps {
+	/** The product object to display. */
 	product: Product;
+	/** The current quantity of this product in the cart. */
 	cartQuantity: number;
+	/** Callback to add the product to the cart. */
 	onAddToCart: (product: Product) => void;
+	/** Callback to update the quantity of the product in the cart. */
 	onUpdateQuantity: (productId: number, delta: number) => void;
 }
 
+/**
+ * Displays a single product summary card.
+ * Handles adding to cart and updating quantity directly from the card.
+ *
+ * @param props - The component props.
+ * @returns The rendered product card.
+ */
 export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuantity }: ProductCardProps) {
 	return (
 		<Link to={`/product/${product.id}`} className="card product-card group">

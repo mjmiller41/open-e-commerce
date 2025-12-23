@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Sun, Moon } from 'lucide-react';
 
+/**
+ * Component for toggling between light and dark themes.
+ * Persists the preference to local storage and updates the data-theme attribute on the document element.
+ *
+ * @returns The toggle button.
+ */
 export function ThemeToggle() {
 	const [theme, setTheme] = useState(() => {
 		const saved = localStorage.getItem('theme');

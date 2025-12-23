@@ -1,14 +1,29 @@
 import { Minus, Plus } from 'lucide-react';
 
+/**
+ * Props for the QuantityControl component.
+ */
 interface QuantityControlProps {
+	/** The current quantity value. */
 	quantity: number;
+	/** Callback function when the decrease button is clicked. */
 	onDecrease: () => void;
+	/** Callback function when the increase button is clicked. */
 	onIncrease: () => void;
+	/** The maximum allowed quantity. Defaults to Infinity. */
 	maxQuantity?: number;
+	/** The size of the control. Defaults to 'sm'. */
 	size?: 'sm' | 'lg';
+	/** Additional CSS classes. */
 	className?: string;
 }
 
+/**
+ * A UI component for incrementing and decrementing a numerical quantity.
+ *
+ * @param props - The component props.
+ * @returns The rendered quantity control.
+ */
 export function QuantityControl({
 	quantity,
 	onDecrease,

@@ -5,6 +5,12 @@ import { ProductDetail } from './pages/ProductDetail';
 import { CartPage } from './pages/CartPage';
 import { CartProvider } from './context/CartContext';
 
+/**
+ * The main application component.
+ * Sets up routing, context providers, and the main layout structure.
+ *
+ * @returns The rendered application.
+ */
 function App() {
 	return (
 		<CartProvider>

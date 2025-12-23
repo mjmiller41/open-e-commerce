@@ -3,8 +3,14 @@ import { supabase, type Product } from '../lib/supabase';
 import { ShoppingCart, ArrowLeft, Package, Truck, ShieldCheck } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { QuantityControl } from '../components/QuantityControl';
-import { useCart } from '../context/CartContext';
+import { useCart } from '../context/useCart';
 
+/**
+ * The product detail page.
+ * Displays detailed information about a specific product identified by the route parameter `id`.
+ *
+ * @returns The rendered product detail page.
+ */
 export function ProductDetail() {
 	const { id } = useParams<{ id: string }>();
 	const productId = parseInt(id || '0');

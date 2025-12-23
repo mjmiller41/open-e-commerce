@@ -43,6 +43,9 @@
 1.  **TypeScript**:
     - Use strict types. Avoid `any`.
     - Define interfaces/types for props and data structures.
+3.  **Documentation (TSDoc)**:
+    - All exported functions, classes, interfaces, and types in `.ts` and `.tsx` files must be documented using TSDoc comments.
+    - Comments should explain the purpose, parameters (`@param`), and return value (`@returns`) where applicable.
 2.  **React Components**:
     - Use Functional Components with Hooks.
     - Keep components small and focused.

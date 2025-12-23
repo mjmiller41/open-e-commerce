@@ -1,10 +1,17 @@
 import { Trash2, ArrowRight, ShoppingBag } from 'lucide-react';
 import { QuantityControl } from '../components/QuantityControl';
 import { Link } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
+import { useCart } from '../context/useCart';
 import { useEffect, useState } from 'react';
 import { supabase, type Product } from '../lib/supabase';
 
+/**
+ * The shopping cart page.
+ * Displays the list of items in the cart, allows quantity adjustment and removal,
+ * and shows the order summary.
+ *
+ * @returns The rendered cart page.
+ */
 export function CartPage() {
 	const { cartItems, updateQuantity, removeFromCart } = useCart();
 	const [products, setProducts] = useState<Map<number, Product>>(new Map());

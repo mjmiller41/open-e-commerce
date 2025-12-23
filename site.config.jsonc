@@ -1,0 +1,22 @@
+{
+  // The name of your e-commerce site.
+  // This value is used in the browser tab title and the site header.
+  "siteTitle": "Open E-Commerce",
+
+  // A brief description of your site.
+  // Used for SEO meta tags and social media sharing.
+  "siteDescription": "A modern open source e-commerce starter built with React and Vite.",
+
+  // The base URL of your deployed site.
+  // Used for generating absolute links (e.g. for OG tags or canonical URLs).
+  "baseUrl": "/",
+
+  // The primary theme color of your site.
+  // Used for the browser address bar color on mobile devices.
+  "themeColor": "#3B82F6",
+
+  // Footer text configuration
+  "footer": {
+    "text": "Open E-Commerce. Built with Vite, React & TypeScript"
+  }
+}
