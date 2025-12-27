@@ -5,7 +5,6 @@ export function AdminOrders() {
 	const [orders, setOrders] = useState<Order[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [filter, setFilter] = useState<'all' | 'pending'>('all');
-	const [refreshTrigger, setRefreshTrigger] = useState(0);
 
 	useEffect(() => {
 		const fetchOrders = async () => {
@@ -30,20 +29,25 @@ export function AdminOrders() {
 		};
 
 		fetchOrders();
-	}, [filter, refreshTrigger]);
+	}, [filter]);
 
-	const updateStatus = async (orderId: number, status: Order['status']) => {
+	const updateStatus = async (orderId: number, newStatus: Order['status']) => {
+		// Optimistic update
+		const previousOrders = [...orders];
+		setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+
 		const { error } = await supabase
 			.from('orders')
-			.update({ status })
+			.update({ status: newStatus })
 			.eq('id', orderId);
 
 		if (error) {
 			console.error('Error updating order:', error);
 			alert('Failed to update status');
-		} else {
-			setRefreshTrigger(prev => prev + 1);
+			// Revert on error
+			setOrders(previousOrders);
 		}
+		// No need to trigger refresh if successful, as local state is already updated
 	};
 
 	return (
@@ -97,6 +101,7 @@ export function AdminOrders() {
 									</td>
 									<td>
 										<select
+											name="status-select"
 											value={order.status}
 											onChange={(e) => updateStatus(order.id, e.target.value as Order['status'])}
 											className="status-select"
