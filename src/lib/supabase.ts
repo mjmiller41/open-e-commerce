@@ -27,3 +27,24 @@ export interface Product {
   category: string;
   on_hand: number;
 }
+
+export type OrderStatus = "pending" | "processing" | "shipped" | "cancelled";
+
+export interface Order {
+  id: number;
+  user_id: string;
+  status: OrderStatus;
+  total_amount: number;
+  shipping_address: string;
+  created_at: string;
+}
+
+export interface OrderItem {
+  id: number;
+  order_id: number;
+  user_id: string;
+  product_id: number;
+  product_name: string;
+  quantity: number;
+  price: number;
+}

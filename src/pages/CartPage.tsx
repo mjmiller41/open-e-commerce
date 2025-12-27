@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useCart } from '../context/useCart';
 import { useEffect, useState } from 'react';
 import { supabase, type Product } from '../lib/supabase';
+import { CheckoutModal } from '../components/CheckoutModal';
 
 /**
  * The shopping cart page.
@@ -16,6 +17,7 @@ export function CartPage() {
 	const { cartItems, updateQuantity, removeFromCart } = useCart();
 	const [products, setProducts] = useState<Map<number, Product>>(new Map());
 	const [loading, setLoading] = useState(true);
+	const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
 	useEffect(() => {
 		async function fetchCartProducts() {
@@ -141,7 +143,7 @@ export function CartPage() {
 							<span style={{ color: 'var(--accent)' }}>${total.toFixed(2)}</span>
 						</div>
 
-						<button className="btn btn-primary btn-full" onClick={() => alert('Checkout flow would start here!')}>
+						<button className="btn btn-primary btn-full" onClick={() => setIsCheckoutOpen(true)}>
 							Proceed to Checkout <ArrowRight size={18} />
 						</button>
 
@@ -151,6 +153,12 @@ export function CartPage() {
 					</div>
 				</div>
 			</div>
+
+			<CheckoutModal
+				isOpen={isCheckoutOpen}
+				onClose={() => setIsCheckoutOpen(false)}
+				totalAmount={total}
+			/>
 		</div>
 	);
 }
