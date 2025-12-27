@@ -4,6 +4,14 @@ import { ProductList } from './pages/ProductList';
 import { ProductDetail } from './pages/ProductDetail';
 import { CartPage } from './pages/CartPage';
 import { CartProvider } from './context/CartContext';
+import { AuthProvider } from './context/AuthContext';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import AdminPage from './pages/AdminPage';
+import ProfilePage from './pages/ProfilePage';
+import ProtectedRoute from './components/ProtectedRoute';
+
+
 
 /**
  * The main application component.
@@ -13,17 +21,32 @@ import { CartProvider } from './context/CartContext';
  */
 function App() {
 	return (
-		<CartProvider>
-			<BrowserRouter basename={import.meta.env.BASE_URL}>
-				<Routes>
-					<Route path="/" element={<Layout />}>
-						<Route index element={<ProductList />} />
-						<Route path="product/:id" element={<ProductDetail />} />
-						<Route path="cart" element={<CartPage />} />
-					</Route>
-				</Routes>
-			</BrowserRouter>
-		</CartProvider>
+		<AuthProvider>
+			<CartProvider>
+				<BrowserRouter basename={import.meta.env.BASE_URL}>
+					<Routes>
+						<Route path="/" element={<Layout />}>
+							<Route index element={<ProductList />} />
+							<Route path="product/:id" element={<ProductDetail />} />
+							<Route path="cart" element={<CartPage />} />
+							<Route path="login" element={<LoginPage />} />
+							<Route path="register" element={<RegisterPage />} />
+
+							{/* Protected Admin Route */}
+							<Route element={<ProtectedRoute requireAdmin />}>
+								<Route path="admin" element={<AdminPage />} />
+							</Route>
+
+							{/* Protected User Routes */}
+							<Route element={<ProtectedRoute />}>
+								<Route path="profile" element={<ProfilePage />} />
+							</Route>
+						</Route>
+					</Routes>
+				</BrowserRouter>
+			</CartProvider>
+
+		</AuthProvider>
 	);
 }
 
