@@ -11,6 +11,7 @@ import AdminPage from './pages/AdminPage';
 import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
+import OrderDetailPage from './pages/OrderDetailPage';
 
 
 
@@ -43,6 +44,7 @@ function App() {
 								<Route element={<ProtectedRoute />}>
 									<Route path="profile" element={<ProfilePage />} />
 									<Route path="profile/:id" element={<ProfilePage />} />
+									<Route path="order/:id" element={<OrderDetailPage />} />
 								</Route>
 							</Route>
 						</Routes>

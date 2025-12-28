@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { supabase, type Order, type Profile } from "../lib/supabase";
 import logger from "../lib/logger";
@@ -332,7 +332,11 @@ export default function ProfilePage() {
 						<tbody>
 							{orders.map((order) => (
 								<tr key={order.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
-									<td className="p-3 text-sm">#{order.id}</td>
+									<td className="p-3 text-sm">
+										<Link to={`/order/${order.id}`} className="hover:underline text-primary">
+											#{order.id}
+										</Link>
+									</td>
 									<td className="p-3 text-sm">{new Date(order.created_at).toLocaleDateString()}</td>
 									<td className="p-3 text-sm font-medium">${order.total_amount.toFixed(2)}</td>
 									<td className="p-3 text-sm">

@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase, type Order } from '../lib/supabase';
 import logger from '../lib/logger';
 
 export function AdminOrders() {
 	const [orders, setOrders] = useState<Order[]>([]);
 	const [loading, setLoading] = useState(true);
-	const [filter, setFilter] = useState<'all' | 'pending'>('all');
+	const [filter, setFilter] = useState<Order['status'] | 'all'>('all');
 
 	useEffect(() => {
 		const fetchOrders = async () => {
@@ -15,8 +16,8 @@ export function AdminOrders() {
 				.select('*')
 				.order('created_at', { ascending: false });
 
-			if (filter === 'pending') {
-				query = query.eq('status', 'pending');
+			if (filter !== 'all') {
+				query = query.eq('status', filter);
 			}
 
 			const { data, error } = await query;
@@ -62,19 +63,19 @@ export function AdminOrders() {
 		<div className="space-y-6">
 			<div className="flex items-center justify-between mb-6">
 				<h2 className="text-xl font-bold">Order Management</h2>
-				<div className="flex gap-2">
-					<button
-						onClick={() => setFilter('all')}
-						className={`btn btn-secondary ${filter === 'all' ? 'ring-2 ring-primary border-primary' : ''}`}
+				<div className="flex items-center gap-2">
+					<label className="text-sm font-medium">Filter by Status:</label>
+					<select
+						value={filter}
+						onChange={(e) => setFilter(e.target.value as Order['status'] | 'all')}
+						className="h-9 px-3 rounded-md border border-input bg-background text-sm"
 					>
-						All
-					</button>
-					<button
-						onClick={() => setFilter('pending')}
-						className={`btn btn-secondary ${filter === 'pending' ? 'ring-2 ring-primary border-primary' : ''}`}
-					>
-						Pending
-					</button>
+						<option value="all">All Statuses</option>
+						<option value="pending">Pending</option>
+						<option value="processing">Processing</option>
+						<option value="shipped">Shipped</option>
+						<option value="cancelled">Cancelled</option>
+					</select>
 				</div>
 			</div>
 
@@ -98,7 +99,11 @@ export function AdminOrders() {
 						<tbody>
 							{orders.map((order) => (
 								<tr key={order.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
-									<td className="p-3 text-sm">#{order.id}</td>
+									<td className="p-3 text-sm">
+										<Link to={`/order/${order.id}`} className="hover:underline text-primary">
+											#{order.id}
+										</Link>
+									</td>
 									<td className="p-3 text-sm">{new Date(order.created_at).toLocaleDateString()}</td>
 									<td className="p-3 text-sm font-mono text-xs">{order.user_id.split('-')[0]}...</td>
 									<td className="p-3 text-sm font-medium">${order.total_amount.toFixed(2)}</td>

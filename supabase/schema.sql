@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict btxjAWr1kBphCuZhP5VPJRwtz1id3bQrdRIgIq7HH09JBBvIfT5UYDt893Bx8JM
+\restrict LAlotF9aPb7ZI30bdb0G57XApQIPCHM91t0oqVxfA2F0eVGy05OCO9HZbJ3wPCI
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.7 (Ubuntu 17.7-3.pgdg24.04+1)
@@ -785,24 +785,6 @@ CREATE FUNCTION pgbouncer.get_auth(p_usename text) RETURNS TABLE(username text, 
 
 
 ALTER FUNCTION pgbouncer.get_auth(p_usename text) OWNER TO supabase_admin;
-
---
--- Name: handle_new_user(); Type: FUNCTION; Schema: public; Owner: postgres
---
-
-CREATE FUNCTION public.handle_new_user() RETURNS trigger
-    LANGUAGE plpgsql SECURITY DEFINER
-    SET search_path TO 'public', 'pg_temp'
-    AS $$
-begin
-  insert into public.profiles (id, full_name, role)
-  values (new.id, new.raw_user_meta_data->>'full_name', 'customer');
-  return new;
-end;
-$$;
-
-
-ALTER FUNCTION public.handle_new_user() OWNER TO postgres;
 
 --
 -- Name: is_admin(); Type: FUNCTION; Schema: public; Owner: postgres
@@ -3237,6 +3219,12 @@ CREATE TABLE public.profiles (
     role text DEFAULT 'customer'::text,
     full_name text,
     updated_at timestamp with time zone,
+    address_line1 text,
+    address_line2 text,
+    city text,
+    state text,
+    zip_code text,
+    phone_number text,
     CONSTRAINT profiles_role_check CHECK ((role = ANY (ARRAY['customer'::text, 'admin'::text])))
 );
 
@@ -4319,13 +4307,6 @@ CREATE UNIQUE INDEX vector_indexes_name_bucket_id_idx ON storage.vector_indexes 
 
 
 --
--- Name: users on_auth_user_created; Type: TRIGGER; Schema: auth; Owner: supabase_auth_admin
---
-
-CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
-
-
---
 -- Name: subscription tr_check_filters; Type: TRIGGER; Schema: realtime; Owner: supabase_admin
 --
 
@@ -4708,6 +4689,13 @@ CREATE POLICY "Admins can update orders" ON public.orders FOR UPDATE TO authenti
 
 
 --
+-- Name: order_items Admins can view all order items; Type: POLICY; Schema: public; Owner: postgres
+--
+
+CREATE POLICY "Admins can view all order items" ON public.order_items FOR SELECT TO authenticated USING (public.is_admin());
+
+
+--
 -- Name: products Allow public read access; Type: POLICY; Schema: public; Owner: postgres
 --
 
@@ -4739,14 +4727,14 @@ CREATE POLICY "Users can create orders" ON public.orders FOR INSERT WITH CHECK (
 -- Name: profiles Users can insert own profile; Type: POLICY; Schema: public; Owner: postgres
 --
 
-CREATE POLICY "Users can insert own profile" ON public.profiles FOR INSERT WITH CHECK ((id = ( SELECT auth.uid() AS uid)));
+CREATE POLICY "Users can insert own profile" ON public.profiles FOR INSERT WITH CHECK ((auth.uid() = id));
 
 
 --
 -- Name: profiles Users can update own profile; Type: POLICY; Schema: public; Owner: postgres
 --
 
-CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE USING ((id = ( SELECT auth.uid() AS uid)));
+CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE USING ((auth.uid() = id));
 
 
 --
@@ -4754,6 +4742,13 @@ CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE USING
 --
 
 CREATE POLICY "Users can view own order items" ON public.order_items FOR SELECT USING ((user_id = ( SELECT auth.uid() AS uid)));
+
+
+--
+-- Name: profiles Users can view own profile; Type: POLICY; Schema: public; Owner: postgres
+--
+
+CREATE POLICY "Users can view own profile" ON public.profiles FOR SELECT USING ((auth.uid() = id));
 
 
 --
@@ -5451,15 +5446,6 @@ GRANT ALL ON FUNCTION pg_catalog.pg_reload_conf() TO postgres WITH GRANT OPTION;
 
 REVOKE ALL ON FUNCTION pgbouncer.get_auth(p_usename text) FROM PUBLIC;
 GRANT ALL ON FUNCTION pgbouncer.get_auth(p_usename text) TO pgbouncer;
-
-
---
--- Name: FUNCTION handle_new_user(); Type: ACL; Schema: public; Owner: postgres
---
-
-GRANT ALL ON FUNCTION public.handle_new_user() TO anon;
-GRANT ALL ON FUNCTION public.handle_new_user() TO authenticated;
-GRANT ALL ON FUNCTION public.handle_new_user() TO service_role;
 
 
 --
@@ -6318,4 +6304,4 @@ ALTER EVENT TRIGGER pgrst_drop_watch OWNER TO supabase_admin;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict btxjAWr1kBphCuZhP5VPJRwtz1id3bQrdRIgIq7HH09JBBvIfT5UYDt893Bx8JM
+\unrestrict LAlotF9aPb7ZI30bdb0G57XApQIPCHM91t0oqVxfA2F0eVGy05OCO9HZbJ3wPCI
