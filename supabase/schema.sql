@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict LAlotF9aPb7ZI30bdb0G57XApQIPCHM91t0oqVxfA2F0eVGy05OCO9HZbJ3wPCI
+\restrict l3sFrRUeL0OqW7byzIGemsRjKu8tTTXmL4vzA1D8kHofjAfWZ9vd3g1x6C9W49k
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.7 (Ubuntu 17.7-3.pgdg24.04+1)
@@ -785,6 +785,52 @@ CREATE FUNCTION pgbouncer.get_auth(p_usename text) RETURNS TABLE(username text, 
 
 
 ALTER FUNCTION pgbouncer.get_auth(p_usename text) OWNER TO supabase_admin;
+
+--
+-- Name: handle_user_email_sync(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.handle_user_email_sync() RETURNS trigger
+    LANGUAGE plpgsql SECURITY DEFINER
+    AS $$
+BEGIN
+  -- We use UPSERT (INSERT ... ON CONFLICT) to ensure we behave correctly if profile was created by another trigger
+  INSERT INTO public.profiles (id, email, email_verified)
+  VALUES (
+    NEW.id, 
+    NEW.email, 
+    (NEW.email_confirmed_at IS NOT NULL)
+  )
+  ON CONFLICT (id) DO UPDATE
+  SET 
+    email = EXCLUDED.email,
+    email_verified = EXCLUDED.email_verified;
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION public.handle_user_email_sync() OWNER TO postgres;
+
+--
+-- Name: handle_user_update(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.handle_user_update() RETURNS trigger
+    LANGUAGE plpgsql SECURITY DEFINER
+    AS $$
+BEGIN
+  UPDATE public.profiles
+  SET 
+    email = NEW.email,
+    email_verified = (NEW.email_confirmed_at IS NOT NULL)
+  WHERE id = NEW.id;
+  RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION public.handle_user_update() OWNER TO postgres;
 
 --
 -- Name: is_admin(); Type: FUNCTION; Schema: public; Owner: postgres
@@ -3225,6 +3271,8 @@ CREATE TABLE public.profiles (
     state text,
     zip_code text,
     phone_number text,
+    email text,
+    email_verified boolean DEFAULT false,
     CONSTRAINT profiles_role_check CHECK ((role = ANY (ARRAY['customer'::text, 'admin'::text])))
 );
 
@@ -4304,6 +4352,20 @@ CREATE UNIQUE INDEX objects_bucket_id_level_idx ON storage.objects USING btree (
 --
 
 CREATE UNIQUE INDEX vector_indexes_name_bucket_id_idx ON storage.vector_indexes USING btree (name, bucket_id);
+
+
+--
+-- Name: users on_auth_user_created_email_sync; Type: TRIGGER; Schema: auth; Owner: supabase_auth_admin
+--
+
+CREATE TRIGGER on_auth_user_created_email_sync AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION public.handle_user_email_sync();
+
+
+--
+-- Name: users on_auth_user_updated; Type: TRIGGER; Schema: auth; Owner: supabase_auth_admin
+--
+
+CREATE TRIGGER on_auth_user_updated AFTER UPDATE ON auth.users FOR EACH ROW EXECUTE FUNCTION public.handle_user_update();
 
 
 --
@@ -5449,6 +5511,24 @@ GRANT ALL ON FUNCTION pgbouncer.get_auth(p_usename text) TO pgbouncer;
 
 
 --
+-- Name: FUNCTION handle_user_email_sync(); Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON FUNCTION public.handle_user_email_sync() TO anon;
+GRANT ALL ON FUNCTION public.handle_user_email_sync() TO authenticated;
+GRANT ALL ON FUNCTION public.handle_user_email_sync() TO service_role;
+
+
+--
+-- Name: FUNCTION handle_user_update(); Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON FUNCTION public.handle_user_update() TO anon;
+GRANT ALL ON FUNCTION public.handle_user_update() TO authenticated;
+GRANT ALL ON FUNCTION public.handle_user_update() TO service_role;
+
+
+--
 -- Name: FUNCTION is_admin(); Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -6304,4 +6384,4 @@ ALTER EVENT TRIGGER pgrst_drop_watch OWNER TO supabase_admin;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict LAlotF9aPb7ZI30bdb0G57XApQIPCHM91t0oqVxfA2F0eVGy05OCO9HZbJ3wPCI
+\unrestrict l3sFrRUeL0OqW7byzIGemsRjKu8tTTXmL4vzA1D8kHofjAfWZ9vd3g1x6C9W49k
