@@ -8,6 +8,7 @@ export function AdminCustomers() {
 	const [loading, setLoading] = useState(true);
 	const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
 	const [roleFilter, setRoleFilter] = useState<string>('all');
+	const [verificationFilter, setVerificationFilter] = useState<string>('all');
 
 	useEffect(() => {
 		const fetchProfiles = async () => {
@@ -32,9 +33,15 @@ export function AdminCustomers() {
 	const availableRoles = Array.from(new Set(profiles.map(p => p.role))).filter(Boolean);
 
 	// Filter profiles
-	const filteredProfiles = roleFilter === 'all'
-		? profiles
-		: profiles.filter(p => p.role === roleFilter);
+	const filteredProfiles = profiles.filter(p => {
+		const matchesRole = roleFilter === 'all' || p.role === roleFilter;
+		const matchesVerification = verificationFilter === 'all'
+			? true
+			: verificationFilter === 'verified'
+				? p.email_verified
+				: !p.email_verified;
+		return matchesRole && matchesVerification;
+	});
 
 	const updateProfile = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -95,174 +102,214 @@ export function AdminCustomers() {
 							<option key={role} value={role}>{role}</option>
 						))}
 					</select>
+
+					<label className="text-sm font-medium ml-2">Status:</label>
+					<select
+						value={verificationFilter}
+						onChange={(e) => setVerificationFilter(e.target.value)}
+						className="h-9 px-3 rounded-md border border-input bg-background text-sm"
+					>
+						<option value="all">All Statuses</option>
+						<option value="verified">Verified</option>
+						<option value="unverified">Unverified</option>
+					</select>
 				</div>
 			</div>
 
-			{loading ? (
-				<div className="text-center p-8">Loading customers...</div>
-			) : filteredProfiles.length === 0 ? (
-				<div className="text-center p-8 text-muted-foreground">No customers found.</div>
-			) : (
-				<div className="overflow-x-auto border border-border rounded-lg">
-					<table className="w-full text-left">
-						<thead>
-							<tr className="bg-muted">
-								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Name</th>
-								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Role</th>
-								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Phone</th>
-								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Location</th>
-								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Actions</th>
-							</tr>
-						</thead>
-						<tbody>
-							{filteredProfiles.map((profile) => (
-								<tr key={profile.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
-									<td className="p-3 text-sm font-medium">
-										<Link to={`/profile/${profile.id}`} className="hover:underline text-primary">
-											{profile.full_name || <span className="text-muted-foreground italic">No Name</span>}
-										</Link>
-										<div className="text-xs text-muted-foreground font-mono mt-0.5">{profile.id.split('-')[0]}...</div>
-									</td>
-									<td className="p-3 text-sm">
-										<span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
+			{
+				loading ? (
+					<div className="text-center p-8">Loading customers...</div>
+				) : filteredProfiles.length === 0 ? (
+					<div className="text-center p-8 text-muted-foreground">No customers found.</div>
+				) : (
+					<div className="overflow-x-auto border border-border rounded-lg">
+						<table className="w-full text-left">
+							<thead>
+								<tr className="bg-muted">
+									<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Name</th>
+									<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Email</th>
+									<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Role</th>
+									<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Phone</th>
+									<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Status</th>
+									<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Location</th>
+									<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Actions</th>
+								</tr>
+							</thead>
+							<tbody>
+								{filteredProfiles.map((profile) => (
+									<tr key={profile.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
+										<td className="p-3 text-sm font-medium">
+											<Link to={`/profile/${profile.id}`} className="hover:underline text-primary">
+												{profile.full_name || <span className="text-muted-foreground italic">No Name</span>}
+											</Link>
+											<div className="text-xs text-muted-foreground font-mono mt-0.5">{profile.id.split('-')[0]}...</div>
+										</td>
+										<td className="p-3 text-sm">
+											<div className="flex flex-col">
+												<span>{profile.email || <span className="text-muted-foreground italic">Hidden</span>}</span>
+											</div>
+										</td>
+										<td className="p-3 text-sm">
+											<span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
 											${profile.role === 'admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400'}
 										`}>
-											{profile.role}
-										</span>
-									</td>
-									<td className="p-3 text-sm">
-										{profile.phone_number || '-'}
-									</td>
-									<td className="p-3 text-sm">
-										{profile.city ? `${profile.city}, ${profile.state}` : '-'}
-									</td>
-									<td className="p-3 text-sm">
-										<div className="flex gap-2">
-											<button
-												onClick={() => setEditingProfile(profile)}
-												className="btn btn-secondary btn-sm"
-											>
-												Edit
-											</button>
-											<button
-												onClick={() => deleteProfile(profile.id)}
-												className="btn btn-danger btn-sm text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-											>
-												Delete
-											</button>
-										</div>
-									</td>
-								</tr>
-							))}
-						</tbody>
-					</table>
-				</div>
-			)}
+												{profile.role}
+											</span>
+										</td>
+										<td className="p-3 text-sm">
+											{profile.phone_number || '-'}
+										</td>
+										<td className="p-3 text-sm">
+											<span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+											${profile.email_verified ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'}
+										`}>
+												{profile.email_verified ? 'Verified' : 'Unverified'}
+											</span>
+										</td>
+										<td className="p-3 text-sm">
+											{profile.city ? `${profile.city}, ${profile.state}` : '-'}
+										</td>
+										<td className="p-3 text-sm">
+											<div className="flex gap-2">
+												<button
+													onClick={() => setEditingProfile(profile)}
+													className="btn btn-secondary btn-sm"
+												>
+													Edit
+												</button>
+												<button
+													onClick={() => deleteProfile(profile.id)}
+													className="btn btn-danger btn-sm text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+												>
+													Delete
+												</button>
+											</div>
+										</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
+				)
+			}
 
 			{/* Edit Modal */}
-			{editingProfile && (
-				<div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-					<div className="bg-background rounded-lg shadow-lg w-full max-w-md p-6 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
-						<h3 className="text-lg font-bold mb-4">Edit Customer</h3>
-						<form onSubmit={updateProfile} className="space-y-4">
-							<div>
-								<label className="block text-sm font-medium mb-1">Full Name</label>
-								<input
-									type="text"
-									value={editingProfile.full_name || ''}
-									onChange={e => setEditingProfile({ ...editingProfile, full_name: e.target.value })}
-									className="w-full h-9 px-3 rounded-md border border-input bg-background"
-								/>
-							</div>
-							<div>
-								<label className="block text-sm font-medium mb-1">Role</label>
-								<select
-									value={editingProfile.role}
-									onChange={e => setEditingProfile({ ...editingProfile, role: e.target.value as Profile['role'] })}
-									className="w-full h-9 px-3 rounded-md border border-input bg-background"
-								>
-									<option value="customer">Customer</option>
-									<option value="admin">Admin</option>
-								</select>
-							</div>
-							<div>
-								<label className="block text-sm font-medium mb-1">Phone</label>
-								<input
-									type="tel"
-									value={editingProfile.phone_number || ''}
-									onChange={e => setEditingProfile({ ...editingProfile, phone_number: e.target.value })}
-									className="w-full h-9 px-3 rounded-md border border-input bg-background"
-								/>
-							</div>
-
-							<div>
-								<label className="block text-sm font-medium mb-1">Address Line 1</label>
-								<input
-									type="text"
-									value={editingProfile.address_line1 || ''}
-									onChange={e => setEditingProfile({ ...editingProfile, address_line1: e.target.value })}
-									className="w-full h-9 px-3 rounded-md border border-input bg-background"
-								/>
-							</div>
-							<div>
-								<label className="block text-sm font-medium mb-1">Address Line 2</label>
-								<input
-									type="text"
-									value={editingProfile.address_line2 || ''}
-									onChange={e => setEditingProfile({ ...editingProfile, address_line2: e.target.value })}
-									className="w-full h-9 px-3 rounded-md border border-input bg-background"
-								/>
-							</div>
-
-							<div className="grid grid-cols-2 gap-4">
+			{
+				editingProfile && (
+					<div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+						<div className="bg-background rounded-lg shadow-lg w-full max-w-md p-6 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+							<h3 className="text-lg font-bold mb-4">Edit Customer</h3>
+							<form onSubmit={updateProfile} className="space-y-4">
 								<div>
-									<label className="block text-sm font-medium mb-1">City</label>
+									<label className="block text-sm font-medium mb-1">Full Name</label>
 									<input
 										type="text"
-										value={editingProfile.city || ''}
-										onChange={e => setEditingProfile({ ...editingProfile, city: e.target.value })}
+										value={editingProfile.full_name || ''}
+										onChange={e => setEditingProfile({ ...editingProfile, full_name: e.target.value })}
 										className="w-full h-9 px-3 rounded-md border border-input bg-background"
 									/>
 								</div>
 								<div>
-									<label className="block text-sm font-medium mb-1">State</label>
+									<label className="block text-sm font-medium mb-1">Email Status</label>
+									<div className="flex items-center h-9 px-3 rounded-md border border-input bg-muted/50 text-sm text-muted-foreground">
+										<span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium mr-2
+										${editingProfile.email_verified ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'}
+									`}>
+											{editingProfile.email_verified ? 'Verified' : 'Unverified'}
+										</span>
+										{editingProfile.email}
+									</div>
+								</div>
+								<div>
+									<label className="block text-sm font-medium mb-1">Role</label>
+									<select
+										value={editingProfile.role}
+										onChange={e => setEditingProfile({ ...editingProfile, role: e.target.value as Profile['role'] })}
+										className="w-full h-9 px-3 rounded-md border border-input bg-background"
+									>
+										<option value="customer">Customer</option>
+										<option value="admin">Admin</option>
+									</select>
+								</div>
+								<div>
+									<label className="block text-sm font-medium mb-1">Phone</label>
 									<input
-										type="text"
-										value={editingProfile.state || ''}
-										onChange={e => setEditingProfile({ ...editingProfile, state: e.target.value })}
+										type="tel"
+										value={editingProfile.phone_number || ''}
+										onChange={e => setEditingProfile({ ...editingProfile, phone_number: e.target.value })}
 										className="w-full h-9 px-3 rounded-md border border-input bg-background"
 									/>
 								</div>
-							</div>
-							<div>
-								<label className="block text-sm font-medium mb-1">Zip Code</label>
-								<input
-									type="text"
-									value={editingProfile.zip_code || ''}
-									onChange={e => setEditingProfile({ ...editingProfile, zip_code: e.target.value })}
-									className="w-full h-9 px-3 rounded-md border border-input bg-background"
-								/>
-							</div>
 
-							<div className="flex justify-end gap-3 mt-6">
-								<button
-									type="button"
-									onClick={() => setEditingProfile(null)}
-									className="btn btn-secondary"
-								>
-									Cancel
-								</button>
-								<button
-									type="submit"
-									className="btn btn-primary"
-								>
-									Save Changes
-								</button>
-							</div>
-						</form>
+								<div>
+									<label className="block text-sm font-medium mb-1">Address Line 1</label>
+									<input
+										type="text"
+										value={editingProfile.address_line1 || ''}
+										onChange={e => setEditingProfile({ ...editingProfile, address_line1: e.target.value })}
+										className="w-full h-9 px-3 rounded-md border border-input bg-background"
+									/>
+								</div>
+								<div>
+									<label className="block text-sm font-medium mb-1">Address Line 2</label>
+									<input
+										type="text"
+										value={editingProfile.address_line2 || ''}
+										onChange={e => setEditingProfile({ ...editingProfile, address_line2: e.target.value })}
+										className="w-full h-9 px-3 rounded-md border border-input bg-background"
+									/>
+								</div>
+
+								<div className="grid grid-cols-2 gap-4">
+									<div>
+										<label className="block text-sm font-medium mb-1">City</label>
+										<input
+											type="text"
+											value={editingProfile.city || ''}
+											onChange={e => setEditingProfile({ ...editingProfile, city: e.target.value })}
+											className="w-full h-9 px-3 rounded-md border border-input bg-background"
+										/>
+									</div>
+									<div>
+										<label className="block text-sm font-medium mb-1">State</label>
+										<input
+											type="text"
+											value={editingProfile.state || ''}
+											onChange={e => setEditingProfile({ ...editingProfile, state: e.target.value })}
+											className="w-full h-9 px-3 rounded-md border border-input bg-background"
+										/>
+									</div>
+								</div>
+								<div>
+									<label className="block text-sm font-medium mb-1">Zip Code</label>
+									<input
+										type="text"
+										value={editingProfile.zip_code || ''}
+										onChange={e => setEditingProfile({ ...editingProfile, zip_code: e.target.value })}
+										className="w-full h-9 px-3 rounded-md border border-input bg-background"
+									/>
+								</div>
+
+								<div className="flex justify-end gap-3 mt-6">
+									<button
+										type="button"
+										onClick={() => setEditingProfile(null)}
+										className="btn btn-secondary"
+									>
+										Cancel
+									</button>
+									<button
+										type="submit"
+										className="btn btn-primary"
+									>
+										Save Changes
+									</button>
+								</div>
+							</form>
+						</div>
 					</div>
-				</div>
-			)}
-		</div>
+				)
+			}
+		</div >
 	);
 }

@@ -155,8 +155,17 @@ export default function ProfilePage() {
 					{(isOwnProfile || role === 'admin') && (
 						<div>
 							<label className="block text-sm font-medium text-muted-foreground mb-1">Email</label>
-							<div className="text-base font-medium text-foreground">
-								{isOwnProfile ? user?.email : "Email not stored in public profile"}
+							<div className="flex items-center gap-2">
+								<div className="text-base font-medium text-foreground">
+									{isOwnProfile ? user?.email : profile?.email || "Email not public"}
+								</div>
+								{((isOwnProfile && user?.email) || (profile?.email)) && (
+									<span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+										${(isOwnProfile ? user?.user_metadata?.email_verified : profile?.email_verified) ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'}
+									`}>
+										{(isOwnProfile ? user?.user_metadata?.email_verified : profile?.email_verified) ? 'Verified' : 'Unverified'}
+									</span>
+								)}
 							</div>
 						</div>
 					)}
