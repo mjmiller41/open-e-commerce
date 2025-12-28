@@ -36,15 +36,21 @@ export function AdminOrders() {
 		const previousOrders = [...orders];
 		setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
 
-		const { error } = await supabase
+		const { data, error } = await supabase
 			.from('orders')
 			.update({ status: newStatus })
-			.eq('id', orderId);
+			.eq('id', orderId)
+			.select();
 
 		if (error) {
 			console.error('Error updating order:', error);
 			alert('Failed to update status');
 			// Revert on error
+			setOrders(previousOrders);
+		} else if (!data || data.length === 0) {
+			console.error('Error updating order: No rows affected. Check RLS policies.');
+			alert('Failed to update status: You may not have permission to update this order.');
+			// Revert if no rows updated (silent failure)
 			setOrders(previousOrders);
 		}
 		// No need to trigger refresh if successful, as local state is already updated
