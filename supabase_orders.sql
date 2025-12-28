@@ -30,15 +30,15 @@ alter table order_items enable row level security;
 
 -- Policies for orders
 create policy "Users can view own orders" on orders
-  for select using (auth.uid() = user_id);
+  for select using (user_id = (select auth.uid()));
 
 create policy "Users can create orders" on orders
-  for insert with check (auth.uid() = user_id);
+  for insert with check (user_id = (select auth.uid()));
 
 -- Policies for order_items
 -- Now we can simply check the user_id on the item itself
 create policy "Users can view own order items" on order_items
-  for select using (auth.uid() = user_id);
+  for select using (user_id = (select auth.uid()));
 
 create policy "Users can create order items" on order_items
-  for insert with check (auth.uid() = user_id);
+  for insert with check (user_id = (select auth.uid()));

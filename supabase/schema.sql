@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict QBQMjigu29JKEEccZWMJ2Zss4uOzQrzzTzwJ9urR2GzzOwB0E0O6ewbak0yIlMI
+\restrict btxjAWr1kBphCuZhP5VPJRwtz1id3bQrdRIgIq7HH09JBBvIfT5UYDt893Bx8JM
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.7 (Ubuntu 17.7-3.pgdg24.04+1)
@@ -4200,6 +4200,13 @@ CREATE INDEX idx_order_items_order_id ON public.order_items USING btree (order_i
 
 
 --
+-- Name: idx_order_items_product_id; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_order_items_product_id ON public.order_items USING btree (product_id);
+
+
+--
 -- Name: idx_order_items_user_id; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -4511,6 +4518,14 @@ ALTER TABLE ONLY public.order_items
 
 
 --
+-- Name: order_items order_items_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.order_items
+    ADD CONSTRAINT order_items_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.products(id) ON DELETE RESTRICT;
+
+
+--
 -- Name: order_items order_items_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4679,6 +4694,20 @@ ALTER TABLE auth.sso_providers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE auth.users ENABLE ROW LEVEL SECURITY;
 
 --
+-- Name: orders Access to orders (Admin or Owner); Type: POLICY; Schema: public; Owner: postgres
+--
+
+CREATE POLICY "Access to orders (Admin or Owner)" ON public.orders FOR SELECT TO authenticated USING ((( SELECT public.is_admin() AS is_admin) OR (user_id = ( SELECT auth.uid() AS uid))));
+
+
+--
+-- Name: orders Admins can update orders; Type: POLICY; Schema: public; Owner: postgres
+--
+
+CREATE POLICY "Admins can update orders" ON public.orders FOR UPDATE TO authenticated USING (public.is_admin());
+
+
+--
 -- Name: products Allow public read access; Type: POLICY; Schema: public; Owner: postgres
 --
 
@@ -4689,7 +4718,7 @@ CREATE POLICY "Allow public read access" ON public.products FOR SELECT USING (tr
 -- Name: profiles Profiles visible to owner and admins; Type: POLICY; Schema: public; Owner: postgres
 --
 
-CREATE POLICY "Profiles visible to owner and admins" ON public.profiles FOR SELECT TO authenticated USING (((id = ( SELECT auth.uid() AS uid)) OR ((( SELECT auth.jwt() AS jwt) ->> 'role'::text) = 'admin'::text)));
+CREATE POLICY "Profiles visible to owner and admins" ON public.profiles FOR SELECT TO authenticated USING (((id = ( SELECT auth.uid() AS uid)) OR ( SELECT public.is_admin() AS is_admin)));
 
 
 --
@@ -4717,7 +4746,7 @@ CREATE POLICY "Users can insert own profile" ON public.profiles FOR INSERT WITH 
 -- Name: profiles Users can update own profile; Type: POLICY; Schema: public; Owner: postgres
 --
 
-CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE TO authenticated USING ((id = ( SELECT auth.uid() AS uid)));
+CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE USING ((id = ( SELECT auth.uid() AS uid)));
 
 
 --
@@ -4725,13 +4754,6 @@ CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE TO au
 --
 
 CREATE POLICY "Users can view own order items" ON public.order_items FOR SELECT USING ((user_id = ( SELECT auth.uid() AS uid)));
-
-
---
--- Name: orders Users can view own orders; Type: POLICY; Schema: public; Owner: postgres
---
-
-CREATE POLICY "Users can view own orders" ON public.orders FOR SELECT USING ((user_id = ( SELECT auth.uid() AS uid)));
 
 
 --
@@ -6296,4 +6318,4 @@ ALTER EVENT TRIGGER pgrst_drop_watch OWNER TO supabase_admin;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict QBQMjigu29JKEEccZWMJ2Zss4uOzQrzzTzwJ9urR2GzzOwB0E0O6ewbak0yIlMI
+\unrestrict btxjAWr1kBphCuZhP5VPJRwtz1id3bQrdRIgIq7HH09JBBvIfT5UYDt893Bx8JM
