@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { supabase, type Order, type Profile } from "../lib/supabase";
 import logger from "../lib/logger";
 import { validateAddress } from "../lib/addressValidation";
 
 export default function ProfilePage() {
+	const { id } = useParams();
 	const { user, role } = useAuth();
 	const [orders, setOrders] = useState<Order[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -12,6 +14,9 @@ export default function ProfilePage() {
 	const [isEditing, setIsEditing] = useState(false);
 	const [saving, setSaving] = useState(false);
 	const [errorMsg, setErrorMsg] = useState("");
+
+	const targetUserId = id || user?.id;
+	const isOwnProfile = !id || id === user?.id;
 
 	// Form state
 	const [formData, setFormData] = useState({
@@ -25,13 +30,13 @@ export default function ProfilePage() {
 	});
 
 	useEffect(() => {
-		if (!user) return;
+		if (!targetUserId) return;
 
 		const fetchOrders = async () => {
 			const { data, error } = await supabase
 				.from("orders")
 				.select("*")
-				.eq("user_id", user.id)
+				.eq("user_id", targetUserId)
 				.order("created_at", { ascending: false });
 
 			if (error) {
@@ -45,10 +50,10 @@ export default function ProfilePage() {
 			const { data, error } = await supabase
 				.from("profiles")
 				.select("*")
-				.eq("id", user.id)
+				.eq("id", targetUserId)
 				.single();
 
-			if (error && error.code !== 'PGRST116') { // PGRST116 is "Relation not found" or "No rows found" e.g. if profile doesn't exist yet
+			if (error && error.code !== 'PGRST116') { // PGRST116 is "Relation not found" or "No rows found"
 				logger.error("Error fetching profile:", error);
 			}
 
@@ -64,10 +69,10 @@ export default function ProfilePage() {
 					phoneNumber: data.phone_number || "",
 				});
 			} else {
-				// Initialize from metadata if available
+				// Initialize from metadata if available and we are viewing our own profile
 				setFormData(prev => ({
 					...prev,
-					fullName: user.user_metadata?.full_name || ""
+					fullName: (isOwnProfile && user?.user_metadata?.full_name) || ""
 				}));
 			}
 		};
@@ -79,7 +84,7 @@ export default function ProfilePage() {
 		};
 
 		loadData();
-	}, [user]);
+	}, [targetUserId, isOwnProfile, user]);
 
 	const handleSaveProfile = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -108,7 +113,7 @@ export default function ProfilePage() {
 
 			// Save to Supabase
 			const updates: Partial<Profile> = {
-				id: user!.id,
+				id: targetUserId!,
 				full_name: formData.fullName,
 				address_line1: validated.addressLine1,
 				address_line2: validated.addressLine2 || null,
@@ -138,15 +143,23 @@ export default function ProfilePage() {
 		}
 	};
 
+	if (!isOwnProfile && role !== 'admin') {
+		return <div className="text-center p-8 text-destructive">You do not have permission to view this profile.</div>;
+	}
+
 	return (
 		<div className="max-w-4xl mx-auto animate-in fade-in duration-500">
-			<h1 className="text-3xl font-bold mb-8">My Profile</h1>
+			<h1 className="text-3xl font-bold mb-8">{isOwnProfile ? "My Profile" : "Customer Profile"}</h1>
 			<div className="card p-6 mb-8">
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-					<div>
-						<label className="block text-sm font-medium text-muted-foreground mb-1">Email</label>
-						<div className="text-base font-medium text-foreground">{user?.email}</div>
-					</div>
+					{(isOwnProfile || role === 'admin') && (
+						<div>
+							<label className="block text-sm font-medium text-muted-foreground mb-1">Email</label>
+							<div className="text-base font-medium text-foreground">
+								{isOwnProfile ? user?.email : "Email not stored in public profile"}
+							</div>
+						</div>
+					)}
 					<div>
 						<label className="block text-sm font-medium text-muted-foreground mb-1">Role</label>
 						<div className="text-base font-medium text-foreground capitalize">{role || "User"}</div>
@@ -295,7 +308,7 @@ export default function ProfilePage() {
 			</div>
 
 			<div className="flex justify-between items-center mt-12 mb-4">
-				<h2 className="text-2xl font-bold">My Orders</h2>
+				<h2 className="text-2xl font-bold">{isOwnProfile ? "My Orders" : "Customer Orders"}</h2>
 			</div>
 
 			{loading ? (

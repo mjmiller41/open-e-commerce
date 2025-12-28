@@ -59,6 +59,5 @@ export interface Profile {
   state: string | null;
   zip_code: string | null;
   phone_number: string | null;
-  created_at: string;
   updated_at?: string;
 }
