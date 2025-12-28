@@ -1,5 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { supabase, type Product } from '../lib/supabase';
+import logger from '../lib/logger';
 import { ShoppingCart, ArrowLeft, Package, Truck, ShieldCheck } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { QuantityControl } from '../components/QuantityControl';
@@ -25,7 +26,7 @@ export function ProductDetail() {
 			if (!productId) return;
 			const { data, error } = await supabase.from('products').select('*').eq('id', productId).single();
 			if (error) {
-				console.error('Error fetching product:', error);
+				logger.error('Error fetching product:', error);
 			} else {
 				setProduct(data);
 			}

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase, type Product } from '../lib/supabase';
+import logger from '../lib/logger';
 import { ProductCard } from '../components/ProductCard';
 import { useCart } from '../context/useCart';
 
@@ -20,7 +21,7 @@ export function ProductList() {
 		async function fetchProducts() {
 			const { data, error } = await supabase.from('products').select('*');
 			if (error) {
-				console.error('Error fetching products:', error);
+				logger.error('Error fetching products:', error);
 			} else {
 				setProducts(data);
 			}

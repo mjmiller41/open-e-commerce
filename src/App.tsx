@@ -10,6 +10,7 @@ import RegisterPage from './pages/RegisterPage';
 import AdminPage from './pages/AdminPage';
 import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './components/ProtectedRoute';
+import ErrorBoundary from './components/ErrorBoundary';
 
 
 
@@ -23,27 +24,29 @@ function App() {
 	return (
 		<AuthProvider>
 			<CartProvider>
-				<BrowserRouter basename={import.meta.env.BASE_URL}>
-					<Routes>
-						<Route path="/" element={<Layout />}>
-							<Route index element={<ProductList />} />
-							<Route path="product/:id" element={<ProductDetail />} />
-							<Route path="cart" element={<CartPage />} />
-							<Route path="login" element={<LoginPage />} />
-							<Route path="register" element={<RegisterPage />} />
+				<ErrorBoundary>
+					<BrowserRouter basename={import.meta.env.BASE_URL}>
+						<Routes>
+							<Route path="/" element={<Layout />}>
+								<Route index element={<ProductList />} />
+								<Route path="product/:id" element={<ProductDetail />} />
+								<Route path="cart" element={<CartPage />} />
+								<Route path="login" element={<LoginPage />} />
+								<Route path="register" element={<RegisterPage />} />
 
-							{/* Protected Admin Route */}
-							<Route element={<ProtectedRoute requireAdmin />}>
-								<Route path="admin" element={<AdminPage />} />
-							</Route>
+								{/* Protected Admin Route */}
+								<Route element={<ProtectedRoute requireAdmin />}>
+									<Route path="admin" element={<AdminPage />} />
+								</Route>
 
-							{/* Protected User Routes */}
-							<Route element={<ProtectedRoute />}>
-								<Route path="profile" element={<ProfilePage />} />
+								{/* Protected User Routes */}
+								<Route element={<ProtectedRoute />}>
+									<Route path="profile" element={<ProfilePage />} />
+								</Route>
 							</Route>
-						</Route>
-					</Routes>
-				</BrowserRouter>
+						</Routes>
+					</BrowserRouter>
+				</ErrorBoundary>
 			</CartProvider>
 
 		</AuthProvider>

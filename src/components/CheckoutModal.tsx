@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/useCart';
+import logger from '../lib/logger';
 
 interface CheckoutModalProps {
 	isOpen: boolean;
@@ -70,7 +71,7 @@ export function CheckoutModal({ isOpen, onClose, totalAmount }: CheckoutModalPro
 			alert('Order placed successfully!');
 			onClose();
 		} catch (err: unknown) {
-			console.error('Checkout error:', err);
+			logger.error('Checkout error:', err);
 			const errorMessage = err instanceof Error ? err.message : 'Failed to place order. Please try again.';
 			setError(errorMessage);
 		} finally {

@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type { User, Session } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
+import logger from "../lib/logger";
 
 type Role = "customer" | "admin" | null;
 
@@ -22,6 +23,7 @@ const AuthContext = createContext<AuthContextType>({
 	signOut: async () => { },
 });
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -68,13 +70,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				.single();
 
 			if (error) {
-				console.error("Error fetching role:", error);
+				logger.error("Error fetching role:", error);
 				setRole("customer"); // Default to customer on error
 			} else {
 				setRole(data.role as Role);
 			}
 		} catch (error) {
-			console.error("Error fetching role:", error);
+			logger.error("Error fetching role:", error);
 		} finally {
 			setLoading(false);
 		}

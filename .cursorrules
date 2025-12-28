@@ -58,3 +58,12 @@
 
 - Follow the rules defined in `eslint.config.js`.
 - Run `npm run lint` to verify.
+
+## Error Handling
+
+1.  **Async Operations**:
+    -   All async operations (API calls, DB queries) MUST be wrapped in `try/catch` blocks.
+2.  **Logging**:
+    -   Use the `logger` utility from `src/lib/logger` instead of `console.log`, `console.error`, etc.
+    -   `logger.error` should always be used to catch blocks to ensure errors are reported.
+

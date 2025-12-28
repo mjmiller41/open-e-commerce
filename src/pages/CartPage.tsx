@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useCart } from '../context/useCart';
 import { useEffect, useState } from 'react';
 import { supabase, type Product } from '../lib/supabase';
+import logger from '../lib/logger';
 import { CheckoutModal } from '../components/CheckoutModal';
 
 /**
@@ -30,7 +31,7 @@ export function CartPage() {
 			const { data, error } = await supabase.from('products').select('*').in('id', productIds);
 
 			if (error) {
-				console.error('Error fetching cart products:', error);
+				logger.error('Error fetching cart products:', error);
 			} else if (data) {
 				const productMap = new Map();
 				data.forEach(p => productMap.set(p.id, p));

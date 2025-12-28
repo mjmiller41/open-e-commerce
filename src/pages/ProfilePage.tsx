@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { supabase, type Order } from "../lib/supabase";
+import logger from "../lib/logger";
 
 export default function ProfilePage() {
 	const { user, role } = useAuth();
@@ -17,7 +18,7 @@ export default function ProfilePage() {
 				.order("created_at", { ascending: false });
 
 			if (error) {
-				console.error("Error fetching orders:", error);
+				logger.error("Error fetching orders:", error);
 			} else {
 				setOrders(data || []);
 			}

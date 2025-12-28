@@ -1,3 +1,5 @@
+import logger from "./logger";
+
 /**
  * The runtime configuration interface matching site.config.jsonc
  */
@@ -19,7 +21,7 @@ declare const __APP_CONFIG__: AppConfig;
 export const appConfig: AppConfig = __APP_CONFIG__;
 
 if (!appConfig) {
-  console.error(
+  logger.error(
     "Global configuration not found. Ensure site.config.jsonc exists and build process injected __APP_CONFIG__."
   );
 }

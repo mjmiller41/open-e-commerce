@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase, type Order } from '../lib/supabase';
+import logger from '../lib/logger';
 
 export function AdminOrders() {
 	const [orders, setOrders] = useState<Order[]>([]);
@@ -21,7 +22,7 @@ export function AdminOrders() {
 			const { data, error } = await query;
 
 			if (error) {
-				console.error('Error fetching orders:', error);
+				logger.error('Error fetching orders:', error);
 			} else {
 				setOrders(data || []);
 			}
@@ -43,12 +44,12 @@ export function AdminOrders() {
 			.select();
 
 		if (error) {
-			console.error('Error updating order:', error);
+			logger.error('Error updating order:', error);
 			alert('Failed to update status');
 			// Revert on error
 			setOrders(previousOrders);
 		} else if (!data || data.length === 0) {
-			console.error('Error updating order: No rows affected. Check RLS policies.');
+			logger.error('Error updating order: No rows affected. Check RLS policies.');
 			alert('Failed to update status: You may not have permission to update this order.');
 			// Revert if no rows updated (silent failure)
 			setOrders(previousOrders);
