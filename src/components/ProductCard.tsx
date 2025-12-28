@@ -28,24 +28,24 @@ interface ProductCardProps {
  */
 export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuantity, onRemoveFromCart }: ProductCardProps) {
 	return (
-		<Link to={`/product/${product.id}`} className="card product-card group">
-			<div className="product-image-container">
-				<img src={product.image} alt={product.name} className="product-image" loading="lazy" />
+		<Link to={`/product/${product.id}`} className="card flex flex-col h-full group hover:shadow-lg hover:border-accent/50 transition-all duration-300">
+			<div className="relative aspect-square bg-muted overflow-hidden">
+				<img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 mix-blend-multiply dark:mix-blend-normal group-hover:scale-105" loading="lazy" />
 				{product.on_hand <= 0 && (
-					<div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+					<div className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-[10px] font-bold uppercase px-2 py-1 rounded backdrop-blur-sm tracking-wider">
 						Out of Stock
 					</div>
 				)}
 			</div>
 
-			<div className="product-info">
-				<div className="product-category">{product.category}</div>
-				<h3 className="product-title group-hover:text-[var(--accent)] transition-colors">
+			<div className="p-4 flex flex-col flex-1">
+				<div className="text-primary font-semibold text-xs uppercase tracking-wider mb-2">{product.category}</div>
+				<h3 className="font-semibold text-lg mb-1 leading-snug group-hover:text-primary transition-colors">
 					{product.name}
 				</h3>
-				<div className="product-price">${product.price.toFixed(2)}</div>
+				<div className="font-bold text-xl">${product.price.toFixed(2)}</div>
 
-				<div className="mt-4 pt-4 border-t border-[var(--border)] flex items-center justify-between" onClick={e => e.preventDefault()}>
+				<div className="mt-4 pt-4 border-t border-border flex items-center justify-between" onClick={e => e.preventDefault()}>
 					{cartQuantity > 0 ? (
 						<QuantityControl
 							quantity={cartQuantity}
@@ -58,7 +58,7 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 								}
 							}}
 							maxQuantity={product.on_hand}
-							className="w-full justify-between"
+							className="w-full"
 						/>
 					) : (
 						<button

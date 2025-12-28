@@ -40,33 +40,19 @@ class ErrorBoundary extends Component<Props, State> {
 	public render() {
 		if (this.state.hasError) {
 			return (
-				<div style={{
-					display: 'flex',
-					flexDirection: 'column',
-					alignItems: 'center',
-					justifyContent: 'center',
-					height: '100vh',
-					padding: '20px',
-					textAlign: 'center'
-				}}>
-					<h1>Something went wrong.</h1>
-					<p>We're sorry, but an unexpected error occurred.</p>
+
+				<div className="flex flex-col items-center justify-center min-h-screen p-6 text-center bg-background text-foreground">
+					<h1 className="text-3xl font-bold mb-4">Something went wrong.</h1>
+					<p className="text-muted-foreground mb-6">We're sorry, but an unexpected error occurred.</p>
 					<button
 						onClick={() => window.location.reload()}
-						style={{
-							padding: '10px 20px',
-							marginTop: '20px',
-							cursor: 'pointer',
-							backgroundColor: 'var(--accent)',
-							border: 'none',
-							borderRadius: '4px',
-							color: '#fff'
-						}}
+						className="btn btn-primary"
 					>
 						Reload Page
 					</button>
 				</div>
 			);
+
 		}
 
 		return this.props.children;

@@ -58,19 +58,20 @@ export function AdminOrders() {
 	};
 
 	return (
-		<div className="checkout-form" style={{ gap: '1.5rem' }}>
-			<div className="admin-header">
-				<h2 className="admin-subtitle">Order Management</h2>
-				<div className="filter-group">
+
+		<div className="space-y-6">
+			<div className="flex items-center justify-between mb-6">
+				<h2 className="text-xl font-bold">Order Management</h2>
+				<div className="flex gap-2">
 					<button
 						onClick={() => setFilter('all')}
-						className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
+						className={`btn btn-secondary ${filter === 'all' ? 'ring-2 ring-primary border-primary' : ''}`}
 					>
 						All
 					</button>
 					<button
 						onClick={() => setFilter('pending')}
-						className={`filter-btn ${filter === 'pending' ? 'active' : ''}`}
+						className={`btn btn-secondary ${filter === 'pending' ? 'ring-2 ring-primary border-primary' : ''}`}
 					>
 						Pending
 					</button>
@@ -78,40 +79,45 @@ export function AdminOrders() {
 			</div>
 
 			{loading ? (
-				<div style={{ textAlign: 'center', padding: '2rem' }}>Loading orders...</div>
+				<div className="text-center p-8">Loading orders...</div>
 			) : orders.length === 0 ? (
-				<div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>No orders found.</div>
+				<div className="text-center p-8 text-muted-foreground">No orders found.</div>
 			) : (
-				<div className="orders-table-container">
-					<table className="orders-table">
+				<div className="overflow-x-auto border border-border rounded-lg">
+					<table className="w-full text-left">
 						<thead>
-							<tr>
-								<th>Order ID</th>
-								<th>Date</th>
-								<th>Customer (ID)</th>
-								<th>Total</th>
-								<th>Status</th>
-								<th>Actions</th>
+							<tr className="bg-muted">
+								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Order ID</th>
+								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Date</th>
+								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Customer (ID)</th>
+								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Total</th>
+								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Status</th>
+								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Actions</th>
 							</tr>
 						</thead>
 						<tbody>
 							{orders.map((order) => (
-								<tr key={order.id}>
-									<td>#{order.id}</td>
-									<td>{new Date(order.created_at).toLocaleDateString()}</td>
-									<td style={{ fontFamily: 'monospace', fontSize: '0.75rem' }}>{order.user_id.split('-')[0]}...</td>
-									<td>${order.total_amount.toFixed(2)}</td>
-									<td>
-										<span className={`status-badge status-${order.status}`}>
+								<tr key={order.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
+									<td className="p-3 text-sm">#{order.id}</td>
+									<td className="p-3 text-sm">{new Date(order.created_at).toLocaleDateString()}</td>
+									<td className="p-3 text-sm font-mono text-xs">{order.user_id.split('-')[0]}...</td>
+									<td className="p-3 text-sm font-medium">${order.total_amount.toFixed(2)}</td>
+									<td className="p-3 text-sm">
+										<span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
+											${order.status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' : ''}
+											${order.status === 'processing' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' : ''}
+											${order.status === 'shipped' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : ''}
+											${order.status === 'cancelled' ? 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400' : ''}
+										`}>
 											{order.status}
 										</span>
 									</td>
-									<td>
+									<td className="p-3 text-sm">
 										<select
 											name="status-select"
 											value={order.status}
 											onChange={(e) => updateStatus(order.id, e.target.value as Order['status'])}
-											className="status-select"
+											className="h-8 px-2 text-xs rounded border border-input bg-background focus:ring-2 focus:ring-ring"
 										>
 											<option value="pending">Pending</option>
 											<option value="processing">Processing</option>

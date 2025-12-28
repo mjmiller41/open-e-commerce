@@ -48,3 +48,17 @@ export interface OrderItem {
   quantity: number;
   price: number;
 }
+
+export interface Profile {
+  id: string;
+  role: "customer" | "admin";
+  full_name: string | null;
+  address_line1: string | null;
+  address_line2: string | null;
+  city: string | null;
+  state: string | null;
+  zip_code: string | null;
+  phone_number: string | null;
+  created_at: string;
+  updated_at?: string;
+}

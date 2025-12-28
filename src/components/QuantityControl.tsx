@@ -36,19 +36,22 @@ export function QuantityControl({
 	const iconSize = isSmall ? 16 : 20;
 
 	return (
-		<div className={`qty-control-primary ${isSmall ? 'sm' : 'lg'} ${className}`}>
+
+
+
+		<div className={`flex items-center rounded-lg overflow-hidden border border-border ${isSmall ? 'h-8' : 'h-10'} ${className}`}>
 			<button
 				onClick={(e) => {
 					e.preventDefault();
 					onDecrease();
 				}}
-				className="qty-btn"
+				className="btn btn-primary rounded-none border-r border-primary-foreground/20 px-3 h-full flex items-center justify-center hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex-1"
 				aria-label="Decrease quantity"
 			>
-				<Minus size={iconSize} color="currentColor" />
+				<Minus size={iconSize} />
 			</button>
 
-			<span className="qty-val">
+			<span className={`bg-primary text-primary-foreground font-medium min-w-[3rem] text-center flex items-center justify-center h-full flex-1 ${isSmall ? 'text-sm' : 'text-base'}`}>
 				{quantity}
 			</span>
 
@@ -57,12 +60,15 @@ export function QuantityControl({
 					e.preventDefault();
 					onIncrease();
 				}}
-				className="qty-btn"
+				className="btn btn-primary rounded-none border-l border-primary-foreground/20 px-3 h-full flex items-center justify-center hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex-1"
 				aria-label="Increase quantity"
 				disabled={quantity >= maxQuantity}
 			>
-				<Plus size={iconSize} color="currentColor" />
+				<Plus size={iconSize} />
 			</button>
 		</div>
 	);
+
+
+
 }

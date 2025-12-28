@@ -80,29 +80,30 @@ export function CheckoutModal({ isOpen, onClose, totalAmount }: CheckoutModalPro
 	};
 
 	return (
-		<div className="modal-overlay">
-			<div className="modal-content">
-				<h2 className="modal-title">Checkout</h2>
 
-				<form onSubmit={handleCheckout} className="checkout-form">
-					<div className="form-field">
-						<label className="form-label">
+		<div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100] animate-in fade-in duration-300">
+			<div className="bg-card w-full max-w-md p-6 rounded-lg shadow-xl animate-in zoom-in-95 duration-300 border border-border">
+				<h2 className="text-xl font-bold mb-6">Checkout</h2>
+
+				<form onSubmit={handleCheckout} className="space-y-4">
+					<div className="space-y-2">
+						<label className="block text-sm font-medium text-muted-foreground">
 							Total Amount
 						</label>
-						<div className="form-value">
+						<div className="text-lg font-bold text-foreground">
 							${totalAmount.toFixed(2)}
 						</div>
 					</div>
 
-					<div className="form-field">
-						<label htmlFor="address" className="form-label">
+					<div className="space-y-2">
+						<label htmlFor="address" className="block text-sm font-medium text-muted-foreground">
 							Shipping Address
 						</label>
 						<textarea
 							id="address"
 							required
 							rows={3}
-							className="form-textarea"
+							className="form-input min-h-[80px] resize-none"
 							value={address}
 							onChange={(e) => setAddress(e.target.value)}
 							placeholder="123 Main St, City, Country"
@@ -110,29 +111,29 @@ export function CheckoutModal({ isOpen, onClose, totalAmount }: CheckoutModalPro
 					</div>
 
 					{/* Dummy Card Inputs for Visuals */}
-					<div className="dummy-card-section">
-						<p className="dummy-label">Payment Details (Dummy)</p>
-						<div className="checkout-form" style={{ gap: '0.5rem' }}>
+					<div className="p-4 bg-muted/50 rounded-lg border border-border">
+						<p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Payment Details (Dummy)</p>
+						<div className="space-y-2">
 							<input
 								type="text"
 								placeholder="Card Number"
 								disabled
-								className="dummy-input"
+								className="form-input bg-background/50 text-muted-foreground cursor-not-allowed"
 								value="**** **** **** 4242"
 							/>
-							<div style={{ display: 'flex', gap: '0.5rem' }}>
+							<div className="flex gap-2">
 								<input
 									type="text"
 									placeholder="MM/YY"
 									disabled
-									className="dummy-input"
+									className="form-input bg-background/50 text-muted-foreground cursor-not-allowed"
 									value="12/25"
 								/>
 								<input
 									type="text"
 									placeholder="CVC"
 									disabled
-									className="dummy-input"
+									className="form-input bg-background/50 text-muted-foreground cursor-not-allowed"
 									value="123"
 								/>
 							</div>
@@ -140,12 +141,12 @@ export function CheckoutModal({ isOpen, onClose, totalAmount }: CheckoutModalPro
 					</div>
 
 					{error && (
-						<div className="auth-error">
+						<div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm">
 							{error}
 						</div>
 					)}
 
-					<div className="modal-actions">
+					<div className="flex justify-end gap-3 mt-6 pt-4 border-t border-border">
 						<button
 							type="button"
 							onClick={onClose}

@@ -35,25 +35,26 @@ export default function LoginPage() {
 	};
 
 	return (
-		<div className="auth-page">
-			<div className="auth-container">
-				<div className="auth-header">
-					<LogIn className="auth-icon" />
-					<h2 className="auth-title">
+
+		<div className="flex items-center justify-center min-h-[calc(100vh-200px)] py-12 px-4 sm:px-6 lg:px-8">
+			<div className="max-w-md w-full space-y-8 animate-in fade-in zoom-in duration-500">
+				<div className="text-center">
+					<LogIn className="mx-auto h-12 w-12 text-primary" />
+					<h2 className="mt-6 text-center text-3xl font-extrabold text-foreground">
 						Sign in to your account
 					</h2>
-					<p className="auth-subtitle">
+					<p className="mt-2 text-center text-sm text-muted-foreground">
 						Or{" "}
 						<Link
 							to="/register"
-							className="auth-link"
+							className="font-medium text-primary hover:text-accent transition-colors"
 						>
 							create a new account
 						</Link>
 					</p>
 				</div>
-				<form className="auth-form" onSubmit={handleLogin}>
-					<div className="form-group-stacked">
+				<form className="mt-8 space-y-6" onSubmit={handleLogin}>
+					<div className="space-y-4">
 						<div>
 							<input
 								id="email-address"
@@ -83,14 +84,14 @@ export default function LoginPage() {
 					</div>
 
 					{error && (
-						<div className="auth-error">{error}</div>
+						<div className="rounded-md bg-destructive/10 p-4 text-sm text-destructive text-center">{error}</div>
 					)}
 
 					<div>
 						<button
 							type="submit"
 							disabled={loading}
-							className="auth-submit-btn"
+							className="btn btn-primary w-full"
 						>
 							{loading ? "Signing in..." : "Sign in"}
 						</button>

@@ -65,12 +65,13 @@ export function CartPage() {
 
 	if (enrichedCartItems.length === 0) {
 		return (
-			<div className="empty-cart fade-in">
-				<div className="empty-icon">
+
+			<div className="text-center py-16 px-4 animate-in fade-in duration-500">
+				<div className="w-20 h-20 bg-muted text-muted-foreground rounded-full flex items-center justify-center mx-auto mb-6">
 					<ShoppingBag size={40} />
 				</div>
-				<h2 className="cart-title" style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Your Cart is Empty</h2>
-				<p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', maxWidth: '400px', margin: '0 auto 2rem auto' }}>
+				<h2 className="text-2xl font-bold mb-4">Your Cart is Empty</h2>
+				<p className="text-muted-foreground mb-8 max-w-md mx-auto">
 					Looks like you haven't added anything to your cart yet. Explore our products to find something you'll love.
 				</p>
 				<Link to="/" className="btn btn-primary">
@@ -78,42 +79,45 @@ export function CartPage() {
 				</Link>
 			</div>
 		);
+
 	}
 
 	return (
-		<div className="fade-in">
-			<div className="cart-header">
-				<ShoppingBag className="text-[var(--accent)]" size={32} />
-				<h1 className="cart-title">Shopping Cart</h1>
-				<span className="cart-count">({enrichedCartItems.length} items)</span>
+
+		<div className="animate-in fade-in duration-500">
+			<div className="flex items-center gap-4 mb-8">
+				<ShoppingBag className="text-primary" size={32} />
+				<h1 className="text-3xl font-bold">Shopping Cart</h1>
+				<span className="text-xl text-muted-foreground">({enrichedCartItems.length} items)</span>
 			</div>
 
-			<div className="cart-layout">
-				<div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+			<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+				<div className="lg:col-span-2 flex flex-col gap-4">
 					{enrichedCartItems.map(({ productId, quantity, product }) => (
-						<div key={productId} className="card cart-item">
-							<div className="cart-item-image">
+						<div key={productId} className="card flex items-center gap-6 p-6">
+							<div className="w-24 h-24 rounded-lg bg-muted object-cover overflow-hidden shrink-0">
 								<img src={product.image} alt={product.name} className="w-full h-full object-cover mix-blend-multiply dark:mix-blend-normal" />
 							</div>
 
-							<div className="cart-item-info">
-								<Link to={`/product/${product.id}`} className="cart-item-title">
+							<div className="flex-1">
+								<Link to={`/product/${product.id}`} className="font-semibold text-lg hover:text-primary mb-1 block">
 									{product.name}
 								</Link>
-								<div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{product.category}</div>
-								<div className="cart-item-price">${product.price.toFixed(2)}</div>
+								<div className="text-sm text-muted-foreground">{product.category}</div>
+								<div className="text-primary font-bold mt-1">${product.price.toFixed(2)}</div>
 							</div>
 
-							<div className="cart-controls">
+							<div className="flex flex-col items-end gap-4">
 								<QuantityControl
 									quantity={quantity}
 									onDecrease={() => handleUpdate(productId, quantity, -1)}
 									onIncrease={() => handleUpdate(productId, quantity, 1)}
 									maxQuantity={product.on_hand}
+									className="w-32"
 								/>
 								<button
 									onClick={() => removeItem(productId)}
-									className="remove-btn"
+									className="text-destructive text-sm flex items-center gap-1 hover:underline"
 								>
 									<Trash2 size={16} /> Remove
 								</button>
@@ -123,32 +127,32 @@ export function CartPage() {
 				</div>
 
 				<div>
-					<div className="card summary-card">
-						<h2 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem' }}>Order Summary</h2>
+					<div className="card p-6 sticky top-24">
+						<h2 className="text-xl font-bold mb-4">Order Summary</h2>
 
-						<div className="summary-row">
+						<div className="flex justify-between mb-2 text-sm text-muted-foreground">
 							<span>Subtotal</span>
 							<span>${total.toFixed(2)}</span>
 						</div>
-						<div className="summary-row">
+						<div className="flex justify-between mb-2 text-sm text-muted-foreground">
 							<span>Shipping</span>
-							<span style={{ color: 'green' }}>Free</span>
+							<span className="text-green-600">Free</span>
 						</div>
-						<div className="summary-row">
+						<div className="flex justify-between mb-6 text-sm text-muted-foreground">
 							<span>Tax</span>
 							<span>Calculated at checkout</span>
 						</div>
 
-						<div className="summary-total">
+						<div className="flex justify-between border-t border-border pt-4 mb-6 font-bold text-xl">
 							<span>Total</span>
-							<span style={{ color: 'var(--accent)' }}>${total.toFixed(2)}</span>
+							<span className="text-primary">${total.toFixed(2)}</span>
 						</div>
 
-						<button className="btn btn-primary btn-full" onClick={() => setIsCheckoutOpen(true)}>
+						<button className="btn btn-primary w-full" onClick={() => setIsCheckoutOpen(true)}>
 							Proceed to Checkout <ArrowRight size={18} />
 						</button>
 
-						<p style={{ fontSize: '0.75rem', textAlign: 'center', color: 'var(--text-secondary)', marginTop: '1rem' }}>
+						<p className="text-xs text-center text-muted-foreground mt-4">
 							Secure Checkout powered by OpenStore
 						</p>
 					</div>

@@ -34,17 +34,17 @@ export function ProductList() {
 	if (!products) return <div className="empty-cart">No products found.</div>;
 
 	return (
-		<div className="fade-in">
-			<div className="hero-section">
-				<h1 className="hero-title">
+		<div className="animate-in fade-in duration-700">
+			<div className="text-center mb-12 max-w-2xl mx-auto">
+				<h1 className="text-4xl font-extrabold mb-4 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
 					Featured Collection
 				</h1>
-				<p style={{ color: 'var(--text-secondary)', fontSize: '1.125rem' }}>
+				<p className="text-muted-foreground text-lg">
 					Explore our premium selection of cutting-edge technology and accessories.
 				</p>
 			</div>
 
-			<div className="product-grid">
+			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
 				{products.map(product => (
 					<ProductCard
 						key={product.id}
@@ -58,7 +58,7 @@ export function ProductList() {
 			</div>
 
 			{products.length === 0 && (
-				<div className="empty-cart" style={{ border: '1px dashed var(--border)', borderRadius: 'var(--radius)' }}>
+				<div className="text-center py-16 px-4 border border-dashed border-border rounded-lg">
 					<p style={{ marginBottom: '1rem' }}>No products found in the database.</p>
 				</div>
 			)}

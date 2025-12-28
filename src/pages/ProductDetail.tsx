@@ -54,27 +54,27 @@ export function ProductDetail() {
 	}
 
 	return (
-		<div className="product-detail-container fade-in">
-			<Link to="/" className="back-link">
+		<div className="max-w-5xl mx-auto animate-in fade-in duration-500">
+			<Link to="/" className="inline-flex items-center gap-2 text-muted-foreground mb-8 font-medium hover:text-primary transition-colors">
 				<ArrowLeft size={20} /> Back to Products
 			</Link>
 
-			<div className="detail-grid">
-				<div className="detail-image">
-					<img src={product.image} alt={product.name} className="product-image" />
+			<div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+				<div className="rounded-2xl bg-muted overflow-hidden">
+					<img src={product.image} alt={product.name} className="w-full h-full object-cover mix-blend-multiply dark:mix-blend-normal" />
 				</div>
 
 				<div>
-					<div className="detail-category">{product.category}</div>
-					<h1 className="detail-title">{product.name}</h1>
-					<div className="detail-price">${product.price.toFixed(2)}</div>
+					<div className="text-primary font-semibold text-sm uppercase tracking-wider mb-2">{product.category}</div>
+					<h1 className="text-4xl font-bold mb-4 leading-tight">{product.name}</h1>
+					<div className="text-3xl font-bold mb-6 text-foreground">${product.price.toFixed(2)}</div>
 
-					<div className="detail-desc">
+					<div className="text-lg text-muted-foreground leading-relaxed mb-8">
 						{product.description}
 					</div>
 
-					<div className="detail-actions">
-						<div className="stock-indicator">
+					<div className="bg-muted/50 p-6 rounded-lg mb-8">
+						<div className="flex items-center gap-2 text-muted-foreground text-sm mb-4">
 							<Package size={18} />
 							<span>{product.on_hand > 0 ? `In Stock (${product.on_hand} available)` : 'Out of Stock'}</span>
 						</div>
@@ -91,13 +91,13 @@ export function ProductDetail() {
 								}}
 								onIncrease={() => updateQuantity(productId, 1)}
 								maxQuantity={product.on_hand}
-								className="w-full"
+								className="w-full max-w-xs"
 							/>
 						) : (
 							<button
 								onClick={handleAddToCart}
 								disabled={product.on_hand <= 0 || isAdding}
-								className={`btn btn-primary btn-full ${isAdding ? 'opacity-80' : ''}`}
+								className={`btn btn-primary w-full ${isAdding ? 'opacity-80' : ''}`}
 							>
 								{isAdding ? 'Added!' : (
 									<>
@@ -109,12 +109,12 @@ export function ProductDetail() {
 
 					</div>
 
-					<div className="feature-grid">
-						<div className="feature-item">
+					<div className="grid grid-cols-2 gap-4">
+						<div className="flex items-center gap-2 text-sm text-muted-foreground">
 							<Truck size={18} />
 							<span>Free Shipping</span>
 						</div>
-						<div className="feature-item">
+						<div className="flex items-center gap-2 text-sm text-muted-foreground">
 							<ShieldCheck size={18} />
 							<span>2 Year Warranty</span>
 						</div>

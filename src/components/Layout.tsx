@@ -40,47 +40,48 @@ export function Layout() {
 	};
 
 	return (
-		<div className="app-container">
-			<header className="app-header">
-				<div className="container header-inner">
-					<Link to="/" className="logo">
+
+		<div className="flex flex-col min-h-screen">
+			<header className="sticky top-0 z-50 bg-[var(--bg-header)] backdrop-blur-md border-b border-border transition-colors duration-300">
+				<div className="container mx-auto px-4 h-16 flex items-center justify-between">
+					<Link to="/" className="flex items-center gap-2 font-bold text-xl text-primary">
 						<LogoIcon />
 						<span>{appConfig.siteTitle}</span>
 					</Link>
 
-					<div className="header-actions">
+					<div className="flex items-center gap-4">
 						<ThemeToggle />
 
 						<Link to="/cart" className="btn btn-ghost relative" aria-label="Cart">
 							<ShoppingCart size={20} />
 							{cartCount > 0 && (
-								<span className="cart-badge">
+								<span className="absolute -top-1 -right-1 bg-primary text-primary-foreground w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold">
 									{cartCount}
 								</span>
 							)}
 						</Link>
 
 						{user ? (
-							<div className="dropdown-container" ref={dropdownRef}>
+							<div className="relative" ref={dropdownRef}>
 								<button
-									className="btn btn-ghost dropdown-trigger"
+									className="btn btn-ghost flex items-center gap-2"
 									onClick={() => setIsDropdownOpen(!isDropdownOpen)}
 									aria-label="User menu"
 								>
 									<User size={20} />
-									<ChevronDown size={16} className={`dropdown-icon-flip ${isDropdownOpen ? 'open' : ''}`} />
+									<ChevronDown size={16} className={`transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
 								</button>
 
 								{isDropdownOpen && (
-									<div className="dropdown-menu">
-										<div className="dropdown-header">
-											<p className="dropdown-user-email">{user.email}</p>
-											<p className="dropdown-user-role">{role || 'User'}</p>
+									<div className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-lg shadow-lg py-1 z-50">
+										<div className="px-4 py-2 border-b border-border">
+											<p className="text-sm font-medium truncate">{user?.email}</p>
+											<p className="text-xs text-muted-foreground capitalize">{role || 'User'}</p>
 										</div>
 
 										<Link
 											to="/profile"
-											className="dropdown-item"
+											className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
 											onClick={() => setIsDropdownOpen(false)}
 										>
 											My Profile
@@ -89,17 +90,17 @@ export function Layout() {
 										{isAdmin && (
 											<Link
 												to="/admin"
-												className="dropdown-item"
+												className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
 												onClick={() => setIsDropdownOpen(false)}
 											>
 												Admin Dashboard
 											</Link>
 										)}
 
-										<div className="dropdown-divider">
+										<div className="border-t border-border mt-1 pt-1">
 											<button
 												onClick={handleSignOut}
-												className="dropdown-item danger"
+												className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
 											>
 												Sign Out
 											</button>
@@ -116,17 +117,18 @@ export function Layout() {
 				</div>
 			</header>
 
-			<main className="main-content">
-				<div className="container">
+			<main className="flex-1 py-8">
+				<div className="container mx-auto px-4">
 					<Outlet />
 				</div>
 			</main>
 
-			<footer className="app-footer">
-				<div className="container">
+			<footer className="mt-auto border-t border-border py-8 bg-muted text-muted-foreground text-center text-sm">
+				<div className="container mx-auto px-4">
 					<p>&copy; {new Date().getFullYear()} {appConfig.footer?.text || appConfig.siteTitle}</p>
 				</div>
 			</footer>
 		</div>
 	);
+
 }
