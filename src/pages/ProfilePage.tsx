@@ -25,6 +25,14 @@ export default function ProfilePage() {
 		phoneNumber: "",
 	});
 
+	// Security State
+	const [securityState, setSecurityState] = useState({
+		newEmail: "",
+		newPassword: "",
+		confirmPassword: "",
+	});
+	const [securitySaving, setSecuritySaving] = useState(false);
+
 
 	// Address Form State
 	const [isAddingAddress, setIsAddingAddress] = useState(false);
@@ -124,6 +132,69 @@ export default function ProfilePage() {
 			setErrorMsg(err instanceof Error ? err.message : "Failed to save profile.");
 		} finally {
 			setSaving(false);
+		}
+	};
+
+	const handleUpdateEmail = async (e: React.FormEvent) => {
+		e.preventDefault();
+		if (!securityState.newEmail) return;
+		setSecuritySaving(true);
+		try {
+			const { error } = await supabase.auth.updateUser({ email: securityState.newEmail });
+			if (error) throw error;
+			alert(`Confirmation email sent to ${securityState.newEmail}. Please click the link in both your old and new emails to finalize the change.`);
+			setSecurityState(prev => ({ ...prev, newEmail: "" }));
+		} catch (err) {
+			logger.error("Error updating email:", err);
+			alert(err instanceof Error ? err.message : "Failed to update email");
+		} finally {
+			setSecuritySaving(false);
+		}
+	};
+
+	const handleUpdatePassword = async (e: React.FormEvent) => {
+		e.preventDefault();
+		if (securityState.newPassword !== securityState.confirmPassword) {
+			alert("Passwords do not match");
+			return;
+		}
+		if (securityState.newPassword.length < 6) {
+			alert("Password must be at least 6 characters");
+			return;
+		}
+
+		setSecuritySaving(true);
+		try {
+			const { error } = await supabase.auth.updateUser({ password: securityState.newPassword });
+			if (error) throw error;
+			alert("Password updated successfully");
+			setSecurityState(prev => ({ ...prev, newPassword: "", confirmPassword: "" }));
+		} catch (err) {
+			logger.error("Error updating password:", err);
+			alert(err instanceof Error ? err.message : "Failed to update password");
+		} finally {
+			setSecuritySaving(false);
+		}
+	};
+
+	const handleAdminPasswordReset = async () => {
+		const email = profile?.email;
+		if (!email) {
+			alert("No email address found for this user.");
+			return;
+		}
+
+		if (!confirm(`Send password reset email to ${email}?`)) return;
+
+		try {
+			const { error } = await supabase.auth.resetPasswordForEmail(email, {
+				redirectTo: window.location.origin + "/reset-password", // Ensure this route handles the recovery flow or just standard
+			});
+			if (error) throw error;
+			alert(`Password reset email sent to ${email}`);
+		} catch (err) {
+			logger.error("Admin reset password error:", err);
+			alert("Failed to send reset email.");
 		}
 	};
 
@@ -239,6 +310,14 @@ export default function ProfilePage() {
 									</span>
 								)}
 							</div>
+							{role === 'admin' && !isOwnProfile && profile?.email && (
+								<button
+									onClick={handleAdminPasswordReset}
+									className="text-xs text-primary hover:underline mt-1 block"
+								>
+									Send Password Reset Email
+								</button>
+							)}
 						</div>
 					)}
 					<div>
@@ -322,6 +401,69 @@ export default function ProfilePage() {
 				)}
 			</div>
 
+			{/* Security Card (Owner Only) */}
+			{
+				isOwnProfile && (
+					<div className="card p-6 mb-8">
+						<h3 className="text-lg font-semibold mb-4">Security</h3>
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+							{/* Change Email */}
+							<div>
+								<h4 className="text-sm font-medium text-muted-foreground mb-3">Change Email</h4>
+								<form onSubmit={handleUpdateEmail} className="space-y-3">
+									<input
+										type="email"
+										placeholder="New Email Address"
+										value={securityState.newEmail}
+										onChange={e => setSecurityState({ ...securityState, newEmail: e.target.value })}
+										className="form-input"
+										required
+									/>
+									<button
+										type="submit"
+										className="btn btn-secondary w-full text-sm"
+										disabled={securitySaving}
+									>
+										Update Email
+									</button>
+									<p className="text-xs text-muted-foreground mt-2">
+										You will receive a confirmation link at your new email address.
+									</p>
+								</form>
+							</div>
+
+							{/* Change Password */}
+							<div>
+								<h4 className="text-sm font-medium text-muted-foreground mb-3">Change Password</h4>
+								<form onSubmit={handleUpdatePassword} className="space-y-3">
+									<input
+										type="password"
+										placeholder="New Password"
+										value={securityState.newPassword}
+										onChange={e => setSecurityState({ ...securityState, newPassword: e.target.value })}
+										className="form-input"
+									/>
+									<input
+										type="password"
+										placeholder="Confirm New Password"
+										value={securityState.confirmPassword}
+										onChange={e => setSecurityState({ ...securityState, confirmPassword: e.target.value })}
+										className="form-input"
+									/>
+									<button
+										type="submit"
+										className="btn btn-secondary w-full text-sm"
+										disabled={securitySaving}
+									>
+										Update Password
+									</button>
+								</form>
+							</div>
+						</div>
+					</div>
+				)
+			}
+
 			{/* Saved Addresses Section */}
 			<div className="mb-8">
 				<div className="flex justify-between items-center mb-4">
@@ -391,53 +533,55 @@ export default function ProfilePage() {
 				<h2 className="text-2xl font-bold">{isOwnProfile ? "My Orders" : "Customer Orders"}</h2>
 			</div>
 
-			{loading ? (
-				<div className="text-center p-8">Loading orders...</div>
-			) : orders.length === 0 ? (
-				<div className="card p-8 text-center text-muted-foreground">
-					You haven't placed any orders yet.
-				</div>
-			) : (
-				<div className="overflow-x-auto border border-border rounded-lg">
-					<table className="w-full text-left">
-						<thead>
-							<tr className="bg-muted">
-								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Order ID</th>
-								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Date</th>
-								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Total</th>
-								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Status</th>
-								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Shipping Address</th>
-							</tr>
-						</thead>
-						<tbody>
-							{orders.map((order) => (
-								<tr key={order.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
-									<td className="p-3 text-sm">
-										<Link to={`/order/${order.id}`} className="hover:underline text-primary">
-											#{order.id}
-										</Link>
-									</td>
-									<td className="p-3 text-sm">{new Date(order.created_at).toLocaleDateString()}</td>
-									<td className="p-3 text-sm font-medium">${order.total_amount.toFixed(2)}</td>
-									<td className="p-3 text-sm">
-										<span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
+			{
+				loading ? (
+					<div className="text-center p-8">Loading orders...</div>
+				) : orders.length === 0 ? (
+					<div className="card p-8 text-center text-muted-foreground">
+						You haven't placed any orders yet.
+					</div>
+				) : (
+					<div className="overflow-x-auto border border-border rounded-lg">
+						<table className="w-full text-left">
+							<thead>
+								<tr className="bg-muted">
+									<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Order ID</th>
+									<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Date</th>
+									<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Total</th>
+									<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Status</th>
+									<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Shipping Address</th>
+								</tr>
+							</thead>
+							<tbody>
+								{orders.map((order) => (
+									<tr key={order.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
+										<td className="p-3 text-sm">
+											<Link to={`/order/${order.id}`} className="hover:underline text-primary">
+												#{order.id}
+											</Link>
+										</td>
+										<td className="p-3 text-sm">{new Date(order.created_at).toLocaleDateString()}</td>
+										<td className="p-3 text-sm font-medium">${order.total_amount.toFixed(2)}</td>
+										<td className="p-3 text-sm">
+											<span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
 											${order.status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' : ''}
 											${order.status === 'processing' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' : ''}
 											${order.status === 'shipped' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : ''}
 											${order.status === 'cancelled' ? 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400' : ''}
 										`}>
-											{order.status}
-										</span>
-									</td>
-									<td className="p-3 text-sm max-w-[200px] truncate">
-										{order.shipping_address}
-									</td>
-								</tr>
-							))}
-						</tbody>
-					</table>
-				</div>
-			)}
-		</div>
+												{order.status}
+											</span>
+										</td>
+										<td className="p-3 text-sm max-w-[200px] truncate">
+											{order.shipping_address}
+										</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
+				)
+			}
+		</div >
 	);
 }

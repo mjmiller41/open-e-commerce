@@ -67,16 +67,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				.from("profiles")
 				.select("role")
 				.eq("id", userId)
-				.single();
+				.maybeSingle();
 
 			if (error) {
 				logger.error("Error fetching role:", error);
 				setRole("customer"); // Default to customer on error
+			} else if (!data) {
+				// Profile doesn't exist yet (likely new user race condition)
+				// Default to customer and let the background trigger handle creation
+				setRole("customer");
 			} else {
 				setRole(data.role as Role);
 			}
 		} catch (error) {
 			logger.error("Error fetching role:", error);
+			setRole("customer");
 		} finally {
 			setLoading(false);
 		}

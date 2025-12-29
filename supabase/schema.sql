@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict KrSaRYvmzvBdJHlK5lATBPmggS4ZHwsrOn0sMWshKAdRQgb5weylxdqlkZYLEj1
+\restrict 9OB2pOGhycRK891rAWdLgpA69KxJYDUMcxbv8kKixkZf7lOjXAo0J5YaGflQtdE
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.7 (Ubuntu 17.7-3.pgdg24.04+1)
@@ -877,6 +877,7 @@ ALTER FUNCTION public.is_current_user_admin() OWNER TO postgres;
 
 CREATE FUNCTION public.is_owner(p_user_id uuid) RETURNS boolean
     LANGUAGE sql STABLE SECURITY DEFINER
+    SET search_path TO ''
     AS $$
   SELECT (SELECT auth.uid()) = p_user_id;
 $$;
@@ -4860,10 +4861,24 @@ CREATE POLICY orders_access_policy ON public.orders TO authenticated USING ((COA
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 
 --
--- Name: products products_admin_only; Type: POLICY; Schema: public; Owner: postgres
+-- Name: products products_admin_only_delete; Type: POLICY; Schema: public; Owner: postgres
 --
 
-CREATE POLICY products_admin_only ON public.products TO authenticated USING (COALESCE(public.is_admin(), false)) WITH CHECK (COALESCE(public.is_admin(), false));
+CREATE POLICY products_admin_only_delete ON public.products FOR DELETE TO authenticated USING (COALESCE(public.is_admin(), false));
+
+
+--
+-- Name: products products_admin_only_insert; Type: POLICY; Schema: public; Owner: postgres
+--
+
+CREATE POLICY products_admin_only_insert ON public.products FOR INSERT TO authenticated WITH CHECK (COALESCE(public.is_admin(), false));
+
+
+--
+-- Name: products products_admin_only_update; Type: POLICY; Schema: public; Owner: postgres
+--
+
+CREATE POLICY products_admin_only_update ON public.products FOR UPDATE TO authenticated USING (COALESCE(public.is_admin(), false)) WITH CHECK (COALESCE(public.is_admin(), false));
 
 
 --
@@ -6447,4 +6462,4 @@ ALTER EVENT TRIGGER pgrst_drop_watch OWNER TO supabase_admin;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict KrSaRYvmzvBdJHlK5lATBPmggS4ZHwsrOn0sMWshKAdRQgb5weylxdqlkZYLEj1
+\unrestrict 9OB2pOGhycRK891rAWdLgpA69KxJYDUMcxbv8kKixkZf7lOjXAo0J5YaGflQtdE
