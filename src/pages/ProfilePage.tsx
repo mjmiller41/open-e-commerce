@@ -320,10 +320,12 @@ export default function ProfilePage() {
 							)}
 						</div>
 					)}
-					<div>
-						<label className="block text-sm font-medium text-muted-foreground mb-1">Role</label>
-						<div className="text-base font-medium text-foreground capitalize">{role || "User"}</div>
-					</div>
+					{role === 'admin' && (
+						<div>
+							<label className="block text-sm font-medium text-muted-foreground mb-1">Role</label>
+							<div className="text-base font-medium text-foreground capitalize">{profile?.role || "User"}</div>
+						</div>
+					)}
 				</div>
 
 				<hr className="my-4 border-gray-200" />
