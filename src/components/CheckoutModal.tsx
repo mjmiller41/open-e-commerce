@@ -4,6 +4,7 @@ import type { Address } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/useCart';
 import logger from '../lib/logger';
+import AddressForm from './AddressForm';
 
 interface CheckoutModalProps {
 	isOpen: boolean;
@@ -20,12 +21,7 @@ export function CheckoutModal({ isOpen, onClose, totalAmount }: CheckoutModalPro
 	const [isLoadingAddresses, setIsLoadingAddresses] = useState(false);
 
 	// New Address Form State
-	const [addressLine1, setAddressLine1] = useState('');
-	const [addressLine2, setAddressLine2] = useState('');
-	const [city, setCity] = useState('');
-	const [state, setState] = useState('');
-	const [zipCode, setZipCode] = useState('');
-	const [shouldSaveAddress, setShouldSaveAddress] = useState(true);
+
 
 	const [isProcessing, setIsProcessing] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -76,35 +72,9 @@ export function CheckoutModal({ isOpen, onClose, totalAmount }: CheckoutModalPro
 		try {
 			let shippingAddressString = '';
 
+
 			if (selectedAddressId === 'new') {
-				// Validate
-				if (!addressLine1 || !city || !state || !zipCode) {
-					throw new Error("Please fill in all required address fields.");
-				}
-
-				// Construct string
-				shippingAddressString = `${addressLine1}, ${addressLine2 ? addressLine2 + ', ' : ''}${city}, ${state} ${zipCode}`;
-
-				// Save if requested
-				if (shouldSaveAddress) {
-					const { error: saveError } = await supabase
-						.from('addresses')
-						.insert({
-							user_id: user.id,
-							address_line1: addressLine1,
-							address_line2: addressLine2 || null,
-							city,
-							state,
-							zip_code: zipCode,
-							country: 'US', // Default
-							is_default: savedAddresses.length === 0 // Make default if it's the first one
-						});
-
-					if (saveError) {
-						logger.error('Failed to save address:', saveError);
-						// Don't block checkout, just log
-					}
-				}
+				throw new Error("Please add and save a new address before checking out.");
 			} else {
 				// Use selected address
 				const addr = savedAddresses.find(a => a.id === selectedAddressId);
@@ -229,64 +199,30 @@ export function CheckoutModal({ isOpen, onClose, totalAmount }: CheckoutModalPro
 					{/* New Address Form */}
 					{selectedAddressId === 'new' && (
 						<div className="space-y-3 p-4 bg-muted/30 rounded-lg border border-border animate-in slide-in-from-top-2 duration-200">
-							<div className="space-y-2">
-								<input
-									type="text"
-									placeholder="Address Line 1"
-									required
-									className="form-input w-full"
-									value={addressLine1}
-									onChange={(e) => setAddressLine1(e.target.value)}
-								/>
-							</div>
-							<div className="space-y-2">
-								<input
-									type="text"
-									placeholder="Address Line 2 (Optional)"
-									className="form-input w-full"
-									value={addressLine2}
-									onChange={(e) => setAddressLine2(e.target.value)}
-								/>
-							</div>
-							<div className="grid grid-cols-2 gap-3">
-								<input
-									type="text"
-									placeholder="City"
-									required
-									className="form-input w-full"
-									value={city}
-									onChange={(e) => setCity(e.target.value)}
-								/>
-								<input
-									type="text"
-									placeholder="State"
-									required
-									className="form-input w-full"
-									value={state}
-									onChange={(e) => setState(e.target.value)}
-								/>
-							</div>
-							<div className="grid grid-cols-2 gap-3">
-								<input
-									type="text"
-									placeholder="Zip Code"
-									required
-									className="form-input w-full"
-									value={zipCode}
-									onChange={(e) => setZipCode(e.target.value)}
-								/>
-								<div className="flex items-center">
-									<label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
-										<input
-											type="checkbox"
-											checked={shouldSaveAddress}
-											onChange={(e) => setShouldSaveAddress(e.target.checked)}
-											className="rounded border-input text-primary focus:ring-primary"
-										/>
-										Save for later
-									</label>
-								</div>
-							</div>
+							<AddressForm
+								onSave={async (addressData) => {
+									try {
+										const { data, error } = await supabase
+											.from('addresses')
+											.insert({
+												user_id: user!.id,
+												...addressData,
+												is_default: savedAddresses.length === 0 ? true : addressData.is_default
+											})
+											.select()
+											.single();
+
+										if (error) throw error;
+
+										setSavedAddresses(prev => [data, ...prev]);
+										setSelectedAddressId(data.id);
+									} catch (err) {
+										logger.error("Failed to save address", err);
+										alert("Failed to save address");
+									}
+								}}
+								onCancel={() => setSelectedAddressId(savedAddresses.length > 0 ? savedAddresses[0].id : '')}
+							/>
 						</div>
 					)}
 

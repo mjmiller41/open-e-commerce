@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 6yV3gfyJfXQ4UPxdZqKVkmg0soxnPfQsiNpOJC3LPqYB0ZsbodijDBd7grWcIK4
+\restrict KrSaRYvmzvBdJHlK5lATBPmggS4ZHwsrOn0sMWshKAdRQgb5weylxdqlkZYLEj1
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.7 (Ubuntu 17.7-3.pgdg24.04+1)
@@ -870,6 +870,19 @@ $$;
 
 
 ALTER FUNCTION public.is_current_user_admin() OWNER TO postgres;
+
+--
+-- Name: is_owner(uuid); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.is_owner(p_user_id uuid) RETURNS boolean
+    LANGUAGE sql STABLE SECURITY DEFINER
+    AS $$
+  SELECT (SELECT auth.uid()) = p_user_id;
+$$;
+
+
+ALTER FUNCTION public.is_owner(p_user_id uuid) OWNER TO postgres;
 
 --
 -- Name: apply_rls(jsonb, integer); Type: FUNCTION; Schema: realtime; Owner: supabase_admin
@@ -4795,80 +4808,10 @@ ALTER TABLE auth.sso_providers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE auth.users ENABLE ROW LEVEL SECURITY;
 
 --
--- Name: orders Access to orders (Admin or Owner); Type: POLICY; Schema: public; Owner: postgres
---
-
-CREATE POLICY "Access to orders (Admin or Owner)" ON public.orders FOR SELECT TO authenticated USING ((( SELECT public.is_admin() AS is_admin) OR (user_id = ( SELECT auth.uid() AS uid))));
-
-
---
--- Name: profiles Admins and owners can view/edit/delete profile; Type: POLICY; Schema: public; Owner: postgres
---
-
-CREATE POLICY "Admins and owners can view/edit/delete profile" ON public.profiles USING (((id = ( SELECT auth.uid() AS uid)) OR public.is_admin()));
-
-
---
--- Name: orders Admins can update orders; Type: POLICY; Schema: public; Owner: postgres
---
-
-CREATE POLICY "Admins can update orders" ON public.orders FOR UPDATE TO authenticated USING (public.is_admin());
-
-
---
 -- Name: products Allow public read access; Type: POLICY; Schema: public; Owner: postgres
 --
 
 CREATE POLICY "Allow public read access" ON public.products FOR SELECT USING (true);
-
-
---
--- Name: order_items Authenticated can view own or admin; Type: POLICY; Schema: public; Owner: postgres
---
-
-CREATE POLICY "Authenticated can view own or admin" ON public.order_items FOR SELECT TO authenticated USING ((public.is_current_user_admin() OR (user_id = ( SELECT auth.uid() AS uid))));
-
-
---
--- Name: order_items Users can create order items; Type: POLICY; Schema: public; Owner: postgres
---
-
-CREATE POLICY "Users can create order items" ON public.order_items FOR INSERT WITH CHECK ((user_id = ( SELECT auth.uid() AS uid)));
-
-
---
--- Name: orders Users can create orders; Type: POLICY; Schema: public; Owner: postgres
---
-
-CREATE POLICY "Users can create orders" ON public.orders FOR INSERT WITH CHECK ((user_id = ( SELECT auth.uid() AS uid)));
-
-
---
--- Name: addresses Users can delete their own addresses; Type: POLICY; Schema: public; Owner: postgres
---
-
-CREATE POLICY "Users can delete their own addresses" ON public.addresses FOR DELETE USING ((( SELECT auth.uid() AS uid) = user_id));
-
-
---
--- Name: addresses Users can insert their own addresses; Type: POLICY; Schema: public; Owner: postgres
---
-
-CREATE POLICY "Users can insert their own addresses" ON public.addresses FOR INSERT WITH CHECK ((( SELECT auth.uid() AS uid) = user_id));
-
-
---
--- Name: addresses Users can update their own addresses; Type: POLICY; Schema: public; Owner: postgres
---
-
-CREATE POLICY "Users can update their own addresses" ON public.addresses FOR UPDATE USING ((( SELECT auth.uid() AS uid) = user_id));
-
-
---
--- Name: addresses Users can view their own addresses; Type: POLICY; Schema: public; Owner: postgres
---
-
-CREATE POLICY "Users can view their own addresses" ON public.addresses FOR SELECT USING ((( SELECT auth.uid() AS uid) = user_id));
 
 
 --
@@ -4878,10 +4821,24 @@ CREATE POLICY "Users can view their own addresses" ON public.addresses FOR SELEC
 ALTER TABLE public.addresses ENABLE ROW LEVEL SECURITY;
 
 --
+-- Name: addresses addresses_access_policy; Type: POLICY; Schema: public; Owner: postgres
+--
+
+CREATE POLICY addresses_access_policy ON public.addresses TO authenticated USING ((COALESCE(public.is_owner(user_id), false) OR COALESCE(public.is_admin(), false))) WITH CHECK ((COALESCE(public.is_owner(user_id), false) OR COALESCE(public.is_admin(), false)));
+
+
+--
 -- Name: order_items; Type: ROW SECURITY; Schema: public; Owner: postgres
 --
 
 ALTER TABLE public.order_items ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: order_items order_items_access_policy; Type: POLICY; Schema: public; Owner: postgres
+--
+
+CREATE POLICY order_items_access_policy ON public.order_items TO authenticated USING ((COALESCE(public.is_owner(user_id), false) OR COALESCE(public.is_admin(), false))) WITH CHECK ((COALESCE(public.is_owner(user_id), false) OR COALESCE(public.is_admin(), false)));
+
 
 --
 -- Name: orders; Type: ROW SECURITY; Schema: public; Owner: postgres
@@ -4890,16 +4847,37 @@ ALTER TABLE public.order_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 
 --
+-- Name: orders orders_access_policy; Type: POLICY; Schema: public; Owner: postgres
+--
+
+CREATE POLICY orders_access_policy ON public.orders TO authenticated USING ((COALESCE(public.is_owner(user_id), false) OR COALESCE(public.is_admin(), false))) WITH CHECK ((COALESCE(public.is_owner(user_id), false) OR COALESCE(public.is_admin(), false)));
+
+
+--
 -- Name: products; Type: ROW SECURITY; Schema: public; Owner: postgres
 --
 
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 
 --
+-- Name: products products_admin_only; Type: POLICY; Schema: public; Owner: postgres
+--
+
+CREATE POLICY products_admin_only ON public.products TO authenticated USING (COALESCE(public.is_admin(), false)) WITH CHECK (COALESCE(public.is_admin(), false));
+
+
+--
 -- Name: profiles; Type: ROW SECURITY; Schema: public; Owner: postgres
 --
 
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+--
+-- Name: profiles profiles_access_policy; Type: POLICY; Schema: public; Owner: postgres
+--
+
+CREATE POLICY profiles_access_policy ON public.profiles TO authenticated USING ((COALESCE(public.is_owner(id), false) OR COALESCE(public.is_admin(), false))) WITH CHECK ((COALESCE(public.is_owner(id), false) OR COALESCE(public.is_admin(), false)));
+
 
 --
 -- Name: messages; Type: ROW SECURITY; Schema: realtime; Owner: supabase_realtime_admin
@@ -5596,8 +5574,6 @@ GRANT ALL ON FUNCTION public.handle_user_update() TO service_role;
 -- Name: FUNCTION is_admin(); Type: ACL; Schema: public; Owner: postgres
 --
 
-GRANT ALL ON FUNCTION public.is_admin() TO anon;
-GRANT ALL ON FUNCTION public.is_admin() TO authenticated;
 GRANT ALL ON FUNCTION public.is_admin() TO service_role;
 
 
@@ -5606,6 +5582,13 @@ GRANT ALL ON FUNCTION public.is_admin() TO service_role;
 --
 
 GRANT ALL ON FUNCTION public.is_current_user_admin() TO service_role;
+
+
+--
+-- Name: FUNCTION is_owner(p_user_id uuid); Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON FUNCTION public.is_owner(p_user_id uuid) TO service_role;
 
 
 --
@@ -6464,4 +6447,4 @@ ALTER EVENT TRIGGER pgrst_drop_watch OWNER TO supabase_admin;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 6yV3gfyJfXQ4UPxdZqKVkmg0soxnPfQsiNpOJC3LPqYB0ZsbodijDBd7grWcIK4
+\unrestrict KrSaRYvmzvBdJHlK5lATBPmggS4ZHwsrOn0sMWshKAdRQgb5weylxdqlkZYLEj1

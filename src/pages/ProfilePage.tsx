@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { supabase, type Order, type Profile, type Address } from "../lib/supabase";
+import AddressForm, { type AddressData } from "../components/AddressForm";
 import logger from "../lib/logger";
 
 export default function ProfilePage() {
@@ -23,6 +24,11 @@ export default function ProfilePage() {
 		fullName: "",
 		phoneNumber: "",
 	});
+
+
+	// Address Form State
+	const [isAddingAddress, setIsAddingAddress] = useState(false);
+	const [addressSaving, setAddressSaving] = useState(false);
 
 	useEffect(() => {
 		if (!targetUserId) return;
@@ -159,6 +165,54 @@ export default function ProfilePage() {
 		}
 	};
 
+
+	const handleAddressFormSave = async (addressData: AddressData) => {
+		setAddressSaving(true);
+
+		try {
+			const dbAddressData = {
+				user_id: targetUserId,
+				...addressData,
+				// If this is the first address, make it default automatically
+				is_default: addresses.length === 0 ? true : addressData.is_default
+			};
+
+			// If setting as default, unset others first
+			if (dbAddressData.is_default && addresses.length > 0) {
+				const currentDefault = addresses.find(a => a.is_default);
+				if (currentDefault) {
+					await supabase.from('addresses').update({ is_default: false }).eq('id', currentDefault.id);
+				}
+			}
+
+			const { data, error } = await supabase
+				.from("addresses")
+				.insert(dbAddressData)
+				.select()
+				.single();
+
+			if (error) throw error;
+
+			setAddresses(prev => {
+				// If the new one is default, make sure we unset any previous default in local state
+				let newAddresses = [...prev];
+				if (data.is_default) {
+					newAddresses = newAddresses.map(a => ({ ...a, is_default: false }));
+				}
+				return [data, ...newAddresses];
+			});
+
+			setIsAddingAddress(false);
+			alert("Address added successfully!");
+
+		} catch (err) {
+			logger.error("Error saving address:", err);
+			alert("Failed to save address. Please try again.");
+		} finally {
+			setAddressSaving(false);
+		}
+	};
+
 	if (!isOwnProfile && role !== 'admin') {
 		return <div className="text-center p-8 text-destructive">You do not have permission to view this profile.</div>;
 	}
@@ -272,8 +326,27 @@ export default function ProfilePage() {
 			<div className="mb-8">
 				<div className="flex justify-between items-center mb-4">
 					<h2 className="text-2xl font-bold">Saved Addresses</h2>
-					{/* Add Address Logic would be here, but for now we rely on Checkout flow or could add a button opening a modal */}
+					{!isAddingAddress && (
+						<button
+							onClick={() => setIsAddingAddress(true)}
+							className="btn btn-primary text-sm"
+						>
+							Add New Address
+						</button>
+					)}
 				</div>
+
+
+				{isAddingAddress && (
+					<div className="card p-6 mb-6 border-2 border-primary/20">
+						<h3 className="text-lg font-semibold mb-4">Add New Address</h3>
+						<AddressForm
+							onSave={handleAddressFormSave}
+							onCancel={() => setIsAddingAddress(false)}
+							isSaving={addressSaving}
+						/>
+					</div>
+				)}
 
 				{addresses.length === 0 ? (
 					<div className="card p-6 text-center text-muted-foreground">
