@@ -53,11 +53,6 @@ export function AdminCustomers() {
 				full_name: editingProfile.full_name,
 				role: editingProfile.role,
 				phone_number: editingProfile.phone_number,
-				address_line1: editingProfile.address_line1,
-				address_line2: editingProfile.address_line2,
-				city: editingProfile.city,
-				state: editingProfile.state,
-				zip_code: editingProfile.zip_code,
 			})
 			.eq('id', editingProfile.id);
 
@@ -73,16 +68,20 @@ export function AdminCustomers() {
 	const deleteProfile = async (id: string) => {
 		if (!confirm('Are you sure you want to delete this profile? This cannot be undone.')) return;
 
-		const { error } = await supabase
+		const { error, data } = await supabase
 			.from('profiles')
 			.delete()
-			.eq('id', id);
+			.eq('id', id)
+			.select('*');
 
 		if (error) {
 			logger.error('Error deleting profile:', error);
 			alert('Failed to delete profile');
-		} else {
+		} else if (data.length > 0) {
 			setProfiles(profiles.filter(p => p.id !== id));
+		} else {
+			logger.error('Profile not found', id);
+			alert('Profile not found');
 		}
 	};
 
@@ -131,7 +130,6 @@ export function AdminCustomers() {
 									<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Role</th>
 									<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Phone</th>
 									<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Status</th>
-									<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Location</th>
 									<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Actions</th>
 								</tr>
 							</thead>
@@ -165,9 +163,6 @@ export function AdminCustomers() {
 										`}>
 												{profile.email_verified ? 'Verified' : 'Unverified'}
 											</span>
-										</td>
-										<td className="p-3 text-sm">
-											{profile.city ? `${profile.city}, ${profile.state}` : '-'}
 										</td>
 										<td className="p-3 text-sm">
 											<div className="flex gap-2">
@@ -241,54 +236,6 @@ export function AdminCustomers() {
 									/>
 								</div>
 
-								<div>
-									<label className="block text-sm font-medium mb-1">Address Line 1</label>
-									<input
-										type="text"
-										value={editingProfile.address_line1 || ''}
-										onChange={e => setEditingProfile({ ...editingProfile, address_line1: e.target.value })}
-										className="w-full h-9 px-3 rounded-md border border-input bg-background"
-									/>
-								</div>
-								<div>
-									<label className="block text-sm font-medium mb-1">Address Line 2</label>
-									<input
-										type="text"
-										value={editingProfile.address_line2 || ''}
-										onChange={e => setEditingProfile({ ...editingProfile, address_line2: e.target.value })}
-										className="w-full h-9 px-3 rounded-md border border-input bg-background"
-									/>
-								</div>
-
-								<div className="grid grid-cols-2 gap-4">
-									<div>
-										<label className="block text-sm font-medium mb-1">City</label>
-										<input
-											type="text"
-											value={editingProfile.city || ''}
-											onChange={e => setEditingProfile({ ...editingProfile, city: e.target.value })}
-											className="w-full h-9 px-3 rounded-md border border-input bg-background"
-										/>
-									</div>
-									<div>
-										<label className="block text-sm font-medium mb-1">State</label>
-										<input
-											type="text"
-											value={editingProfile.state || ''}
-											onChange={e => setEditingProfile({ ...editingProfile, state: e.target.value })}
-											className="w-full h-9 px-3 rounded-md border border-input bg-background"
-										/>
-									</div>
-								</div>
-								<div>
-									<label className="block text-sm font-medium mb-1">Zip Code</label>
-									<input
-										type="text"
-										value={editingProfile.zip_code || ''}
-										onChange={e => setEditingProfile({ ...editingProfile, zip_code: e.target.value })}
-										className="w-full h-9 px-3 rounded-md border border-input bg-background"
-									/>
-								</div>
 
 								<div className="flex justify-end gap-3 mt-6">
 									<button

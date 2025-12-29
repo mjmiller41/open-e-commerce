@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict l3sFrRUeL0OqW7byzIGemsRjKu8tTTXmL4vzA1D8kHofjAfWZ9vd3g1x6C9W49k
+\restrict 6yV3gfyJfXQ4UPxdZqKVkmg0soxnPfQsiNpOJC3LPqYB0ZsbodijDBd7grWcIK4
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.7 (Ubuntu 17.7-3.pgdg24.04+1)
@@ -792,17 +792,18 @@ ALTER FUNCTION pgbouncer.get_auth(p_usename text) OWNER TO supabase_admin;
 
 CREATE FUNCTION public.handle_user_email_sync() RETURNS trigger
     LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public', 'pg_temp'
     AS $$
 BEGIN
-  -- We use UPSERT (INSERT ... ON CONFLICT) to ensure we behave correctly if profile was created by another trigger
+  -- Ensure we use the public.profiles table explicitly and a fixed search_path
   INSERT INTO public.profiles (id, email, email_verified)
   VALUES (
-    NEW.id, 
-    NEW.email, 
+    NEW.id,
+    NEW.email,
     (NEW.email_confirmed_at IS NOT NULL)
   )
   ON CONFLICT (id) DO UPDATE
-  SET 
+  SET
     email = EXCLUDED.email,
     email_verified = EXCLUDED.email_verified;
   RETURN NEW;
@@ -818,10 +819,11 @@ ALTER FUNCTION public.handle_user_email_sync() OWNER TO postgres;
 
 CREATE FUNCTION public.handle_user_update() RETURNS trigger
     LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO 'public', 'pg_catalog'
     AS $$
 BEGIN
   UPDATE public.profiles
-  SET 
+  SET
     email = NEW.email,
     email_verified = (NEW.email_confirmed_at IS NOT NULL)
   WHERE id = NEW.id;
@@ -850,6 +852,24 @@ $$;
 
 
 ALTER FUNCTION public.is_admin() OWNER TO postgres;
+
+--
+-- Name: is_current_user_admin(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.is_current_user_admin() RETURNS boolean
+    LANGUAGE sql STABLE SECURITY DEFINER
+    SET search_path TO 'public', 'pg_catalog'
+    AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE id = (SELECT auth.uid())
+      AND role = 'admin'
+  );
+$$;
+
+
+ALTER FUNCTION public.is_current_user_admin() OWNER TO postgres;
 
 --
 -- Name: apply_rls(jsonb, integer); Type: FUNCTION; Schema: realtime; Owner: supabase_admin
@@ -3164,6 +3184,26 @@ COMMENT ON COLUMN auth.users.is_sso_user IS 'Auth: Set this column to true when 
 
 
 --
+-- Name: addresses; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.addresses (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    user_id uuid NOT NULL,
+    address_line1 text NOT NULL,
+    address_line2 text,
+    city text NOT NULL,
+    state text NOT NULL,
+    zip_code text NOT NULL,
+    country text DEFAULT 'US'::text,
+    is_default boolean DEFAULT false,
+    created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+
+ALTER TABLE public.addresses OWNER TO postgres;
+
+--
 -- Name: order_items; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -3265,11 +3305,6 @@ CREATE TABLE public.profiles (
     role text DEFAULT 'customer'::text,
     full_name text,
     updated_at timestamp with time zone,
-    address_line1 text,
-    address_line2 text,
-    city text,
-    state text,
-    zip_code text,
     phone_number text,
     email text,
     email_verified boolean DEFAULT false,
@@ -3757,6 +3792,14 @@ ALTER TABLE ONLY auth.users
 
 
 --
+-- Name: addresses addresses_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.addresses
+    ADD CONSTRAINT addresses_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: order_items order_items_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4229,6 +4272,13 @@ CREATE INDEX users_is_anonymous_idx ON auth.users USING btree (is_anonymous);
 
 
 --
+-- Name: addresses_user_id_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX addresses_user_id_idx ON public.addresses USING btree (user_id);
+
+
+--
 -- Name: idx_order_items_order_id; Type: INDEX; Schema: public; Owner: postgres
 --
 
@@ -4553,6 +4603,14 @@ ALTER TABLE ONLY auth.sso_domains
 
 
 --
+-- Name: addresses addresses_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.addresses
+    ADD CONSTRAINT addresses_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id) ON DELETE CASCADE;
+
+
+--
 -- Name: order_items order_items_order_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -4744,17 +4802,17 @@ CREATE POLICY "Access to orders (Admin or Owner)" ON public.orders FOR SELECT TO
 
 
 --
+-- Name: profiles Admins and owners can view/edit/delete profile; Type: POLICY; Schema: public; Owner: postgres
+--
+
+CREATE POLICY "Admins and owners can view/edit/delete profile" ON public.profiles USING (((id = ( SELECT auth.uid() AS uid)) OR public.is_admin()));
+
+
+--
 -- Name: orders Admins can update orders; Type: POLICY; Schema: public; Owner: postgres
 --
 
 CREATE POLICY "Admins can update orders" ON public.orders FOR UPDATE TO authenticated USING (public.is_admin());
-
-
---
--- Name: order_items Admins can view all order items; Type: POLICY; Schema: public; Owner: postgres
---
-
-CREATE POLICY "Admins can view all order items" ON public.order_items FOR SELECT TO authenticated USING (public.is_admin());
 
 
 --
@@ -4765,10 +4823,10 @@ CREATE POLICY "Allow public read access" ON public.products FOR SELECT USING (tr
 
 
 --
--- Name: profiles Profiles visible to owner and admins; Type: POLICY; Schema: public; Owner: postgres
+-- Name: order_items Authenticated can view own or admin; Type: POLICY; Schema: public; Owner: postgres
 --
 
-CREATE POLICY "Profiles visible to owner and admins" ON public.profiles FOR SELECT TO authenticated USING (((id = ( SELECT auth.uid() AS uid)) OR ( SELECT public.is_admin() AS is_admin)));
+CREATE POLICY "Authenticated can view own or admin" ON public.order_items FOR SELECT TO authenticated USING ((public.is_current_user_admin() OR (user_id = ( SELECT auth.uid() AS uid))));
 
 
 --
@@ -4786,32 +4844,38 @@ CREATE POLICY "Users can create orders" ON public.orders FOR INSERT WITH CHECK (
 
 
 --
--- Name: profiles Users can insert own profile; Type: POLICY; Schema: public; Owner: postgres
+-- Name: addresses Users can delete their own addresses; Type: POLICY; Schema: public; Owner: postgres
 --
 
-CREATE POLICY "Users can insert own profile" ON public.profiles FOR INSERT WITH CHECK ((auth.uid() = id));
-
-
---
--- Name: profiles Users can update own profile; Type: POLICY; Schema: public; Owner: postgres
---
-
-CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE USING ((auth.uid() = id));
+CREATE POLICY "Users can delete their own addresses" ON public.addresses FOR DELETE USING ((( SELECT auth.uid() AS uid) = user_id));
 
 
 --
--- Name: order_items Users can view own order items; Type: POLICY; Schema: public; Owner: postgres
+-- Name: addresses Users can insert their own addresses; Type: POLICY; Schema: public; Owner: postgres
 --
 
-CREATE POLICY "Users can view own order items" ON public.order_items FOR SELECT USING ((user_id = ( SELECT auth.uid() AS uid)));
+CREATE POLICY "Users can insert their own addresses" ON public.addresses FOR INSERT WITH CHECK ((( SELECT auth.uid() AS uid) = user_id));
 
 
 --
--- Name: profiles Users can view own profile; Type: POLICY; Schema: public; Owner: postgres
+-- Name: addresses Users can update their own addresses; Type: POLICY; Schema: public; Owner: postgres
 --
 
-CREATE POLICY "Users can view own profile" ON public.profiles FOR SELECT USING ((auth.uid() = id));
+CREATE POLICY "Users can update their own addresses" ON public.addresses FOR UPDATE USING ((( SELECT auth.uid() AS uid) = user_id));
 
+
+--
+-- Name: addresses Users can view their own addresses; Type: POLICY; Schema: public; Owner: postgres
+--
+
+CREATE POLICY "Users can view their own addresses" ON public.addresses FOR SELECT USING ((( SELECT auth.uid() AS uid) = user_id));
+
+
+--
+-- Name: addresses; Type: ROW SECURITY; Schema: public; Owner: postgres
+--
+
+ALTER TABLE public.addresses ENABLE ROW LEVEL SECURITY;
 
 --
 -- Name: order_items; Type: ROW SECURITY; Schema: public; Owner: postgres
@@ -5538,6 +5602,13 @@ GRANT ALL ON FUNCTION public.is_admin() TO service_role;
 
 
 --
+-- Name: FUNCTION is_current_user_admin(); Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON FUNCTION public.is_current_user_admin() TO service_role;
+
+
+--
 -- Name: FUNCTION apply_rls(wal jsonb, max_record_bytes integer); Type: ACL; Schema: realtime; Owner: supabase_admin
 --
 
@@ -5891,6 +5962,15 @@ GRANT ALL ON TABLE extensions.pg_stat_statements TO dashboard_user;
 REVOKE ALL ON TABLE extensions.pg_stat_statements_info FROM postgres;
 GRANT ALL ON TABLE extensions.pg_stat_statements_info TO postgres WITH GRANT OPTION;
 GRANT ALL ON TABLE extensions.pg_stat_statements_info TO dashboard_user;
+
+
+--
+-- Name: TABLE addresses; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON TABLE public.addresses TO anon;
+GRANT ALL ON TABLE public.addresses TO authenticated;
+GRANT ALL ON TABLE public.addresses TO service_role;
 
 
 --
@@ -6384,4 +6464,4 @@ ALTER EVENT TRIGGER pgrst_drop_watch OWNER TO supabase_admin;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict l3sFrRUeL0OqW7byzIGemsRjKu8tTTXmL4vzA1D8kHofjAfWZ9vd3g1x6C9W49k
+\unrestrict 6yV3gfyJfXQ4UPxdZqKVkmg0soxnPfQsiNpOJC3LPqYB0ZsbodijDBd7grWcIK4

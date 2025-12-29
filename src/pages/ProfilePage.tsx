@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { supabase, type Order, type Profile } from "../lib/supabase";
+import { supabase, type Order, type Profile, type Address } from "../lib/supabase";
 import logger from "../lib/logger";
-import { validateAddress } from "../lib/addressValidation";
 
 export default function ProfilePage() {
 	const { id } = useParams();
@@ -11,6 +10,7 @@ export default function ProfilePage() {
 	const [orders, setOrders] = useState<Order[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [profile, setProfile] = useState<Profile | null>(null);
+	const [addresses, setAddresses] = useState<Address[]>([]);
 	const [isEditing, setIsEditing] = useState(false);
 	const [saving, setSaving] = useState(false);
 	const [errorMsg, setErrorMsg] = useState("");
@@ -21,11 +21,6 @@ export default function ProfilePage() {
 	// Form state
 	const [formData, setFormData] = useState({
 		fullName: "",
-		addressLine1: "",
-		addressLine2: "",
-		city: "",
-		state: "",
-		zipCode: "",
 		phoneNumber: "",
 	});
 
@@ -53,7 +48,7 @@ export default function ProfilePage() {
 				.eq("id", targetUserId)
 				.single();
 
-			if (error && error.code !== 'PGRST116') { // PGRST116 is "Relation not found" or "No rows found"
+			if (error && error.code !== 'PGRST116') {
 				logger.error("Error fetching profile:", error);
 			}
 
@@ -61,15 +56,9 @@ export default function ProfilePage() {
 				setProfile(data);
 				setFormData({
 					fullName: data.full_name || "",
-					addressLine1: data.address_line1 || "",
-					addressLine2: data.address_line2 || "",
-					city: data.city || "",
-					state: data.state || "",
-					zipCode: data.zip_code || "",
 					phoneNumber: data.phone_number || "",
 				});
 			} else {
-				// Initialize from metadata if available and we are viewing our own profile
 				setFormData(prev => ({
 					...prev,
 					fullName: (isOwnProfile && user?.user_metadata?.full_name) || ""
@@ -77,9 +66,24 @@ export default function ProfilePage() {
 			}
 		};
 
+		const fetchAddresses = async () => {
+			const { data, error } = await supabase
+				.from("addresses")
+				.select("*")
+				.eq("user_id", targetUserId)
+				.order("is_default", { ascending: false })
+				.order("created_at", { ascending: false });
+
+			if (error) {
+				logger.error("Error fetching addresses", error);
+			} else {
+				setAddresses(data || []);
+			}
+		};
+
 		const loadData = async () => {
 			setLoading(true);
-			await Promise.all([fetchOrders(), fetchProfile()]);
+			await Promise.all([fetchOrders(), fetchProfile(), fetchAddresses()]);
 			setLoading(false);
 		};
 
@@ -92,34 +96,9 @@ export default function ProfilePage() {
 		setSaving(true);
 
 		try {
-			// Validate Address
-			const validated = await validateAddress({
-				addressLine1: formData.addressLine1,
-				addressLine2: formData.addressLine2,
-				city: formData.city,
-				state: formData.state,
-				zipCode: formData.zipCode
-			});
-
-			// Update form data with normalized values
-			setFormData(prev => ({
-				...prev,
-				addressLine1: validated.addressLine1,
-				addressLine2: validated.addressLine2 || "",
-				city: validated.city,
-				state: validated.state,
-				zipCode: validated.zipCode
-			}));
-
-			// Save to Supabase
 			const updates: Partial<Profile> = {
 				id: targetUserId!,
 				full_name: formData.fullName,
-				address_line1: validated.addressLine1,
-				address_line2: validated.addressLine2 || null,
-				city: validated.city,
-				state: validated.state,
-				zip_code: validated.zipCode,
 				phone_number: formData.phoneNumber,
 				updated_at: new Date().toISOString(),
 			};
@@ -130,8 +109,7 @@ export default function ProfilePage() {
 
 			if (error) throw error;
 
-			// Refresh profile
-			setProfile(updates as Profile);
+			setProfile(prev => prev ? { ...prev, ...updates } : updates as Profile);
 			setIsEditing(false);
 			alert("Profile updated successfully!");
 
@@ -143,6 +121,44 @@ export default function ProfilePage() {
 		}
 	};
 
+	const handleDeleteAddress = async (addressId: string) => {
+		if (!window.confirm("Are you sure you want to delete this address?")) return;
+		try {
+			const { error } = await supabase.from('addresses').delete().eq('id', addressId);
+			if (error) throw error;
+			setAddresses(prev => prev.filter(a => a.id !== addressId));
+		} catch (err) {
+			logger.error("Failed to delete address", err);
+			alert("Failed to delete address");
+		}
+	};
+
+	const handleSetDefaultAddress = async (addressId: string) => {
+		try {
+			// First set all others to false (this part is tricky to do atomically without a stored proc, but we'll doing separate updates for now)
+			// Better approach: Call a specific RPC or just update locally and rely on server trigger?
+			// Simplest approach: Update logic.
+
+			// 1. Set current default to false (if any)
+			const currentDefault = addresses.find(a => a.is_default);
+			if (currentDefault) {
+				await supabase.from('addresses').update({ is_default: false }).eq('id', currentDefault.id);
+			}
+
+			// 2. Set new default
+			const { error } = await supabase.from('addresses').update({ is_default: true }).eq('id', addressId);
+			if (error) throw error;
+
+			// Refresh addresses
+			const { data } = await supabase.from('addresses').select('*').eq('user_id', targetUserId).order('is_default', { ascending: false });
+			if (data) setAddresses(data);
+
+		} catch (err) {
+			logger.error("Failed to set default address", err);
+			alert("Failed to set default address");
+		}
+	};
+
 	if (!isOwnProfile && role !== 'admin') {
 		return <div className="text-center p-8 text-destructive">You do not have permission to view this profile.</div>;
 	}
@@ -150,6 +166,8 @@ export default function ProfilePage() {
 	return (
 		<div className="max-w-4xl mx-auto animate-in fade-in duration-500">
 			<h1 className="text-3xl font-bold mb-8">{isOwnProfile ? "My Profile" : "Customer Profile"}</h1>
+
+			{/* Profile Info Card */}
 			<div className="card p-6 mb-8">
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 					{(isOwnProfile || role === 'admin') && (
@@ -198,18 +216,6 @@ export default function ProfilePage() {
 								<label className="block text-sm font-medium text-muted-foreground mb-1">Phone Number</label>
 								<div className="text-base font-medium text-foreground">{profile?.phone_number || "-"}</div>
 							</div>
-							<div className="col-span-full">
-								<label className="block text-sm font-medium text-muted-foreground mb-1">Mailing Address</label>
-								<div className="text-base font-medium text-foreground">
-									{profile?.address_line1 ? (
-										<>
-											{profile.address_line1}<br />
-											{profile.address_line2 && <>{profile.address_line2}<br /></>}
-											{profile.city}, {profile.state} {profile.zip_code}
-										</>
-									) : "-"}
-								</div>
-							</div>
 						</div>
 					</div>
 				) : (
@@ -240,60 +246,6 @@ export default function ProfilePage() {
 									placeholder="123-456-7890"
 								/>
 							</div>
-							<div className="col-span-full">
-								<label className="block text-sm font-medium text-muted-foreground mb-1">Address Line 1</label>
-								<input
-									type="text"
-									value={formData.addressLine1}
-									onChange={e => setFormData({ ...formData, addressLine1: e.target.value })}
-									className="form-input"
-									required
-								/>
-							</div>
-							<div className="col-span-full">
-								<label className="block text-sm font-medium text-muted-foreground mb-1">Address Line 2</label>
-								<input
-									type="text"
-									value={formData.addressLine2}
-									onChange={e => setFormData({ ...formData, addressLine2: e.target.value })}
-									className="form-input"
-								/>
-							</div>
-							<div>
-								<label className="block text-sm font-medium text-muted-foreground mb-1">City</label>
-								<input
-									type="text"
-									value={formData.city}
-									onChange={e => setFormData({ ...formData, city: e.target.value })}
-									className="form-input"
-									required
-								/>
-							</div>
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-								<div>
-									<label className="block text-sm font-medium text-muted-foreground mb-1">State</label>
-									<input
-										type="text"
-										value={formData.state}
-										onChange={e => setFormData({ ...formData, state: e.target.value.toUpperCase() })}
-										className="form-input"
-										maxLength={2}
-										placeholder="NY"
-										required
-									/>
-								</div>
-								<div>
-									<label className="block text-sm font-medium text-muted-foreground mb-1">Zip Code</label>
-									<input
-										type="text"
-										value={formData.zipCode}
-										onChange={e => setFormData({ ...formData, zipCode: e.target.value })}
-										className="form-input"
-										maxLength={10}
-										required
-									/>
-								</div>
-							</div>
 						</div>
 						<div className="flex justify-end gap-3 mt-6">
 							<button
@@ -313,6 +265,52 @@ export default function ProfilePage() {
 							</button>
 						</div>
 					</form>
+				)}
+			</div>
+
+			{/* Saved Addresses Section */}
+			<div className="mb-8">
+				<div className="flex justify-between items-center mb-4">
+					<h2 className="text-2xl font-bold">Saved Addresses</h2>
+					{/* Add Address Logic would be here, but for now we rely on Checkout flow or could add a button opening a modal */}
+				</div>
+
+				{addresses.length === 0 ? (
+					<div className="card p-6 text-center text-muted-foreground">
+						No addresses saved. Add one during checkout.
+					</div>
+				) : (
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						{addresses.map((addr) => (
+							<div key={addr.id} className="card p-4 relative group">
+								{addr.is_default && (
+									<span className="absolute top-2 right-2 bg-primary/10 text-primary text-xs font-bold px-2 py-1 rounded-full">
+										Default
+									</span>
+								)}
+								<div className="font-medium text-lg mb-1">{addr.address_line1}</div>
+								{addr.address_line2 && <div className="text-muted-foreground">{addr.address_line2}</div>}
+								<div className="text-muted-foreground mb-3">{addr.city}, {addr.state} {addr.zip_code}</div>
+
+								<div className="flex gap-2 text-sm">
+									{!addr.is_default && (
+										<button
+											onClick={() => handleSetDefaultAddress(addr.id)}
+											className="text-primary hover:underline"
+										>
+											Make Default
+										</button>
+									)}
+									<button
+										onClick={() => handleDeleteAddress(addr.id)}
+										className="text-destructive hover:underline"
+									>
+										Delete
+									</button>
+								</div>
+							</div>
+						))}
+					</div>
 				)}
 			</div>
 

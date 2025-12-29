@@ -53,13 +53,21 @@ export interface Profile {
   id: string;
   role: "customer" | "admin";
   full_name: string | null;
-  address_line1: string | null;
-  address_line2: string | null;
-  city: string | null;
-  state: string | null;
-  zip_code: string | null;
   phone_number: string | null;
   updated_at?: string;
   email?: string;
   email_verified?: boolean;
+}
+
+export interface Address {
+  id: string;
+  user_id: string;
+  address_line1: string;
+  address_line2?: string | null;
+  city: string;
+  state: string;
+  zip_code: string;
+  country: string;
+  is_default: boolean;
+  created_at: string;
 }
