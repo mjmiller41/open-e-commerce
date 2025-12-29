@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 9OB2pOGhycRK891rAWdLgpA69KxJYDUMcxbv8kKixkZf7lOjXAo0J5YaGflQtdE
+\restrict 4cOpadJtVxv0ihsar3P6dEutnHIkQeffp3su6H0FlfNeJPW2iwFXfOLYMFkwNtK
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.7 (Ubuntu 17.7-3.pgdg24.04+1)
@@ -794,20 +794,21 @@ CREATE FUNCTION public.handle_user_email_sync() RETURNS trigger
     LANGUAGE plpgsql SECURITY DEFINER
     SET search_path TO 'public', 'pg_temp'
     AS $$
-BEGIN
-  -- Ensure we use the public.profiles table explicitly and a fixed search_path
-  INSERT INTO public.profiles (id, email, email_verified)
-  VALUES (
-    NEW.id,
-    NEW.email,
-    (NEW.email_confirmed_at IS NOT NULL)
+begin
+  insert into public.profiles (id, email, email_verified, full_name)
+  values (
+    new.id,
+    new.email,
+    (new.email_confirmed_at is not null),
+    new.raw_user_meta_data->>'full_name'
   )
-  ON CONFLICT (id) DO UPDATE
-  SET
-    email = EXCLUDED.email,
-    email_verified = EXCLUDED.email_verified;
-  RETURN NEW;
-END;
+  on conflict (id) do update
+  set
+    email = excluded.email,
+    email_verified = excluded.email_verified,
+    full_name = excluded.full_name;
+  return new;
+end;
 $$;
 
 
@@ -821,14 +822,15 @@ CREATE FUNCTION public.handle_user_update() RETURNS trigger
     LANGUAGE plpgsql SECURITY DEFINER
     SET search_path TO 'public', 'pg_catalog'
     AS $$
-BEGIN
-  UPDATE public.profiles
-  SET
-    email = NEW.email,
-    email_verified = (NEW.email_confirmed_at IS NOT NULL)
-  WHERE id = NEW.id;
-  RETURN NEW;
-END;
+begin
+  update public.profiles
+  set
+    email = new.email,
+    email_verified = (new.email_confirmed_at is not null),
+    full_name = new.raw_user_meta_data->>'full_name'
+  where id = new.id;
+  return new;
+end;
 $$;
 
 
@@ -6462,4 +6464,4 @@ ALTER EVENT TRIGGER pgrst_drop_watch OWNER TO supabase_admin;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 9OB2pOGhycRK891rAWdLgpA69KxJYDUMcxbv8kKixkZf7lOjXAo0J5YaGflQtdE
+\unrestrict 4cOpadJtVxv0ihsar3P6dEutnHIkQeffp3su6H0FlfNeJPW2iwFXfOLYMFkwNtK

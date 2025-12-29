@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase, type Profile } from '../lib/supabase';
 import logger from '../lib/logger';
+import { useAuth } from '../context/AuthContext';
 
 export function AdminCustomers() {
+	const { isAdmin } = useAuth();
 	const [profiles, setProfiles] = useState<Profile[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
@@ -47,13 +49,18 @@ export function AdminCustomers() {
 		e.preventDefault();
 		if (!editingProfile) return;
 
+		const updates: Partial<Profile> = {
+			full_name: editingProfile.full_name,
+			phone_number: editingProfile.phone_number,
+		};
+
+		if (isAdmin) {
+			updates.role = editingProfile.role;
+		}
+
 		const { error } = await supabase
 			.from('profiles')
-			.update({
-				full_name: editingProfile.full_name,
-				role: editingProfile.role,
-				phone_number: editingProfile.phone_number,
-			})
+			.update(updates)
 			.eq('id', editingProfile.id);
 
 		if (error) {
@@ -217,14 +224,20 @@ export function AdminCustomers() {
 								</div>
 								<div>
 									<label className="block text-sm font-medium mb-1">Role</label>
-									<select
-										value={editingProfile.role}
-										onChange={e => setEditingProfile({ ...editingProfile, role: e.target.value as Profile['role'] })}
-										className="w-full h-9 px-3 rounded-md border border-input bg-background"
-									>
-										<option value="customer">Customer</option>
-										<option value="admin">Admin</option>
-									</select>
+									{isAdmin ? (
+										<select
+											value={editingProfile.role}
+											onChange={e => setEditingProfile({ ...editingProfile, role: e.target.value as Profile['role'] })}
+											className="w-full h-9 px-3 rounded-md border border-input bg-background"
+										>
+											<option value="customer">Customer</option>
+											<option value="admin">Admin</option>
+										</select>
+									) : (
+										<div className="h-9 px-3 flex items-center rounded-md border border-input bg-muted text-sm text-muted-foreground capitalize">
+											{editingProfile.role}
+										</div>
+									)}
 								</div>
 								<div>
 									<label className="block text-sm font-medium mb-1">Phone</label>
