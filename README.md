@@ -103,7 +103,10 @@ This project is configured to deploy directly to GitHub Pages using the `gh-page
 Here's what's planned for the future of Open E-Commerce:
 
 - [x] **User Authentication & Roles**: Secure login/signup and role management (Admin vs. Customer).
-- [ ] **Admin Dashboard**: A dedicated interface for managing products, inventory, and viewing orders.
+- [-] **Admin Dashboard**: A dedicated interface for
+  - [ ] managing products, inventory
+  - [x] viewing orders
+  - [x] managing users and their roles
 - [ ] **Payment Processing**: Integration with providers like Stripe or PayPal for real transactions.
 - [x] **Backend Integration**: Connect to a robust backend (e.g., Supabase) for data persistence.
 - [ ] **Product Reviews**: Allow customers to rate and review products.

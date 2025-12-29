@@ -30,7 +30,15 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 	return (
 		<Link to={`/product/${product.id}`} className="card flex flex-col h-full group hover:shadow-lg hover:border-accent/50 transition-all duration-300">
 			<div className="relative aspect-square bg-muted overflow-hidden">
-				<img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 mix-blend-multiply dark:mix-blend-normal group-hover:scale-105" loading="lazy" />
+				<img
+					src={product.image || 'https://placehold.co/400x400?text=No+Image'}
+					alt={product.name}
+					className="w-full h-full object-cover transition-transform duration-500 mix-blend-multiply dark:mix-blend-normal group-hover:scale-105"
+					loading="lazy"
+					onError={(e) => {
+						e.currentTarget.src = 'https://placehold.co/400x400?text=Error';
+					}}
+				/>
 				{product.on_hand <= 0 && (
 					<div className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-[10px] font-bold uppercase px-2 py-1 rounded backdrop-blur-sm tracking-wider">
 						Out of Stock

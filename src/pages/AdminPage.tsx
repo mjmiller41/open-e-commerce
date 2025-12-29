@@ -1,12 +1,13 @@
 import { useSearchParams } from 'react-router-dom';
 import { AdminOrders } from '../components/AdminOrders';
 import { AdminCustomers } from '../components/AdminCustomers';
+import { AdminInventory } from '../components/AdminInventory';
 
 export default function AdminPage() {
 	const [searchParams, setSearchParams] = useSearchParams();
-	const activeTab = searchParams.get('tab') === 'customers' ? 'customers' : 'orders';
+	const activeTab = searchParams.get('tab') || 'orders';
 
-	const handleTabChange = (tab: 'orders' | 'customers') => {
+	const handleTabChange = (tab: 'orders' | 'customers' | 'inventory') => {
 		setSearchParams({ tab });
 	};
 
@@ -33,10 +34,21 @@ export default function AdminPage() {
 				>
 					Customers
 				</button>
+				<button
+					onClick={() => handleTabChange('inventory')}
+					className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === 'inventory'
+						? 'bg-primary text-primary-foreground'
+						: 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+						}`}
+				>
+					Inventory
+				</button>
 			</div>
 
 			<div className="card p-6">
-				{activeTab === 'orders' ? <AdminOrders /> : <AdminCustomers />}
+				{activeTab === 'orders' && <AdminOrders />}
+				{activeTab === 'customers' && <AdminCustomers />}
+				{activeTab === 'inventory' && <AdminInventory />}
 			</div>
 		</div>
 	);
