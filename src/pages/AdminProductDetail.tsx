@@ -30,7 +30,7 @@ export function AdminProductDetail() {
 		condition: 'new',
 		product_type: '',
 		tags: [],
-		is_active: true
+		status: 'active'
 	});
 
 	useEffect(() => {
@@ -94,7 +94,7 @@ export function AdminProductDetail() {
 					if (confirm('This product cannot be deleted because it is part of existing orders. Would you like to archive it instead?')) {
 						const { error: archiveError } = await supabase
 							.from('products')
-							.update({ is_active: false })
+							.update({ status: 'archived' })
 							.eq('id', id);
 
 						if (archiveError) throw archiveError;
@@ -380,15 +380,18 @@ export function AdminProductDetail() {
 								}}
 							/>
 						</div>
-						<div className="flex items-center gap-2 mt-4">
-							<input
-								type="checkbox"
-								id="isActive"
-								className="w-4 h-4 rounded border-input"
-								checked={formData.is_active ?? true}
-								onChange={e => setFormData({ ...formData, is_active: e.target.checked })}
-							/>
-							<label htmlFor="isActive" className="text-sm font-medium">Is Active (Visible in store)</label>
+						<div className="space-y-2">
+							<label className="text-sm font-medium">Status</label>
+							<select
+								className="input w-full"
+								value={formData.status || 'draft'}
+								onChange={e => setFormData({ ...formData, status: e.target.value as any })}
+							>
+								<option value="active">Active</option>
+								<option value="inactive">Inactive</option>
+								<option value="draft">Draft</option>
+								<option value="archived">Archived</option>
+							</select>
 						</div>
 					</div>
 				</section>

@@ -27,7 +27,8 @@ export function ProductModal({ product, isOpen, onClose, onSave }: ProductModalP
 		mpn: '',
 		condition: 'new',
 		product_type: '',
-		tags: []
+		tags: [],
+		status: 'draft'
 	});
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -52,7 +53,8 @@ export function ProductModal({ product, isOpen, onClose, onSave }: ProductModalP
 				mpn: '',
 				condition: 'new',
 				product_type: '',
-				tags: []
+				tags: [],
+				status: 'draft'
 			});
 		}
 		setError(null);
@@ -214,6 +216,20 @@ export function ProductModal({ product, isOpen, onClose, onSave }: ProductModalP
 							value={formData.category || ''}
 							onChange={e => setFormData({ ...formData, category: e.target.value })}
 						/>
+					</div>
+
+					<div className="space-y-2">
+						<label className="text-sm font-medium">Status</label>
+						<select
+							className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+							value={formData.status || 'draft'}
+							onChange={e => setFormData({ ...formData, status: e.target.value as any })}
+						>
+							<option value="active">Active</option>
+							<option value="inactive">Inactive</option>
+							<option value="draft">Draft</option>
+							<option value="archived">Archived</option>
+						</select>
 					</div>
 
 					<div className="grid grid-cols-2 gap-4">

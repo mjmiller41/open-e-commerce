@@ -19,7 +19,7 @@ export function ProductList() {
 
 	useEffect(() => {
 		async function fetchProducts() {
-			const { data, error } = await supabase.from('products').select('*');
+			const { data, error } = await supabase.from('products').select('*').eq('status', 'active');
 			if (error) {
 				logger.error('Error fetching products:', error);
 			} else {

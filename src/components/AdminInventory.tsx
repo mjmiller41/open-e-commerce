@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase, type Product } from '../lib/supabase';
-import { Plus, Search, Edit2, Trash2, Package, Minus } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Package, Minus, X } from 'lucide-react';
 import logger from '../lib/logger';
 import { ProductModal } from './ProductModal';
 
@@ -11,6 +11,11 @@ export function AdminInventory() {
 	const [searchQuery, setSearchQuery] = useState('');
 	const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 	const [isModalOpen, setIsModalOpen] = useState(false);
+
+	// Filters
+	const [statusFilter, setStatusFilter] = useState<string[]>([]);
+	const [typeFilter, setTypeFilter] = useState<string[]>([]);
+	const [tagFilter, setTagFilter] = useState<string[]>([]);
 
 	const fetchProducts = async () => {
 		try {
@@ -46,7 +51,7 @@ export function AdminInventory() {
 					if (confirm(`"${productName}" cannot be deleted because it is in existing orders. Would you like to archive (deactivate) it instead?`)) {
 						const { error: archiveError } = await supabase
 							.from('products')
-							.update({ is_active: false })
+							.update({ status: 'archived' })
 							.eq('id', productId);
 
 						if (archiveError) throw archiveError;
@@ -85,12 +90,47 @@ export function AdminInventory() {
 		}
 	};
 
-	const filteredProducts = products.filter(product =>
-		product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-		product.category.toLowerCase().includes(searchQuery.toLowerCase())
-	);
+	// Helper to get products filtered by active criteria, optionally ignoring one filter type
+	const getFilteredCtx = (ignoreType: 'status' | 'type' | 'tag' | null) => {
+		return products.filter(product => {
+			const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				product.category.toLowerCase().includes(searchQuery.toLowerCase());
 
+			const matchesStatus = ignoreType === 'status' || statusFilter.length === 0 || statusFilter.includes(product.status);
+			const matchesType = ignoreType === 'type' || typeFilter.length === 0 || typeFilter.includes(product.product_type || '');
+			const matchesTag = ignoreType === 'tag' || tagFilter.length === 0 || (product.tags && product.tags.some(tag => tagFilter.includes(tag)));
 
+			return matchesSearch && matchesStatus && matchesType && matchesTag;
+		});
+	};
+
+	// Derive available options based on other active filters (Faceted search)
+	// For each filter, we use the context where that specific filter is IGNORED, 
+	// so you see all *possible* options for that category given the *other* constraints.
+	const availableStatuses = Array.from(new Set(getFilteredCtx('status').map(p => p.status)));
+	const availableTypes = Array.from(new Set(getFilteredCtx('type').map(p => p.product_type || '').filter(Boolean)));
+	const availableTags = Array.from(new Set(getFilteredCtx('tag').flatMap(p => p.tags || [])));
+
+	// Final filtered list for display (respects ALL filters)
+	const filteredProducts = getFilteredCtx(null);
+
+	const addFilter = (
+		currentFilters: string[],
+		setFilter: (filters: string[]) => void,
+		value: string
+	) => {
+		if (value && value !== 'all' && !currentFilters.includes(value)) {
+			setFilter([...currentFilters, value]);
+		}
+	};
+
+	const removeFilter = (
+		currentFilters: string[],
+		setFilter: (filters: string[]) => void,
+		value: string
+	) => {
+		setFilter(currentFilters.filter(item => item !== value));
+	};
 
 	const handleAdd = () => {
 		setSelectedProduct(null);
@@ -123,6 +163,107 @@ export function AdminInventory() {
 				</button>
 			</div>
 
+			{/* Filters */}
+			<div className="flex flex-col sm:flex-row gap-4 items-start">
+				<div className="space-y-2 w-full sm:flex-1">
+					<label className="text-sm font-medium text-muted-foreground">Status</label>
+					<select
+						className="input w-full p-2 border rounded-md"
+						value=""
+						onChange={(e) => addFilter(statusFilter, setStatusFilter, e.target.value)}
+					>
+						<option value="">Select Status...</option>
+						{['active', 'inactive', 'draft', 'archived']
+							.filter(s => availableStatuses.includes(s as any) || statusFilter.includes(s))
+							.map(status => (
+								<option key={status} value={status} className="capitalize">{status}</option>
+							))}
+					</select>
+					{statusFilter.length > 0 && (
+						<div className="flex flex-wrap gap-2">
+							{statusFilter.map(status => (
+								<button
+									key={status}
+									onClick={() => removeFilter(statusFilter, setStatusFilter, status)}
+									className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-foreground/10 hover:bg-destructive/15 hover:text-destructive text-foreground text-xs font-medium transition-colors cursor-pointer group"
+								>
+									<span className="capitalize">{status}</span>
+									<X size={14} className="opacity-50 group-hover:opacity-100" />
+								</button>
+							))}
+						</div>
+					)}
+				</div>
+
+				<div className="space-y-2 w-full sm:flex-1">
+					<label className="text-sm font-medium text-muted-foreground">Type</label>
+					<select
+						className="input w-full p-2 border rounded-md"
+						value=""
+						onChange={(e) => addFilter(typeFilter, setTypeFilter, e.target.value)}
+					>
+						<option value="">Select Type...</option>
+						{availableTypes.map(type => (
+							<option key={type} value={type}>{type}</option>
+						))}
+					</select>
+					{typeFilter.length > 0 && (
+						<div className="flex flex-wrap gap-2">
+							{typeFilter.map(type => (
+								<button
+									key={type}
+									onClick={() => removeFilter(typeFilter, setTypeFilter, type)}
+									className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-foreground/10 hover:bg-destructive/15 hover:text-destructive text-foreground text-xs font-medium transition-colors cursor-pointer group"
+								>
+									{type}
+									<X size={14} className="opacity-50 group-hover:opacity-100" />
+								</button>
+							))}
+						</div>
+					)}
+				</div>
+
+				<div className="space-y-2 w-full sm:flex-1">
+					<label className="text-sm font-medium text-muted-foreground">Tag</label>
+					<select
+						className="input w-full p-2 border rounded-md"
+						value=""
+						onChange={(e) => addFilter(tagFilter, setTagFilter, e.target.value)}
+					>
+						<option value="">Select Tag...</option>
+						{availableTags.map(tag => (
+							<option key={tag} value={tag}>{tag}</option>
+						))}
+					</select>
+					{tagFilter.length > 0 && (
+						<div className="flex flex-wrap gap-2">
+							{tagFilter.map(tag => (
+								<button
+									key={tag}
+									onClick={() => removeFilter(tagFilter, setTagFilter, tag)}
+									className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-foreground/10 hover:bg-destructive/15 hover:text-destructive text-foreground text-xs font-medium transition-colors cursor-pointer group"
+								>
+									{tag}
+									<X size={14} className="opacity-50 group-hover:opacity-100" />
+								</button>
+							))}
+						</div>
+					)}
+				</div>
+
+				<button
+					onClick={() => {
+						setStatusFilter([]);
+						setTypeFilter([]);
+						setTagFilter([]);
+						setSearchQuery('');
+					}}
+					className="btn btn-primary h-[42px] whitespace-nowrap shrink-0 mt-[26px]"
+				>
+					Clear Filters
+				</button>
+			</div>
+
 			<div className="rounded-lg border border-border overflow-hidden">
 				<div className="overflow-x-auto">
 					<table className="w-full min-w-max">
@@ -144,7 +285,7 @@ export function AdminInventory() {
 								<th className="px-4 py-3 whitespace-nowrap">Condition</th>
 								<th className="px-4 py-3 whitespace-nowrap">Type</th>
 								<th className="px-4 py-3 whitespace-nowrap">Tags</th>
-								<th className="px-4 py-3 whitespace-nowrap text-center">Active</th>
+								<th className="px-4 py-3 whitespace-nowrap">Status</th>
 								<th className="px-4 py-3 whitespace-nowrap text-right">Actions</th>
 							</tr>
 						</thead>
@@ -251,11 +392,15 @@ export function AdminInventory() {
 										) : '-'}
 									</td>
 									<td className="px-4 py-3 text-center whitespace-nowrap">
-										<span className={`px-2 py-0.5 rounded-full text-xs border ${product.is_active
+										<span className={`px-2 py-0.5 rounded-full text-xs border uppercase font-medium ${product.status === 'active'
 											? 'bg-green-500/10 text-green-600 border-green-200'
-											: 'bg-muted text-muted-foreground border-border'
+											: product.status === 'draft'
+												? 'bg-yellow-500/10 text-yellow-600 border-yellow-200'
+												: product.status === 'archived'
+													? 'bg-orange-500/10 text-orange-600 border-orange-200'
+													: 'bg-muted text-muted-foreground border-border'
 											}`}>
-											{product.is_active ? 'Active' : 'Draft'}
+											{product.status}
 										</span>
 									</td>
 									<td className="px-4 py-3 text-right sticky right-0 bg-background/95 backdrop-blur-sm border-l shadow-sm">

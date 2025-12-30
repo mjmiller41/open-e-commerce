@@ -32,7 +32,7 @@ export function ProductDetail() {
 	useEffect(() => {
 		async function fetchProduct() {
 			if (!productId) return;
-			const { data, error } = await supabase.from('products').select('*').eq('id', productId).single();
+			const { data, error } = await supabase.from('products').select('*').eq('id', productId).eq('status', 'active').single();
 			if (error) {
 				logger.error('Error fetching product:', error);
 			} else {

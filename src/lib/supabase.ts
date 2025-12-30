@@ -38,7 +38,7 @@ export interface Product {
   gtin?: string;
   mpn?: string;
   condition?: string;
-  is_active?: boolean;
+  status: "active" | "inactive" | "draft" | "archived";
 }
 
 export type OrderStatus = "pending" | "processing" | "shipped" | "cancelled";
