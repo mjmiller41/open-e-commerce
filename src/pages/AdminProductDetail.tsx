@@ -33,6 +33,20 @@ export function AdminProductDetail() {
 		status: 'active'
 	});
 
+	const [visibleCategoriesCount, setVisibleCategoriesCount] = useState(10);
+
+	// Reset visible count when search changes
+	useEffect(() => {
+		setVisibleCategoriesCount(10);
+	}, [formData.category]);
+
+	const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+		const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
+		if (scrollHeight - scrollTop <= clientHeight + 20) {
+			setVisibleCategoriesCount(prev => prev + 10);
+		}
+	};
+
 	useEffect(() => {
 		async function fetchProduct() {
 			if (!id) return;
@@ -114,6 +128,10 @@ export function AdminProductDetail() {
 	};
 
 	if (loading) return <div className="p-8 text-center">Loading product...</div>;
+
+	const filteredCategories = taxonomy
+		.filter(c => c.toLowerCase().includes((formData.category || '').toLowerCase()))
+		.slice(0, visibleCategoriesCount);
 
 	return (
 		<div className="max-w-4xl mx-auto pb-16 animate-in fade-in duration-500">
@@ -348,22 +366,22 @@ export function AdminProductDetail() {
 									placeholder="Start typing to search categories..."
 									title={formData.category}
 								/>
-								{formData.category && formData.category.length > 2 && (
-									<div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-60 overflow-y-auto hidden group-focus-within:block">
-										{taxonomy
-											.filter(c => c.toLowerCase().includes((formData.category || '').toLowerCase()))
-											.slice(0, 50)
-											.map(category => (
-												<button
-													key={category}
-													type="button"
-													className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground truncate block"
-													title={category}
-													onClick={() => setFormData({ ...formData, category })}
-												>
-													{category}
-												</button>
-											))}
+								{filteredCategories.length > 0 && (
+									<div
+										className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-60 overflow-y-auto hidden group-focus-within:block"
+										onScroll={handleScroll}
+									>
+										{filteredCategories.map(category => (
+											<button
+												key={category}
+												type="button"
+												className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground truncate block"
+												title={category}
+												onClick={() => setFormData({ ...formData, category })}
+											>
+												{category}
+											</button>
+										))}
 									</div>
 								)}
 							</div>
@@ -395,6 +413,17 @@ export function AdminProductDetail() {
 						</div>
 					</div>
 				</section>
+
+				<div className="flex justify-end">
+					<button
+						onClick={handleSave}
+						disabled={saving}
+						className="btn btn-primary flex items-center gap-2"
+					>
+						{saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+						Save Changes
+					</button>
+				</div>
 			</form>
 		</div>
 	);

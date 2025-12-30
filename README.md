@@ -110,6 +110,6 @@ Here's what's planned for the future of Open E-Commerce:
   - [x] managing users and their roles
 - [x] **Order History**: User profile section to view past purchases.
 - [x] **Advanced Search & Filtering**: Faceted search for better product discovery.
-- [ ] **Payment Processing**: Integration with providers like Stripe or PayPal for real transactions.
 - [ ] **Product Reviews**: Allow customers to rate and review products.
 - [ ] **Wishlist**: Save functionality for products.
+- [ ] **Payment Processing**: Integration with providers like Stripe or PayPal for real transactions.
