@@ -16,6 +16,8 @@ export function AdminProductDetail() {
 	const [success, setSuccess] = useState<boolean>(false);
 	const [suggestedSku, setSuggestedSku] = useState<string | null>(null);
 
+	const [saveSource, setSaveSource] = useState<'top' | 'bottom' | null>(null);
+
 	const [formData, setFormData] = useState<Partial<Product>>({
 		name: '',
 		description: '',
@@ -74,9 +76,9 @@ export function AdminProductDetail() {
 		fetchProduct();
 	}, [id]);
 
-	const handleSave = async (e: React.FormEvent) => {
-		e.preventDefault();
+	const handleSave = async (source: 'top' | 'bottom') => {
 		setSaving(true);
+		setSaveSource(source);
 		setError(null);
 		setSuccess(false);
 		setSuggestedSku(null);
@@ -98,7 +100,10 @@ export function AdminProductDetail() {
 
 			if (updateError) throw updateError;
 			setSuccess(true);
-			setTimeout(() => setSuccess(false), 3000);
+			setTimeout(() => {
+				setSuccess(false);
+				setSaveSource(null);
+			}, 3000);
 		} catch (err) {
 			logger.error('Error saving product:', err);
 			setError(err instanceof Error ? err.message : 'Failed to save product');
@@ -126,6 +131,8 @@ export function AdminProductDetail() {
 
 						if (archiveError) throw archiveError;
 
+						const tempSource = saveSource || 'top';
+						setSaveSource(tempSource);
 						setSuccess(true);
 						setTimeout(() => navigate('/admin?tab=inventory'), 1500);
 						return;
@@ -173,14 +180,21 @@ export function AdminProductDetail() {
 
 			<div className="flex items-center justify-between mb-8">
 				<h1 className="text-3xl font-bold">Edit Product</h1>
-				<button
-					onClick={handleSave}
-					disabled={saving}
-					className="btn btn-primary flex items-center gap-2"
-				>
-					{saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
-					Save Changes
-				</button>
+				<div className="flex items-center gap-4">
+					{success && saveSource === 'top' && (
+						<span className="text-sm text-green-600 animate-in fade-in slide-in-from-right-2 flex items-center gap-1">
+							<Save size={14} /> Saved!
+						</span>
+					)}
+					<button
+						onClick={() => handleSave('top')}
+						disabled={saving}
+						className="btn btn-primary flex items-center gap-2"
+					>
+						{saving && saveSource === 'top' ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+						Save Changes
+					</button>
+				</div>
 			</div>
 
 			{error && (
@@ -208,13 +222,7 @@ export function AdminProductDetail() {
 				</div>
 			)}
 
-			{success && (
-				<div className="bg-green-500/10 text-green-600 p-4 rounded-lg mb-6 border border-green-500/20">
-					Product saved successfully!
-				</div>
-			)}
-
-			<form onSubmit={handleSave} className="space-y-8">
+			<form onSubmit={(e) => { e.preventDefault(); handleSave('bottom'); }} className="space-y-8">
 				{/* Basic Info Section */}
 				<section className="bg-card border border-border rounded-xl p-6 shadow-sm">
 					<h2 className="text-lg font-semibold mb-4 border-b border-border pb-2">Basic Information</h2>
@@ -477,13 +485,19 @@ export function AdminProductDetail() {
 					</div>
 				</section>
 
-				<div className="flex justify-end">
+				<div className="flex justify-end gap-4 items-center">
+					{success && saveSource === 'bottom' && (
+						<span className="text-sm text-green-600 animate-in fade-in slide-in-from-right-2 flex items-center gap-1">
+							<Save size={14} /> Saved!
+						</span>
+					)}
 					<button
-						onClick={handleSave}
+						type="button"
+						onClick={() => handleSave('bottom')}
 						disabled={saving}
 						className="btn btn-primary flex items-center gap-2"
 					>
-						{saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+						{saving && saveSource === 'bottom' ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
 						Save Changes
 					</button>
 				</div>
