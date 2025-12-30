@@ -5,6 +5,8 @@ import { ProductCard } from '../components/ProductCard';
 import { useCart } from '../context/useCart';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
+import { SearchFilterBar, type FilterState, type SortOption } from '../components/SearchFilterBar';
+import { fetchCategories, buildCategoryTree, type CategoryNode } from '../lib/categoryUtils';
 
 /**
  * The product listing page (Home page).
@@ -26,27 +28,78 @@ export function ProductList() {
 
 	const cartMap = new Map(cartItems.map(item => [item.productId, item.quantity]));
 
+	// ... imports remain the same, just adding the new component ...
+
+	const [searchTerm, setSearchTerm] = useState('');
+	const [filters, setFilters] = useState<FilterState>({ minPrice: '', maxPrice: '', category: '' });
+	const [sortOption, setSortOption] = useState<SortOption>('newest');
+	const [categories, setCategories] = useState<CategoryNode[]>([]);
+
+	useEffect(() => {
+		async function loadCategories() {
+			const rawCategories = await fetchCategories();
+			const tree = buildCategoryTree(rawCategories);
+			setCategories(tree);
+		}
+		loadCategories();
+	}, []);
+
 	useEffect(() => {
 		async function fetchProducts() {
 			setLoading(true);
 			let query = supabase.from('products').select('*').eq('status', 'active');
 
-			if (categoryPath) {
-				// Decode the path segments to reconstruct the likely category string
-				// Determine separator format: The DB likely uses " > " based on user request context.
-				// We'll support flexible matching.
+			// If URL has a category path, it takes precedence as the "base" context, 
+			// but we can refine it further with the local filter or override it.
+			// Given user request for "Local Filter", we treat the dropdown as an additional filter.
+			// However, usually detailed filters refine the broader context.
+			// IF filter.category is set, use that.
+			// IF NOT, use URL category.
+
+			let activeCategoryIdentifier = filters.category;
+			if (!activeCategoryIdentifier && categoryPath) {
 				const decodedCategory = decodeURIComponent(categoryPath);
-				// We construct a query that matches products starting with this category path.
-				// Assuming DB category format is "Level1 > Level2 > Level3"
-				// If URL is "Level1/Level2", we match "Level1 > Level2%"
-
-				// We try to match leniently. If the URL uses slashes, we replace them with the DB separator.
-				// However, we must be careful not to replace legitimate slashes if they existed in names (unlikely but possible).
-				// For now, assume standard mapping: URL '/' -> DB ' > '
-				const dbCategoryPrefix = decodedCategory.replace(/\//g, ' > ');
-
-				query = query.ilike('category', `${dbCategoryPrefix}%`);
+				activeCategoryIdentifier = decodedCategory.replace(/\//g, ' > ');
 			}
+
+			if (activeCategoryIdentifier) {
+				query = query.ilike('category', `${activeCategoryIdentifier}%`);
+			}
+
+			if (searchTerm) {
+				// Search in name or description
+				query = query.or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
+			}
+
+			if (filters.minPrice) {
+				query = query.gte('price', parseFloat(filters.minPrice));
+			}
+
+			if (filters.maxPrice) {
+				query = query.lte('price', parseFloat(filters.maxPrice));
+			}
+
+			switch (sortOption) {
+				case 'price_asc':
+					query = query.order('price', { ascending: true });
+					break;
+				case 'price_desc':
+					query = query.order('price', { ascending: false });
+					break;
+				case 'name_asc':
+					query = query.order('name', { ascending: true });
+					break;
+				case 'newest':
+				default:
+					query = query.order('id', { ascending: false });
+					break;
+			}
+
+			// Apply fallback sort if specific sort wasn't applied effectively (though the switch covers it)
+			if (sortOption === 'newest') {
+				query = query.order('id', { ascending: false });
+			}
+
 
 			const { data, error } = await query;
 			if (error) {
@@ -57,7 +110,7 @@ export function ProductList() {
 			setLoading(false);
 		}
 		fetchProducts();
-	}, [categoryPath]);
+	}, [categoryPath, searchTerm, filters, sortOption]);
 
 	// Generate breadcrumbs
 	const renderBreadcrumbs = () => {
@@ -94,9 +147,6 @@ export function ProductList() {
 		);
 	};
 
-	if (loading) return <div className="empty-cart">Loading products...</div>;
-	if (!products) return <div className="empty-cart">No products found.</div>;
-
 	const pageTitle = categoryPath
 		? decodeURIComponent(categoryPath.split('/').pop() || 'Category')
 		: 'Featured Collection';
@@ -116,24 +166,38 @@ export function ProductList() {
 				</p>
 			</div>
 
-			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-				{products.map(product => (
-					<ProductCard
-						key={product.id}
-						product={product}
-						cartQuantity={cartMap.get(product.id!) || 0}
-						onAddToCart={addToCart}
-						onUpdateQuantity={updateQuantity}
-						onRemoveFromCart={removeFromCart}
-					/>
-				))}
-			</div>
+			<SearchFilterBar
+				onSearch={setSearchTerm}
+				onFilterChange={setFilters}
+				onSortChange={setSortOption}
+				categories={categories}
+			/>
 
-			{products.length === 0 && (
+			{loading ? (
+				<div className="text-center py-16">
+					<div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" role="status">
+						<span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">Loading...</span>
+					</div>
+					<p className="mt-4 text-muted-foreground">Loading products...</p>
+				</div>
+			) : !products || products.length === 0 ? (
 				<div className="text-center py-16 px-4 border border-dashed border-border rounded-lg">
 					<p style={{ marginBottom: '1rem' }}>
 						No products found {categoryPath ? 'in this category' : 'in the database'}.
 					</p>
+				</div>
+			) : (
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+					{products.map(product => (
+						<ProductCard
+							key={product.id}
+							product={product}
+							cartQuantity={cartMap.get(product.id!) || 0}
+							onAddToCart={addToCart}
+							onUpdateQuantity={updateQuantity}
+							onRemoveFromCart={removeFromCart}
+						/>
+					))}
 				</div>
 			)}
 		</div>

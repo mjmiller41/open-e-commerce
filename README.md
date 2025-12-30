@@ -102,14 +102,14 @@ This project is configured to deploy directly to GitHub Pages using the `gh-page
 
 Here's what's planned for the future of Open E-Commerce:
 
+- [x] **Backend Integration**: Connect to a robust backend (e.g., Supabase) for data persistence.
 - [x] **User Authentication & Roles**: Secure login/signup and role management (Admin vs. Customer).
 - [x] **Admin Dashboard**: A dedicated interface for
   - [x] managing products, inventory
   - [x] viewing orders
   - [x] managing users and their roles
+- [x] **Order History**: User profile section to view past purchases.
+- [x] **Advanced Search & Filtering**: Faceted search for better product discovery.
 - [ ] **Payment Processing**: Integration with providers like Stripe or PayPal for real transactions.
-- [x] **Backend Integration**: Connect to a robust backend (e.g., Supabase) for data persistence.
 - [ ] **Product Reviews**: Allow customers to rate and review products.
 - [ ] **Wishlist**: Save functionality for products.
-- [x] **Order History**: User profile section to view past purchases.
-- [ ] **Advanced Search & Filtering**: Faceted search for better product discovery.
