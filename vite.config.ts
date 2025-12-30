@@ -31,6 +31,39 @@ export default defineConfig(() => {
         },
       },
     ],
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes("node_modules")) {
+              if (
+                id.includes("react") ||
+                id.includes("react-dom") ||
+                id.includes("react-router-dom")
+              ) {
+                return "react-vendor";
+              }
+              if (id.includes("@supabase")) {
+                return "supabase";
+              }
+              if (
+                id.includes("lucide-react") ||
+                id.includes("clsx") ||
+                id.includes("tailwind-merge")
+              ) {
+                return "ui-vendor";
+              }
+              if (id.includes("axios") || id.includes("papaparse")) {
+                return "utils";
+              }
+            }
+            if (id.includes("taxonomy.json")) {
+              return "taxonomy";
+            }
+          },
+        },
+      },
+    },
     define: {
       __APP_CONFIG__: JSON.stringify(config),
     },
