@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase, type Product } from '../lib/supabase';
 import { generateSKU } from '../lib/skuGenerator';
+import { checkSkuExists, getSuggestedSku } from '../lib/productService';
 import { X, Loader2 } from 'lucide-react';
 import logger from '../lib/logger';
 import taxonomy from '../assets/taxonomy.json';
@@ -35,6 +36,7 @@ export function ProductModal({ product, isOpen, onClose, onSave }: ProductModalP
 	});
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [suggestedSku, setSuggestedSku] = useState<string | null>(null);
 
 	useEffect(() => {
 		if (product) {
@@ -62,6 +64,7 @@ export function ProductModal({ product, isOpen, onClose, onSave }: ProductModalP
 			});
 		}
 		setError(null);
+		setSuggestedSku(null);
 		setVisibleCategoriesCount(10);
 	}, [product, isOpen]);
 
@@ -93,8 +96,19 @@ export function ProductModal({ product, isOpen, onClose, onSave }: ProductModalP
 		e.preventDefault();
 		setLoading(true);
 		setError(null);
+		setSuggestedSku(null);
 
 		try {
+			if (formData.sku) {
+				const excludeId = product?.id;
+				const exists = await checkSkuExists(formData.sku, excludeId);
+				if (exists) {
+					const suggestion = await getSuggestedSku(formData.sku);
+					setSuggestedSku(suggestion);
+					throw new Error(`SKU "${formData.sku}" already exists.`);
+				}
+			}
+
 			if (product && product.id) {
 				// Update existing product
 				const { error: updateError } = await supabase
@@ -141,7 +155,23 @@ export function ProductModal({ product, isOpen, onClose, onSave }: ProductModalP
 				<form onSubmit={handleSubmit} className="p-6 overflow-y-auto flex-1 space-y-6">
 					{error && (
 						<div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
-							{error}
+							<p>{error}</p>
+							{suggestedSku && (
+								<div className="mt-2 flex items-center gap-2">
+									<span>Suggestion: <span className="font-mono font-bold">{suggestedSku}</span></span>
+									<button
+										type="button"
+										onClick={() => {
+											setFormData({ ...formData, sku: suggestedSku });
+											setError(null);
+											setSuggestedSku(null);
+										}}
+										className="text-xs bg-background/50 hover:bg-background px-2 py-1 rounded border border-destructive/20 ml-auto"
+									>
+										Use This
+									</button>
+								</div>
+							)}
 						</div>
 					)}
 

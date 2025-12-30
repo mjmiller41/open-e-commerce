@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 6gzVzR5x9gyhIoHBYoUs7I2C3klNdbNQvRD4fZ0oiGu9RMm4ZPpPfXSfhbKeZv2
+\restrict 8r0kV1LJ2abgUI2PotOJ2eoVJIAm5hnz2ExxXs4kenNIcX2UQH08SNGNhEYcyyb
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.7 (Ubuntu 17.7-3.pgdg24.04+1)
@@ -275,6 +275,20 @@ CREATE TYPE auth.one_time_token_type AS ENUM (
 
 
 ALTER TYPE auth.one_time_token_type OWNER TO supabase_auth_admin;
+
+--
+-- Name: product_status; Type: TYPE; Schema: public; Owner: postgres
+--
+
+CREATE TYPE public.product_status AS ENUM (
+    'active',
+    'inactive',
+    'draft',
+    'archived'
+);
+
+
+ALTER TYPE public.product_status OWNER TO postgres;
 
 --
 -- Name: action; Type: TYPE; Schema: realtime; Owner: supabase_admin
@@ -3303,7 +3317,8 @@ CREATE TABLE public.products (
     gtin text,
     mpn text,
     condition text DEFAULT 'new'::text,
-    is_active boolean DEFAULT true
+    status public.product_status DEFAULT 'draft'::public.product_status,
+    variant text
 );
 
 
@@ -4331,6 +4346,13 @@ CREATE INDEX idx_order_items_user_id ON public.order_items USING btree (user_id)
 --
 
 CREATE INDEX idx_orders_user_id ON public.orders USING btree (user_id);
+
+
+--
+-- Name: idx_products_status; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_products_status ON public.products USING btree (status);
 
 
 --
@@ -6496,4 +6518,4 @@ ALTER EVENT TRIGGER pgrst_drop_watch OWNER TO supabase_admin;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 6gzVzR5x9gyhIoHBYoUs7I2C3klNdbNQvRD4fZ0oiGu9RMm4ZPpPfXSfhbKeZv2
+\unrestrict 8r0kV1LJ2abgUI2PotOJ2eoVJIAm5hnz2ExxXs4kenNIcX2UQH08SNGNhEYcyyb

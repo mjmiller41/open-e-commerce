@@ -5,6 +5,7 @@ import { ArrowLeft, Save, Trash2, Loader2, Image as ImageIcon } from 'lucide-rea
 import logger from '../lib/logger';
 import taxonomy from '../assets/taxonomy.json';
 import { generateSKU } from '../lib/skuGenerator';
+import { checkSkuExists, getSuggestedSku } from '../lib/productService';
 
 export function AdminProductDetail() {
 	const { id } = useParams<{ id: string }>();
@@ -13,6 +14,7 @@ export function AdminProductDetail() {
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<boolean>(false);
+	const [suggestedSku, setSuggestedSku] = useState<string | null>(null);
 
 	const [formData, setFormData] = useState<Partial<Product>>({
 		name: '',
@@ -77,8 +79,18 @@ export function AdminProductDetail() {
 		setSaving(true);
 		setError(null);
 		setSuccess(false);
+		setSuggestedSku(null);
 
 		try {
+			if (formData.sku && id) {
+				const exists = await checkSkuExists(formData.sku, parseInt(id));
+				if (exists) {
+					const suggestion = await getSuggestedSku(formData.sku);
+					setSuggestedSku(suggestion);
+					throw new Error(`SKU "${formData.sku}" already exists.`);
+				}
+			}
+
 			const { error: updateError } = await supabase
 				.from('products')
 				.update(formData)
@@ -89,7 +101,7 @@ export function AdminProductDetail() {
 			setTimeout(() => setSuccess(false), 3000);
 		} catch (err) {
 			logger.error('Error saving product:', err);
-			setError('Failed to save product');
+			setError(err instanceof Error ? err.message : 'Failed to save product');
 		} finally {
 			setSaving(false);
 		}
@@ -173,7 +185,26 @@ export function AdminProductDetail() {
 
 			{error && (
 				<div className="bg-destructive/10 text-destructive p-4 rounded-lg mb-6 border border-destructive/20">
-					{error}
+					<p>{error}</p>
+					{suggestedSku && (
+						<div className="mt-3 flex items-center gap-3">
+							<span className="text-sm text-foreground/80">Suggestion:</span>
+							<code className="text-sm font-mono bg-background/50 px-2 py-1 rounded border border-destructive/20">
+								{suggestedSku}
+							</code>
+							<button
+								type="button"
+								onClick={() => {
+									setFormData({ ...formData, sku: suggestedSku });
+									setError(null);
+									setSuggestedSku(null);
+								}}
+								className="text-xs px-3 py-1 bg-background hover:bg-muted border border-border rounded transition-colors"
+							>
+								Use Suggestion
+							</button>
+						</div>
+					)}
 				</div>
 			)}
 
