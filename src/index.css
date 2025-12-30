@@ -127,4 +127,60 @@
   ::-webkit-scrollbar-corner {
     @apply bg-transparent;
   }
+
+  /* --- Refactoring: New Standard Components --- */
+
+  /* Badges */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize border whitespace-nowrap;
+  }
+  .badge-success {
+    @apply bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-900/50;
+  }
+  .badge-warning {
+    @apply bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-900/50;
+  }
+  .badge-error {
+    @apply bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-900/50;
+  }
+  .badge-info {
+    @apply bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-900/50;
+  }
+  .badge-neutral {
+    @apply bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700;
+  }
+  .badge-purple {
+     @apply bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-900/50;
+  }
+  .badge-orange {
+      @apply bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-900/50;
+  }
+
+
+  /* Tables */
+  .table-header {
+    @apply px-4 py-3 text-left text-sm font-semibold text-muted-foreground bg-muted/50 border-b border-border select-none;
+  }
+  .table-cell {
+    @apply px-4 py-3 text-sm border-b border-border;
+  }
+  .table-row-hover {
+    @apply hover:bg-muted/30 transition-colors;
+  }
+
+  /* Filter Chips */
+  .filter-chip {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-foreground/10 hover:bg-destructive/15 hover:text-destructive text-foreground text-xs font-medium transition-colors cursor-pointer border border-transparent;
+  }
+
+  /* Page Layouts */
+  .page-header {
+    @apply flex items-center justify-between mb-6;
+  }
+  .page-title {
+    @apply text-xl font-bold;
+  }
+  .filter-section {
+    @apply flex flex-col sm:flex-row gap-4 items-start mb-6;
+  }
 }

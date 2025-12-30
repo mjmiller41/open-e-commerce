@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { supabase, type Product } from '../lib/supabase';
 import logger from '../lib/logger';
 import { CheckoutModal } from '../components/CheckoutModal';
-
+import { PageHeader } from '../components/ui/PageHeader';
 /**
  * The shopping cart page.
  * Displays the list of items in the cart, allows quantity adjustment and removal,
@@ -85,11 +85,16 @@ export function CartPage() {
 	return (
 
 		<div className="animate-in fade-in duration-500">
-			<div className="flex items-center gap-4 mb-8">
-				<ShoppingBag className="text-primary" size={32} />
-				<h1 className="text-3xl font-bold">Shopping Cart</h1>
-				<span className="text-xl text-muted-foreground">({enrichedCartItems.length} items)</span>
-			</div>
+			<PageHeader
+				title={
+					<div className="flex items-center gap-4">
+						<ShoppingBag className="text-primary" size={32} />
+						<span>Shopping Cart</span>
+						<span className="text-xl text-muted-foreground font-normal">({enrichedCartItems.length} items)</span>
+					</div>
+				}
+				className="mb-8"
+			/>
 
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 				<div className="lg:col-span-2 flex flex-col gap-4">

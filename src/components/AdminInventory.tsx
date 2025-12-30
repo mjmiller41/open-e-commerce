@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase, type Product } from '../lib/supabase';
-import { Plus, Search, Edit2, Trash2, Package, Minus, X, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Package, Minus, X } from 'lucide-react';
 import logger from '../lib/logger';
 import { ProductModal } from './ProductModal';
 import { useSortableData } from '../hooks/useSortableData';
 import Papa from 'papaparse';
 import { Download, Upload } from 'lucide-react';
+import { Badge } from './ui/Badge';
+import { PageHeader } from './ui/PageHeader';
+import { SortableHeader } from './ui/SortableHeader';
 
 export function AdminInventory() {
 	const [products, setProducts] = useState<Product[]>([]);
@@ -126,22 +129,7 @@ export function AdminInventory() {
 		}
 	);
 
-	const renderSortIcon = (key: string) => {
-		if (sortConfig?.key !== key) return null;
-		return sortConfig.direction === 'ascending' ? <ArrowUp size={14} className="inline ml-1" /> : <ArrowDown size={14} className="inline ml-1" />;
-	};
 
-	const renderSortableHeader = (label: string, sortKey: string, className = "") => (
-		<th
-			className={`px-4 py-3 whitespace-nowrap cursor-pointer hover:text-foreground transition-colors select-none ${className}`}
-			onClick={() => requestSort(sortKey)}
-		>
-			<div className={`flex items-center gap-1 ${className.includes('text-right') ? 'justify-end' : className.includes('text-center') ? 'justify-center' : ''}`}>
-				{label}
-				{renderSortIcon(sortKey)}
-			</div>
-		</th>
-	);
 
 	const addFilter = (
 		currentFilters: string[],
@@ -296,56 +284,54 @@ export function AdminInventory() {
 
 	return (
 		<div className="space-y-6">
-			<div className="flex items-center justify-between">
-				<h2 className="text-xl font-bold">Inventory Management</h2>
-			</div>
-
-			<div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-				<div className="relative w-full sm:w-72">
-					<Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-					<input
-						type="text"
-						placeholder="Search products..."
-						className="input pl-10"
-						value={searchQuery}
-						onChange={(e) => setSearchQuery(e.target.value)}
-					/>
-				</div>
-				<div className="flex gap-2 w-full sm:w-auto">
-					<div className="relative">
+			<PageHeader title="Inventory Management">
+				<div className="flex flex-col sm:flex-row gap-4 items-center w-full sm:w-auto">
+					<div className="relative w-full sm:w-72">
+						<Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
 						<input
-							type="file"
-							accept=".csv"
-							onChange={handleImport}
-							className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-							title="Import CSV"
+							type="text"
+							placeholder="Search products..."
+							className="input pl-10"
+							value={searchQuery}
+							onChange={(e) => setSearchQuery(e.target.value)}
 						/>
+					</div>
+					<div className="flex gap-2 w-full sm:w-auto">
+						<div className="relative">
+							<input
+								type="file"
+								accept=".csv"
+								onChange={handleImport}
+								className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+								title="Import CSV"
+							/>
+							<button
+								className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 transition-colors flex items-center justify-center gap-2 font-medium w-full"
+							>
+								<Upload size={18} />
+								Import
+							</button>
+						</div>
 						<button
-							className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 transition-colors flex items-center justify-center gap-2 font-medium w-full"
+							onClick={handleExport}
+							className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 transition-colors flex items-center justify-center gap-2 font-medium"
 						>
-							<Upload size={18} />
-							Import
+							<Download size={18} />
+							Export
+						</button>
+						<button
+							onClick={handleAdd}
+							className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 font-medium flex-1 sm:flex-none"
+						>
+							<Plus size={18} />
+							Add Product
 						</button>
 					</div>
-					<button
-						onClick={handleExport}
-						className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 transition-colors flex items-center justify-center gap-2 font-medium"
-					>
-						<Download size={18} />
-						Export
-					</button>
-					<button
-						onClick={handleAdd}
-						className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 font-medium flex-1 sm:flex-none"
-					>
-						<Plus size={18} />
-						Add Product
-					</button>
 				</div>
-			</div>
+			</PageHeader>
 
 			{/* Filters */}
-			<div className="flex flex-col sm:flex-row gap-4 items-start">
+			<div className="filter-section">
 				<div className="space-y-2 w-full sm:flex-1">
 					<label className="text-sm font-medium text-muted-foreground">Status</label>
 					<select
@@ -363,14 +349,14 @@ export function AdminInventory() {
 					{statusFilter.length > 0 && (
 						<div className="flex flex-wrap gap-2">
 							{statusFilter.map(status => (
-								<button
+								<div
 									key={status}
 									onClick={() => removeFilter(statusFilter, setStatusFilter, status)}
-									className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-foreground/10 hover:bg-destructive/15 hover:text-destructive text-foreground text-xs font-medium transition-colors cursor-pointer group"
+									className="filter-chip group"
 								>
 									<span className="capitalize">{status}</span>
 									<X size={14} className="opacity-50 group-hover:opacity-100" />
-								</button>
+								</div>
 							))}
 						</div>
 					)}
@@ -391,14 +377,14 @@ export function AdminInventory() {
 					{typeFilter.length > 0 && (
 						<div className="flex flex-wrap gap-2">
 							{typeFilter.map(type => (
-								<button
+								<div
 									key={type}
 									onClick={() => removeFilter(typeFilter, setTypeFilter, type)}
-									className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-foreground/10 hover:bg-destructive/15 hover:text-destructive text-foreground text-xs font-medium transition-colors cursor-pointer group"
+									className="filter-chip group"
 								>
 									{type}
 									<X size={14} className="opacity-50 group-hover:opacity-100" />
-								</button>
+								</div>
 							))}
 						</div>
 					)}
@@ -419,14 +405,14 @@ export function AdminInventory() {
 					{tagFilter.length > 0 && (
 						<div className="flex flex-wrap gap-2">
 							{tagFilter.map(tag => (
-								<button
+								<div
 									key={tag}
 									onClick={() => removeFilter(tagFilter, setTagFilter, tag)}
-									className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-foreground/10 hover:bg-destructive/15 hover:text-destructive text-foreground text-xs font-medium transition-colors cursor-pointer group"
+									className="filter-chip group"
 								>
 									{tag}
 									<X size={14} className="opacity-50 group-hover:opacity-100" />
-								</button>
+								</div>
 							))}
 						</div>
 					)}
@@ -449,25 +435,25 @@ export function AdminInventory() {
 				<div className="overflow-x-auto">
 					<table className="w-full min-w-max">
 						<thead className="bg-muted/50">
-							<tr className="text-left text-sm font-medium text-muted-foreground">
-								{renderSortableHeader("Image", "image")}
-								{renderSortableHeader("Title", "name")}
-								{renderSortableHeader("Description", "description")}
-								{renderSortableHeader("Images", "images_count", "text-center")}
-								{renderSortableHeader("Category", "category")}
-								{renderSortableHeader("Brand", "brand")}
-								{renderSortableHeader("Price", "price", "text-right")}
-								{renderSortableHeader("Cost", "cost", "text-right")}
-								{renderSortableHeader("Stock", "on_hand", "text-center")}
-								{renderSortableHeader("SKU", "sku")}
-								{renderSortableHeader("Variant", "variant")}
-								{renderSortableHeader("GTIN", "gtin")}
-								{renderSortableHeader("MPN", "mpn")}
-								{renderSortableHeader("Weight", "weight")}
-								{renderSortableHeader("Condition", "condition")}
-								{renderSortableHeader("Type", "product_type")}
-								{renderSortableHeader("Tags", "tags_string")}
-								{renderSortableHeader("Status", "status")}
+							<tr className="border-b border-border">
+								<SortableHeader label="Image" sortKey="image" onSort={requestSort} currentSort={sortConfig} />
+								<SortableHeader label="Title" sortKey="name" onSort={requestSort} currentSort={sortConfig} />
+								<SortableHeader label="Description" sortKey="description" onSort={requestSort} currentSort={sortConfig} />
+								<SortableHeader label="Images" sortKey="images_count" onSort={requestSort} currentSort={sortConfig} align="center" />
+								<SortableHeader label="Category" sortKey="category" onSort={requestSort} currentSort={sortConfig} />
+								<SortableHeader label="Brand" sortKey="brand" onSort={requestSort} currentSort={sortConfig} />
+								<SortableHeader label="Price" sortKey="price" onSort={requestSort} currentSort={sortConfig} align="right" />
+								<SortableHeader label="Cost" sortKey="cost" onSort={requestSort} currentSort={sortConfig} align="right" />
+								<SortableHeader label="Stock" sortKey="on_hand" onSort={requestSort} currentSort={sortConfig} align="center" />
+								<SortableHeader label="SKU" sortKey="sku" onSort={requestSort} currentSort={sortConfig} />
+								<SortableHeader label="Variant" sortKey="variant" onSort={requestSort} currentSort={sortConfig} />
+								<SortableHeader label="GTIN" sortKey="gtin" onSort={requestSort} currentSort={sortConfig} />
+								<SortableHeader label="MPN" sortKey="mpn" onSort={requestSort} currentSort={sortConfig} />
+								<SortableHeader label="Weight" sortKey="weight" onSort={requestSort} currentSort={sortConfig} />
+								<SortableHeader label="Condition" sortKey="condition" onSort={requestSort} currentSort={sortConfig} />
+								<SortableHeader label="Type" sortKey="product_type" onSort={requestSort} currentSort={sortConfig} />
+								<SortableHeader label="Tags" sortKey="tags_string" onSort={requestSort} currentSort={sortConfig} />
+								<SortableHeader label="Status" sortKey="status" onSort={requestSort} currentSort={sortConfig} />
 								<th className="px-4 py-3 whitespace-nowrap text-right">Actions</th>
 							</tr>
 						</thead>
@@ -527,15 +513,10 @@ export function AdminInventory() {
 											>
 												<Minus size={14} />
 											</button>
-											<div className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border min-w-[60px] justify-center ${product.on_hand > 10
-												? 'bg-green-500/10 text-green-600 border-green-200'
-												: product.on_hand > 0
-													? 'bg-yellow-500/10 text-yellow-600 border-yellow-200'
-													: 'bg-red-500/10 text-red-600 border-red-200'
-												}`}>
+											<Badge variant={product.on_hand > 10 ? 'success' : product.on_hand > 0 ? 'warning' : 'error'} className="min-w-[60px] justify-center gap-1.5">
 												<Package size={12} />
 												{product.on_hand}
-											</div>
+											</Badge>
 											<button
 												onClick={() => handleStockAdjustment(product, 1)}
 												className="p-1 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
@@ -577,16 +558,9 @@ export function AdminInventory() {
 										) : '-'}
 									</td>
 									<td className="px-4 py-3 text-center whitespace-nowrap">
-										<span className={`px-2 py-0.5 rounded-full text-xs border uppercase font-medium ${product.status === 'active'
-											? 'bg-green-500/10 text-green-600 border-green-200'
-											: product.status === 'draft'
-												? 'bg-yellow-500/10 text-yellow-600 border-yellow-200'
-												: product.status === 'archived'
-													? 'bg-orange-500/10 text-orange-600 border-orange-200'
-													: 'bg-muted text-muted-foreground border-border'
-											}`}>
+										<Badge variant={product.status === 'active' ? 'success' : product.status === 'draft' ? 'warning' : product.status === 'archived' ? 'orange' : 'neutral'}>
 											{product.status}
-										</span>
+										</Badge>
 									</td>
 									<td className="px-4 py-3 text-right sticky right-0 bg-background/95 backdrop-blur-sm border-l shadow-sm">
 										<div className="flex justify-end gap-2">

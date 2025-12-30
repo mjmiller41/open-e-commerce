@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase, type Order, type Profile } from '../lib/supabase';
-import { X, ArrowUp, ArrowDown } from 'lucide-react';
+import { X } from 'lucide-react';
 import logger from '../lib/logger';
 import { useSortableData } from '../hooks/useSortableData';
+import { Badge } from './ui/Badge';
+import { PageHeader } from './ui/PageHeader';
+import { SortableHeader } from './ui/SortableHeader';
 
 export function AdminOrders() {
 	const [orders, setOrders] = useState<Order[]>([]);
@@ -87,10 +90,7 @@ export function AdminOrders() {
 		}
 	);
 
-	const renderSortIcon = (key: string) => {
-		if (sortConfig?.key !== key) return null;
-		return sortConfig.direction === 'ascending' ? <ArrowUp size={14} /> : <ArrowDown size={14} />;
-	};
+
 
 	const addFilter = <T extends string>(
 		currentFilters: T[],
@@ -138,11 +138,9 @@ export function AdminOrders() {
 
 	return (
 		<div className="space-y-6">
-			<div className="flex items-center justify-between">
-				<h2 className="text-xl font-bold">Order Management</h2>
-			</div>
+			<PageHeader title="Order Management" />
 
-			<div className="flex flex-col sm:flex-row gap-4 items-start">
+			<div className="filter-section">
 				<div className="space-y-2 w-full sm:flex-1">
 					<label className="text-sm font-medium text-muted-foreground">Status</label>
 					<select
@@ -160,14 +158,14 @@ export function AdminOrders() {
 					{statusFilter.length > 0 && (
 						<div className="flex flex-wrap gap-2">
 							{statusFilter.map(status => (
-								<button
+								<div
 									key={status}
 									onClick={() => removeFilter(statusFilter, setStatusFilter, status)}
-									className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-foreground/10 hover:bg-destructive/15 hover:text-destructive text-foreground text-xs font-medium transition-colors cursor-pointer group"
+									className="filter-chip"
 								>
 									<span className="capitalize">{status}</span>
 									<X size={14} className="opacity-50 group-hover:opacity-100" />
-								</button>
+								</div>
 							))}
 						</div>
 					)}
@@ -197,14 +195,14 @@ export function AdminOrders() {
 							{customerFilter.map(userId => {
 								const profile = profiles[userId];
 								return (
-									<button
+									<div
 										key={userId}
 										onClick={() => removeFilter(customerFilter, setCustomerFilter, userId)}
-										className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-foreground/10 hover:bg-destructive/15 hover:text-destructive text-foreground text-xs font-medium transition-colors cursor-pointer group"
+										className="filter-chip group"
 									>
 										{profile?.full_name || profile?.email || userId}
 										<X size={14} className="opacity-50 group-hover:opacity-100" />
-									</button>
+									</div>
 								);
 							})}
 						</div>
@@ -231,36 +229,11 @@ export function AdminOrders() {
 					<table className="w-full text-left">
 						<thead>
 							<tr className="bg-muted">
-								<th
-									className="p-3 text-sm font-semibold text-muted-foreground border-b border-border cursor-pointer hover:text-foreground transition-colors select-none"
-									onClick={() => requestSort('id')}
-								>
-									<div className="flex items-center gap-1">Order ID {renderSortIcon('id')}</div>
-								</th>
-								<th
-									className="p-3 text-sm font-semibold text-muted-foreground border-b border-border cursor-pointer hover:text-foreground transition-colors select-none"
-									onClick={() => requestSort('created_at')}
-								>
-									<div className="flex items-center gap-1">Date {renderSortIcon('created_at')}</div>
-								</th>
-								<th
-									className="p-3 text-sm font-semibold text-muted-foreground border-b border-border cursor-pointer hover:text-foreground transition-colors select-none"
-									onClick={() => requestSort('customer_name')}
-								>
-									<div className="flex items-center gap-1">Customer {renderSortIcon('customer_name')}</div>
-								</th>
-								<th
-									className="p-3 text-sm font-semibold text-muted-foreground border-b border-border cursor-pointer hover:text-foreground transition-colors select-none"
-									onClick={() => requestSort('total_amount')}
-								>
-									<div className="flex items-center gap-1">Total {renderSortIcon('total_amount')}</div>
-								</th>
-								<th
-									className="p-3 text-sm font-semibold text-muted-foreground border-b border-border cursor-pointer hover:text-foreground transition-colors select-none"
-									onClick={() => requestSort('status')}
-								>
-									<div className="flex items-center gap-1">Status {renderSortIcon('status')}</div>
-								</th>
+								<SortableHeader label="Order ID" sortKey="id" onSort={requestSort} currentSort={sortConfig} />
+								<SortableHeader label="Date" sortKey="created_at" onSort={requestSort} currentSort={sortConfig} />
+								<SortableHeader label="Customer" sortKey="customer_name" onSort={requestSort} currentSort={sortConfig} />
+								<SortableHeader label="Total" sortKey="total_amount" onSort={requestSort} currentSort={sortConfig} />
+								<SortableHeader label="Status" sortKey="status" onSort={requestSort} currentSort={sortConfig} />
 								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Actions</th>
 							</tr>
 						</thead>
@@ -285,14 +258,13 @@ export function AdminOrders() {
 										</td>
 										<td className="p-3 text-sm font-medium">${order.total_amount.toFixed(2)}</td>
 										<td className="p-3 text-sm">
-											<span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-												${order.status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' : ''}
-												${order.status === 'processing' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' : ''}
-												${order.status === 'shipped' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : ''}
-												${order.status === 'cancelled' ? 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400' : ''}
-											`}>
+											<Badge variant={
+												order.status === 'shipped' ? 'success' :
+													order.status === 'processing' ? 'info' :
+														order.status === 'cancelled' ? 'neutral' : 'warning'
+											}>
 												{order.status}
-											</span>
+											</Badge>
 										</td>
 										<td className="p-3 text-sm">
 											<select

@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { supabase, type Order, type OrderItem } from "../lib/supabase";
 import logger from "../lib/logger";
+import { Badge } from "../components/ui/Badge";
+import { PageHeader } from "../components/ui/PageHeader";
 
 export default function OrderDetailPage() {
 	const { id } = useParams();
@@ -93,41 +95,41 @@ export default function OrderDetailPage() {
 
 	return (
 		<div className="max-w-4xl mx-auto animate-in fade-in duration-500 py-8 px-4">
-			<div className="flex items-center justify-between mb-8">
-				<div className="flex items-center gap-4">
-					<button onClick={() => navigate(-1)} className="text-muted-foreground hover:text-foreground">
-						&larr; Back
-					</button>
-					<h1 className="text-3xl font-bold">Order #{order.id}</h1>
-				</div>
-
-				<div className="flex items-center gap-4">
-					{role === "admin" ? (
-						<div className="flex items-center gap-2">
-							<span className="text-sm font-medium">Status:</span>
-							<select
-								value={order.status}
-								onChange={(e) => updateStatus(e.target.value as Order["status"])}
-								className="h-9 px-3 rounded-md border border-input bg-background"
-							>
-								<option value="pending">Pending</option>
-								<option value="processing">Processing</option>
-								<option value="shipped">Shipped</option>
-								<option value="cancelled">Cancelled</option>
-							</select>
-						</div>
-					) : (
-						<span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium capitalize
-                ${order.status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' : ''}
-                ${order.status === 'processing' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' : ''}
-                ${order.status === 'shipped' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : ''}
-                ${order.status === 'cancelled' ? 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400' : ''}
-            `}>
-							{order.status}
-						</span>
-					)}
-				</div>
-			</div>
+			<PageHeader
+				title={
+					<div className="flex items-center gap-4">
+						<button onClick={() => navigate(-1)} className="text-muted-foreground hover:text-foreground">
+							&larr; Back
+						</button>
+						<h1 className="text-3xl font-bold">Order #{order.id}</h1>
+					</div>
+				}
+				className="mb-8"
+			>
+				{role === "admin" ? (
+					<div className="flex items-center gap-2">
+						<span className="text-sm font-medium">Status:</span>
+						<select
+							value={order.status}
+							onChange={(e) => updateStatus(e.target.value as Order["status"])}
+							className="h-9 px-3 rounded-md border border-input bg-background"
+						>
+							<option value="pending">Pending</option>
+							<option value="processing">Processing</option>
+							<option value="shipped">Shipped</option>
+							<option value="cancelled">Cancelled</option>
+						</select>
+					</div>
+				) : (
+					<Badge variant={
+						order.status === 'shipped' ? 'success' :
+							order.status === 'processing' ? 'info' :
+								order.status === 'cancelled' ? 'neutral' : 'warning'
+					}>
+						{order.status}
+					</Badge>
+				)}
+			</PageHeader>
 
 			<div className="grid grid-cols-1 md:grid-cols-3 gap-8">
 				{/* Left Column: Items */}

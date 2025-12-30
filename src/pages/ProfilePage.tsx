@@ -4,6 +4,8 @@ import { useAuth } from "../context/AuthContext";
 import { supabase, type Order, type Profile, type Address } from "../lib/supabase";
 import AddressForm, { type AddressData } from "../components/AddressForm";
 import logger from "../lib/logger";
+import { Badge } from "../components/ui/Badge";
+import { PageHeader } from "../components/ui/PageHeader";
 
 export default function ProfilePage() {
 	const { id } = useParams();
@@ -290,7 +292,8 @@ export default function ProfilePage() {
 
 	return (
 		<div className="max-w-4xl mx-auto animate-in fade-in duration-500">
-			<h1 className="text-3xl font-bold mb-8">{isOwnProfile ? "My Profile" : "Customer Profile"}</h1>
+			<PageHeader title={isOwnProfile ? "My Profile" : "Customer Profile"} className="mb-8" />
+
 
 			{/* Profile Info Card */}
 			<div className="card p-6 mb-8">
@@ -303,11 +306,9 @@ export default function ProfilePage() {
 									{isOwnProfile ? user?.email : profile?.email || "Email not public"}
 								</div>
 								{((isOwnProfile && user?.email) || (profile?.email)) && (
-									<span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
-										${(profile?.email_verified) ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'}
-									`}>
+									<Badge variant={profile?.email_verified ? 'success' : 'warning'}>
 										{(profile?.email_verified) ? 'Verified' : 'Unverified'}
-									</span>
+									</Badge>
 								)}
 							</div>
 							{role === 'admin' && !isOwnProfile && profile?.email && (
@@ -565,14 +566,13 @@ export default function ProfilePage() {
 										<td className="p-3 text-sm">{new Date(order.created_at).toLocaleDateString()}</td>
 										<td className="p-3 text-sm font-medium">${order.total_amount.toFixed(2)}</td>
 										<td className="p-3 text-sm">
-											<span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-											${order.status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' : ''}
-											${order.status === 'processing' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' : ''}
-											${order.status === 'shipped' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : ''}
-											${order.status === 'cancelled' ? 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400' : ''}
-										`}>
+											<Badge variant={
+												order.status === 'shipped' ? 'success' :
+													order.status === 'processing' ? 'info' :
+														order.status === 'cancelled' ? 'neutral' : 'warning'
+											}>
 												{order.status}
-											</span>
+											</Badge>
 										</td>
 										<td className="p-3 text-sm max-w-[200px] truncate">
 											{order.shipping_address}

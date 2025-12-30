@@ -2,6 +2,7 @@ import { type Product } from '../lib/supabase';
 import { ShoppingCart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { QuantityControl } from './QuantityControl';
+import { Badge } from './ui/Badge';
 
 /**
  * Props for the ProductCard component.
@@ -46,9 +47,9 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 					}}
 				/>
 				{product.on_hand <= 0 && (
-					<div className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-[10px] font-bold uppercase px-2 py-1 rounded backdrop-blur-sm tracking-wider">
+					<Badge variant="error" className="absolute top-2 right-2 backdrop-blur-sm tracking-wider">
 						Out of Stock
-					</div>
+					</Badge>
 				)}
 			</Link>
 

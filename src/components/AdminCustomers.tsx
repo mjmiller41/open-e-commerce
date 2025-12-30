@@ -3,8 +3,11 @@ import { Link } from 'react-router-dom';
 import { supabase, type Profile } from '../lib/supabase';
 import logger from '../lib/logger';
 import { useAuth } from '../context/AuthContext';
-import { X, ArrowUp, ArrowDown } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useSortableData } from '../hooks/useSortableData';
+import { Badge } from './ui/Badge';
+import { PageHeader } from './ui/PageHeader';
+import { SortableHeader } from './ui/SortableHeader';
 
 export function AdminCustomers() {
 	const { isAdmin } = useAuth();
@@ -53,22 +56,7 @@ export function AdminCustomers() {
 		}
 	);
 
-	const renderSortIcon = (key: string) => {
-		if (sortConfig?.key !== key) return null;
-		return sortConfig.direction === 'ascending' ? <ArrowUp size={14} /> : <ArrowDown size={14} />;
-	};
 
-	const renderSortableHeader = (label: string, sortKey: string, className = "") => (
-		<th
-			className={`p-3 text-sm font-semibold text-muted-foreground border-b border-border cursor-pointer hover:text-foreground transition-colors select-none ${className}`}
-			onClick={() => requestSort(sortKey)}
-		>
-			<div className="flex items-center gap-1">
-				{label}
-				{renderSortIcon(sortKey)}
-			</div>
-		</th>
-	);
 
 	const addFilter = <T extends string>(
 		currentFilters: T[],
@@ -137,11 +125,9 @@ export function AdminCustomers() {
 
 	return (
 		<div className="space-y-6">
-			<div className="flex items-center justify-between">
-				<h2 className="text-xl font-bold">Customer Management</h2>
-			</div>
+			<PageHeader title="Customer Management" />
 
-			<div className="flex flex-col sm:flex-row gap-4 items-start">
+			<div className="filter-section">
 				<div className="space-y-2 w-full sm:flex-1">
 					<label className="text-sm font-medium text-muted-foreground">Filter by Role</label>
 					<select
@@ -159,14 +145,14 @@ export function AdminCustomers() {
 					{roleFilter.length > 0 && (
 						<div className="flex flex-wrap gap-2">
 							{roleFilter.map(role => (
-								<button
+								<div
 									key={role}
 									onClick={() => removeFilter(roleFilter, setRoleFilter, role)}
-									className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-foreground/10 hover:bg-destructive/15 hover:text-destructive text-foreground text-xs font-medium transition-colors cursor-pointer group"
+									className="filter-chip group"
 								>
 									{role}
 									<X size={14} className="opacity-50 group-hover:opacity-100" />
-								</button>
+								</div>
 							))}
 						</div>
 					)}
@@ -189,14 +175,14 @@ export function AdminCustomers() {
 					{verificationFilter.length > 0 && (
 						<div className="flex flex-wrap gap-2">
 							{verificationFilter.map(status => (
-								<button
+								<div
 									key={status}
 									onClick={() => removeFilter(verificationFilter, setVerificationFilter, status)}
-									className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-foreground/10 hover:bg-destructive/15 hover:text-destructive text-foreground text-xs font-medium transition-colors cursor-pointer group"
+									className="filter-chip group"
 								>
 									<span className="capitalize">{status}</span>
 									<X size={14} className="opacity-50 group-hover:opacity-100" />
-								</button>
+								</div>
 							))}
 						</div>
 					)}
@@ -223,11 +209,11 @@ export function AdminCustomers() {
 						<table className="w-full text-left">
 							<thead>
 								<tr className="bg-muted">
-									{renderSortableHeader("Name", "full_name")}
-									{renderSortableHeader("Email", "email")}
-									{renderSortableHeader("Role", "role")}
-									{renderSortableHeader("Phone", "phone_number")}
-									{renderSortableHeader("Status", "email_verified_status")}
+									<SortableHeader label="Name" sortKey="full_name" onSort={requestSort} currentSort={sortConfig} />
+									<SortableHeader label="Email" sortKey="email" onSort={requestSort} currentSort={sortConfig} />
+									<SortableHeader label="Role" sortKey="role" onSort={requestSort} currentSort={sortConfig} />
+									<SortableHeader label="Phone" sortKey="phone_number" onSort={requestSort} currentSort={sortConfig} />
+									<SortableHeader label="Status" sortKey="email_verified_status" onSort={requestSort} currentSort={sortConfig} />
 									<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Actions</th>
 								</tr>
 							</thead>
@@ -246,21 +232,17 @@ export function AdminCustomers() {
 											</div>
 										</td>
 										<td className="p-3 text-sm">
-											<span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-											${profile.role === 'admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400'}
-										`}>
+											<Badge variant={profile.role === 'admin' ? 'purple' : 'neutral'}>
 												{profile.role}
-											</span>
+											</Badge>
 										</td>
 										<td className="p-3 text-sm">
 											{profile.phone_number || '-'}
 										</td>
 										<td className="p-3 text-sm">
-											<span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-											${profile.email_verified ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'}
-										`}>
+											<Badge variant={profile.email_verified ? 'success' : 'warning'}>
 												{profile.email_verified ? 'Verified' : 'Unverified'}
-											</span>
+											</Badge>
 										</td>
 										<td className="p-3 text-sm">
 											<div className="flex gap-2">
@@ -305,11 +287,9 @@ export function AdminCustomers() {
 								<div>
 									<label className="block text-sm font-medium mb-1">Email Status</label>
 									<div className="flex items-center h-9 px-3 rounded-md border border-input bg-muted/50 text-sm text-muted-foreground">
-										<span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium mr-2
-										${editingProfile.email_verified ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'}
-									`}>
+										<Badge variant={editingProfile.email_verified ? 'success' : 'warning'} className="mr-2">
 											{editingProfile.email_verified ? 'Verified' : 'Unverified'}
-										</span>
+										</Badge>
 										{editingProfile.email}
 									</div>
 								</div>
