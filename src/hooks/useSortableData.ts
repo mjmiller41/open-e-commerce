@@ -8,7 +8,10 @@ export type SortConfig<T> = {
 export const useSortableData = <T>(
   items: T[],
   config: SortConfig<T> = null,
-  customGetters: Record<string, (item: T) => any> = {}
+  customGetters: Record<
+    string,
+    (item: T) => string | number | boolean | null | undefined
+  > = {}
 ) => {
   const [sortConfig, setSortConfig] = useState<SortConfig<T>>(config);
 
@@ -16,15 +19,25 @@ export const useSortableData = <T>(
     const sortableItems = [...items];
     if (sortConfig !== null) {
       sortableItems.sort((a, b) => {
-        let aValue: any;
-        let bValue: any;
+        let aValue: string | number | boolean | null | undefined;
+        let bValue: string | number | boolean | null | undefined;
 
         if (customGetters[sortConfig.key as string]) {
           aValue = customGetters[sortConfig.key as string](a);
           bValue = customGetters[sortConfig.key as string](b);
         } else {
-          aValue = (a as any)[sortConfig.key];
-          bValue = (b as any)[sortConfig.key];
+          aValue = (a as Record<string, unknown>)[sortConfig.key as string] as
+            | string
+            | number
+            | boolean
+            | null
+            | undefined;
+          bValue = (b as Record<string, unknown>)[sortConfig.key as string] as
+            | string
+            | number
+            | boolean
+            | null
+            | undefined;
         }
 
         // Handle case-insensitive string sorting

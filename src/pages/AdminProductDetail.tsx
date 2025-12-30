@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase, type Product } from '../lib/supabase';
-import { ArrowLeft, Save, Trash2, Loader2, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Save, Trash2, Loader2, Image as ImageIcon, AlertCircle, ImageOff } from 'lucide-react';
 import logger from '../lib/logger';
 import taxonomy from '../assets/taxonomy.json';
 import { generateSKU } from '../lib/skuGenerator';
@@ -44,6 +44,14 @@ export function AdminProductDetail() {
 	useEffect(() => {
 		setVisibleCategoriesCount(10);
 	}, [formData.category]);
+
+	// Track indices of broken images
+	const [brokenImageIndices, setBrokenImageIndices] = useState<Set<number>>(new Set());
+
+	// Reset broken indices when images change
+	useEffect(() => {
+		setBrokenImageIndices(new Set());
+	}, [formData.images]);
 
 	const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
 		const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
@@ -394,9 +402,17 @@ export function AdminProductDetail() {
 					</h2>
 					<div className="space-y-4">
 						<div className="space-y-2">
-							<label className="text-sm font-medium">Image URLs (One per line)</label>
+							<div className="flex items-center justify-between">
+								<label className="text-sm font-medium">Image URLs (One per line)</label>
+								{brokenImageIndices.size > 0 && (
+									<span className="text-xs text-destructive flex items-center gap-1 font-medium animate-in fade-in">
+										<AlertCircle size={12} />
+										{brokenImageIndices.size} broken URL{brokenImageIndices.size !== 1 ? 's' : ''} detected
+									</span>
+								)}
+							</div>
 							<textarea
-								className="input w-full min-h-[100px] font-mono text-xs"
+								className={`input w-full min-h-[100px] font-mono text-xs ${brokenImageIndices.size > 0 ? 'border-destructive focus-visible:ring-destructive' : ''}`}
 								placeholder="https://example.com/image1.jpg"
 								value={formData.images?.join('\n') || ''}
 								onChange={e => {
@@ -404,13 +420,43 @@ export function AdminProductDetail() {
 									setFormData({ ...formData, images: urls, image: urls[0] || '' });
 								}}
 							/>
+							{brokenImageIndices.size > 0 && (
+								<p className="text-[11px] text-destructive">
+									Lines with errors: {Array.from(brokenImageIndices).map(i => i + 1).join(', ')}
+								</p>
+							)}
 						</div>
 
 						{formData.images && formData.images.length > 0 && (
 							<div className="flex gap-4 overflow-x-auto py-2">
 								{formData.images.map((url, i) => (
-									<div key={i} className="relative w-24 h-24 shrink-0 rounded-lg border overflow-hidden bg-muted group">
-										<img src={url} alt="" className="w-full h-full object-cover" />
+									<div
+										key={`${url}-${i}`}
+										className={`relative w-24 h-24 shrink-0 rounded-lg border overflow-hidden bg-muted group ${brokenImageIndices.has(i) ? 'border-destructive ring-1 ring-destructive' : ''}`}
+									>
+										{brokenImageIndices.has(i) ? (
+											<div className="w-full h-full flex flex-col items-center justify-center text-destructive bg-destructive/10">
+												<ImageOff size={24} className="mb-1" />
+												<span className="text-[10px] font-medium">Broken</span>
+											</div>
+										) : (
+											<img
+												src={url}
+												alt=""
+												className="w-full h-full object-cover"
+												onError={() => {
+													setBrokenImageIndices(prev => new Set(prev).add(i));
+												}}
+												onLoad={() => {
+													// If it was previously marked broken but now loads (e.g. slight url tweak), remove it
+													if (brokenImageIndices.has(i)) {
+														const next = new Set(brokenImageIndices);
+														next.delete(i);
+														setBrokenImageIndices(next);
+													}
+												}}
+											/>
+										)}
 										<div className="absolute inset-x-0 bottom-0 bg-black/50 text-white text-[10px] p-1 text-center truncate px-2 opacity-0 group-hover:opacity-100 transition-opacity">
 											Image {i + 1}
 										</div>

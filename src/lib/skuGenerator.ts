@@ -47,7 +47,7 @@ export function getAbbreviation(word: string): string {
  * Generates a SKU based on the hierarchical pattern:
  * [CATEGORY]-[BRAND]-[MODEL]-[VARIANT]
  *
- * - Category: Uses the last segment of the category path (e.g., "Electronics > Audio" becomes "Audio").
+ * - Category: Uses the last segment of the category path (e.g., "Electronics \> Audio" becomes "Audio").
  * - Brand: Abbreviated brand name.
  * - Model: First word of the product name/model.
  * - Variant: Abbreviated variant (optional).

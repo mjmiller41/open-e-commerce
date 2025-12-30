@@ -37,7 +37,7 @@ export function ProductDetail() {
 				logger.error('Error fetching product:', error);
 			} else {
 				setProduct(data);
-				setActiveImage(data.images?.[0] || data.image || 'https://placehold.co/600x600?text=No+Image');
+				setActiveImage(data.images?.[0] || data.image || `${import.meta.env.BASE_URL}logo.png`);
 			}
 			setLoading(false);
 		}
@@ -108,7 +108,15 @@ export function ProductDetail() {
 				{/* Image Gallery */}
 				<div className="space-y-4">
 					<div className="rounded-2xl bg-muted overflow-hidden aspect-square border border-border">
-						<img src={activeImage} alt={product.name} className="w-full h-full object-cover mix-blend-multiply dark:mix-blend-normal" />
+						<img
+							src={activeImage || `${import.meta.env.BASE_URL}logo.png`}
+							alt={product.name}
+							className="w-full h-full object-cover mix-blend-multiply dark:mix-blend-normal"
+							onError={(e) => {
+								e.currentTarget.src = `${import.meta.env.BASE_URL}logo.png`;
+								e.currentTarget.onerror = null;
+							}}
+						/>
 					</div>
 					{product.images && product.images.length > 1 && (
 						<div className="flex gap-4 overflow-x-auto pb-2">
@@ -118,7 +126,15 @@ export function ProductDetail() {
 									onClick={() => setActiveImage(img)}
 									className={`relative w-24 h-24 rounded-lg overflow-hidden border-2 transition-all shrink-0 ${activeImage === img ? 'border-primary ring-2 ring-primary/20' : 'border-transparent hover:border-muted-foreground/50'}`}
 								>
-									<img src={img} alt={`${product.name} view ${idx + 1}`} className="w-full h-full object-cover" />
+									<img
+										src={img}
+										alt={`${product.name} view ${idx + 1}`}
+										className="w-full h-full object-cover"
+										onError={(e) => {
+											e.currentTarget.src = `${import.meta.env.BASE_URL}logo.png`;
+											e.currentTarget.onerror = null;
+										}}
+									/>
 								</button>
 							))}
 						</div>

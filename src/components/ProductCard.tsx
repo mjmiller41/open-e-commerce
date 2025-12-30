@@ -38,12 +38,13 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 		<div className="card flex flex-col h-full group hover:shadow-lg hover:border-accent/50 transition-all duration-300 relative">
 			<Link to={`/product/${product.id}`} className="relative aspect-square bg-muted overflow-hidden block">
 				<img
-					src={product.images?.[0] || product.image || 'https://placehold.co/400x400?text=No+Image'}
+					src={product.images?.[0] || product.image || `${import.meta.env.BASE_URL}logo.png`}
 					alt={product.name}
 					className="w-full h-full object-cover transition-transform duration-500 mix-blend-multiply dark:mix-blend-normal group-hover:scale-105"
 					loading="lazy"
 					onError={(e) => {
-						e.currentTarget.src = 'https://placehold.co/400x400?text=Error';
+						e.currentTarget.src = `${import.meta.env.BASE_URL}logo.png`;
+						e.currentTarget.onerror = null; // Prevent infinite loop
 					}}
 				/>
 				{product.on_hand <= 0 && (

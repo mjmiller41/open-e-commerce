@@ -11,6 +11,50 @@ import { Badge } from './ui/Badge';
 import { PageHeader } from './ui/PageHeader';
 import { SortableHeader } from './ui/SortableHeader';
 
+// Internal component for handling sequential image fallback
+const ProductThumbnail = ({ product }: { product: Product }) => {
+	const [currentImageIndex, setCurrentImageIndex] = useState(0);
+	const [hasError, setHasError] = useState(false);
+
+
+
+	// Construct list of all possible images: [images array] + [legacy image field]
+	const allImages = [
+		...(product.images || []),
+		product.image
+	].filter(Boolean) as string[];
+
+	// If no images at all, show fallback immediately
+	if (allImages.length === 0) {
+		return (
+			<img
+				src={`${import.meta.env.BASE_URL}logo.png`}
+				alt={product.name}
+				className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+			/>
+		);
+	}
+
+	const handleError = () => {
+		if (currentImageIndex < allImages.length - 1) {
+			// Try next image
+			setCurrentImageIndex(prev => prev + 1);
+		} else {
+			// All images failed
+			setHasError(true);
+		}
+	};
+
+	return (
+		<img
+			src={hasError ? `${import.meta.env.BASE_URL}logo.png` : allImages[currentImageIndex]}
+			alt={product.name}
+			className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+			onError={handleError}
+		/>
+	);
+};
+
 export function AdminInventory() {
 	const [products, setProducts] = useState<Product[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -68,9 +112,10 @@ export function AdminInventory() {
 				throw error;
 			}
 			fetchProducts();
-		} catch (error: any) {
+		} catch (error: unknown) {
 			logger.error('Error deleting product:', error);
-			alert(error.message || 'Failed to delete product. Please try again.');
+			const message = error instanceof Error ? error.message : 'Failed to delete product. Please try again.';
+			alert(message);
 		}
 	};
 
@@ -189,6 +234,27 @@ export function AdminInventory() {
 		document.body.removeChild(link);
 	};
 
+	interface CSVRow {
+		name?: string;
+		sku?: string;
+		variant?: string;
+		category?: string;
+		price?: string;
+		cost?: string;
+		on_hand?: string;
+		brand?: string;
+		description?: string;
+		status?: string;
+		image?: string;
+		images?: string;
+		weight?: string;
+		gtin?: string;
+		mpn?: string;
+		condition?: string;
+		product_type?: string;
+		tags?: string;
+	}
+
 	const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
 		if (!file) return;
@@ -198,7 +264,7 @@ export function AdminInventory() {
 			header: true,
 			skipEmptyLines: true,
 			complete: async (results) => {
-				const rows = results.data as any[];
+				const rows = results.data as CSVRow[];
 				let successCount = 0;
 				let failureCount = 0;
 
@@ -213,22 +279,22 @@ export function AdminInventory() {
 
 						const productData: Partial<Product> = {
 							name: row.name,
-							sku: row.sku || null,
-							variant: row.variant || null,
-							category: row.category,
+							sku: row.sku || undefined,
+							variant: row.variant || undefined,
+							category: row.category || '',
 							price: parseFloat(row.price),
 							cost: row.cost ? parseFloat(row.cost) : undefined,
 							on_hand: row.on_hand ? parseInt(row.on_hand) : 0,
-							brand: row.brand || null,
+							brand: row.brand || undefined,
 							description: row.description || '',
-							status: row.status || 'draft',
-							image: row.image || null,
+							status: (row.status as Product['status']) || 'draft',
+							image: row.image || undefined,
 							images: row.images ? row.images.split('|') : [],
 							weight: row.weight ? parseFloat(row.weight) : undefined,
-							gtin: row.gtin || null,
-							mpn: row.mpn || null,
+							gtin: row.gtin || undefined,
+							mpn: row.mpn || undefined,
 							condition: row.condition || 'new',
-							product_type: row.product_type || null,
+							product_type: row.product_type || undefined,
 							tags: row.tags ? row.tags.split('|') : []
 						};
 
@@ -462,14 +528,7 @@ export function AdminInventory() {
 								<tr key={product.id} className="hover:bg-muted/30 transition-colors">
 									<td className="px-4 py-3">
 										<Link to={`/admin/product/${product.id}`} className="block w-10 h-10 rounded-md bg-muted overflow-hidden shrink-0 group">
-											<img
-												src={product.images?.[0] || product.image || 'https://placehold.co/100x100?text=No+Image'}
-												alt={product.name}
-												className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-												onError={(e) => {
-													e.currentTarget.src = 'https://placehold.co/100x100?text=Error';
-												}}
-											/>
+											<ProductThumbnail key={`${product.id}-${product.images?.length || 0}-${product.image || ''}`} product={product} />
 										</Link>
 									</td>
 									<td className="px-4 py-3 font-medium text-foreground max-w-[200px]">

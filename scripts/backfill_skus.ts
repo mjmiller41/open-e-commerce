@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { generateSKU } from "../src/lib/skuGenerator";
-import type { Product } from "../src/lib/supabase";
+// import type { Product } from "../src/lib/supabase";
 
 // Initialize Supabase client
 const supabaseUrl = process.env.VITE_SUPABASE_URL;

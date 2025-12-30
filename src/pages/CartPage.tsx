@@ -101,7 +101,15 @@ export function CartPage() {
 					{enrichedCartItems.map(({ productId, quantity, product }) => (
 						<div key={productId} className="card flex items-center gap-6 p-6">
 							<div className="w-24 h-24 rounded-lg bg-muted object-cover overflow-hidden shrink-0">
-								<img src={product.image} alt={product.name} className="w-full h-full object-cover mix-blend-multiply dark:mix-blend-normal" />
+								<img
+									src={product.image || `${import.meta.env.BASE_URL}logo.png`}
+									alt={product.name}
+									className="w-full h-full object-cover mix-blend-multiply dark:mix-blend-normal"
+									onError={(e) => {
+										e.currentTarget.src = `${import.meta.env.BASE_URL}logo.png`;
+										e.currentTarget.onerror = null;
+									}}
+								/>
 							</div>
 
 							<div className="flex-1">
