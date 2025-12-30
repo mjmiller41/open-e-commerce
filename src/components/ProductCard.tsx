@@ -27,9 +27,15 @@ interface ProductCardProps {
  * @returns The rendered product card.
  */
 export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuantity, onRemoveFromCart }: ProductCardProps) {
+	const categorySegments = product.category ? product.category.split('>').map(s => s.trim()) : [];
+	const leafCategory = categorySegments.length > 0 ? categorySegments[categorySegments.length - 1] : product.category;
+	const categoryUrl = categorySegments.length > 0
+		? `/category/${categorySegments.map(s => encodeURIComponent(s)).join('/')}`
+		: '#';
+
 	return (
-		<Link to={`/product/${product.id}`} className="card flex flex-col h-full group hover:shadow-lg hover:border-accent/50 transition-all duration-300">
-			<div className="relative aspect-square bg-muted overflow-hidden">
+		<div className="card flex flex-col h-full group hover:shadow-lg hover:border-accent/50 transition-all duration-300 relative">
+			<Link to={`/product/${product.id}`} className="relative aspect-square bg-muted overflow-hidden block">
 				<img
 					src={product.images?.[0] || product.image || 'https://placehold.co/400x400?text=No+Image'}
 					alt={product.name}
@@ -44,16 +50,28 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 						Out of Stock
 					</div>
 				)}
-			</div>
+			</Link>
 
 			<div className="p-4 flex flex-col flex-1">
-				<div className="text-primary font-semibold text-xs uppercase tracking-wider mb-2">{product.category}</div>
-				<h3 className="font-semibold text-lg mb-1 leading-snug group-hover:text-primary transition-colors">
-					{product.name}
-				</h3>
+				{categorySegments.length > 0 ? (
+					<Link
+						to={categoryUrl}
+						className="text-primary font-semibold text-xs uppercase tracking-wider mb-2 hover:underline w-fit"
+					>
+						{leafCategory}
+					</Link>
+				) : (
+					<div className="text-primary font-semibold text-xs uppercase tracking-wider mb-2">{product.category}</div>
+				)}
+
+				<Link to={`/product/${product.id}`} className="block mb-1">
+					<h3 className="font-semibold text-lg leading-snug group-hover:text-primary transition-colors">
+						{product.name}
+					</h3>
+				</Link>
 				<div className="font-bold text-xl">${product.price.toFixed(2)}</div>
 
-				<div className="mt-4 pt-4 border-t border-border flex items-center justify-between" onClick={e => e.preventDefault()}>
+				<div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
 					{cartQuantity > 0 ? (
 						<QuantityControl
 							quantity={cartQuantity}
@@ -83,6 +101,6 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 					)}
 				</div>
 			</div>
-		</Link>
+		</div>
 	);
 }

@@ -126,8 +126,13 @@ export function ProductDetail() {
 				</div>
 
 				<div className="flex flex-col">
-					<div className="flex items-center justify-between mb-2">
-						<div className="text-primary font-bold text-sm uppercase tracking-wider">{product.category}</div>
+					<div className="flex flex-col gap-1 mb-2">
+						<Link
+							to={`/category/${product.category.split('>').map(s => encodeURIComponent(s.trim())).join('/')}`}
+							className="text-primary font-bold text-sm uppercase tracking-wider hover:underline"
+						>
+							{product.category}
+						</Link>
 						{product.brand && <div className="text-muted-foreground font-medium text-sm">{product.brand}</div>}
 					</div>
 
