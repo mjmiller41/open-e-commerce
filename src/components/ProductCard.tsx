@@ -61,7 +61,10 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 						{leafCategory}
 					</Link>
 				) : (
-					<div className="text-primary font-semibold text-xs uppercase tracking-wider mb-2">{product.category}</div>
+					<div className="flex flex-col gap-0.5 mb-2">
+						<div className="text-primary font-semibold text-xs uppercase tracking-wider">{product.category}</div>
+						{product.variant && <div className="text-[10px] text-muted-foreground uppercase font-medium">{product.variant}</div>}
+					</div>
 				)}
 
 				<Link to={`/product/${product.id}`} className="block mb-1">

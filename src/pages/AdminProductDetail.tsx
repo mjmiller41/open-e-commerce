@@ -4,6 +4,7 @@ import { supabase, type Product } from '../lib/supabase';
 import { ArrowLeft, Save, Trash2, Loader2, Image as ImageIcon } from 'lucide-react';
 import logger from '../lib/logger';
 import taxonomy from '../assets/taxonomy.json';
+import { generateSKU } from '../lib/skuGenerator';
 
 export function AdminProductDetail() {
 	const { id } = useParams<{ id: string }>();
@@ -27,10 +28,10 @@ export function AdminProductDetail() {
 		weight: 0,
 		gtin: '',
 		mpn: '',
-		condition: 'new',
 		product_type: '',
 		tags: [],
-		status: 'active'
+		status: 'active',
+		variant: ''
 	});
 
 	const [visibleCategoriesCount, setVisibleCategoriesCount] = useState(10);
@@ -121,10 +122,21 @@ export function AdminProductDetail() {
 				throw deleteError;
 			}
 			navigate('/admin?tab=inventory');
-		} catch (err: any) {
-			logger.error('Error deleting product:', err);
-			setError(err.message || 'Failed to delete product');
+		} catch (err: unknown) {
+			const error = err as Error;
+			logger.error('Error deleting product:', error);
+			setError(error.message || 'Failed to delete product');
 		}
+	};
+
+	const handleGenerateSKU = () => {
+		const newSKU = generateSKU(
+			formData.category || '',
+			formData.brand || '',
+			formData.name || '',
+			formData.variant || ''
+		);
+		setFormData(prev => ({ ...prev, sku: newSKU }));
 	};
 
 	if (loading) return <div className="p-8 text-center">Loading product...</div>;
@@ -257,11 +269,31 @@ export function AdminProductDetail() {
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 						<div className="space-y-2">
 							<label className="text-sm font-medium">SKU</label>
+							<div className="flex gap-2">
+								<input
+									type="text"
+									className="input w-full font-mono"
+									value={formData.sku || ''}
+									onChange={e => setFormData({ ...formData, sku: e.target.value })}
+								/>
+								<button
+									type="button"
+									onClick={handleGenerateSKU}
+									className="px-3 py-2 bg-secondary text-secondary-foreground rounded-md text-xs font-medium hover:bg-secondary/80 whitespace-nowrap"
+									title="Generate SKU from attributes"
+								>
+									Generate
+								</button>
+							</div>
+						</div>
+						<div className="space-y-2">
+							<label className="text-sm font-medium">Variant</label>
 							<input
 								type="text"
-								className="input w-full font-mono"
-								value={formData.sku || ''}
-								onChange={e => setFormData({ ...formData, sku: e.target.value })}
+								className="input w-full"
+								value={formData.variant || ''}
+								onChange={e => setFormData({ ...formData, variant: e.target.value })}
+								placeholder="e.g. Red, XL"
 							/>
 						</div>
 						<div className="space-y-2">
@@ -403,7 +435,7 @@ export function AdminProductDetail() {
 							<select
 								className="input w-full"
 								value={formData.status || 'draft'}
-								onChange={e => setFormData({ ...formData, status: e.target.value as any })}
+								onChange={e => setFormData({ ...formData, status: e.target.value as Product['status'] })}
 							>
 								<option value="active">Active</option>
 								<option value="inactive">Inactive</option>

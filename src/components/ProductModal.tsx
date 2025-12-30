@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { supabase, type Product } from '../lib/supabase';
+import { generateSKU } from '../lib/skuGenerator';
 import { X, Loader2 } from 'lucide-react';
 import logger from '../lib/logger';
+import taxonomy from '../assets/taxonomy.json';
 
 interface ProductModalProps {
 	product?: Product | null;
@@ -21,6 +23,7 @@ export function ProductModal({ product, isOpen, onClose, onSave }: ProductModalP
 		on_hand: 0,
 		cost: 0,
 		sku: '',
+		variant: '',
 		brand: '',
 		weight: 0,
 		gtin: '',
@@ -47,6 +50,7 @@ export function ProductModal({ product, isOpen, onClose, onSave }: ProductModalP
 				on_hand: 0,
 				cost: 0,
 				sku: '',
+				variant: '',
 				brand: '',
 				weight: 0,
 				gtin: '',
@@ -58,7 +62,30 @@ export function ProductModal({ product, isOpen, onClose, onSave }: ProductModalP
 			});
 		}
 		setError(null);
+		setVisibleCategoriesCount(10);
 	}, [product, isOpen]);
+
+	const [visibleCategoriesCount, setVisibleCategoriesCount] = useState(10);
+	const filteredCategories = taxonomy
+		.filter(c => c.toLowerCase().includes((formData.category || '').toLowerCase()))
+		.slice(0, visibleCategoriesCount);
+
+	const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+		const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
+		if (scrollHeight - scrollTop <= clientHeight + 20) {
+			setVisibleCategoriesCount(prev => prev + 10);
+		}
+	};
+
+	const handleGenerateSKU = () => {
+		const newSKU = generateSKU(
+			formData.category || '',
+			formData.brand || '',
+			formData.name || '',
+			formData.variant || ''
+		);
+		setFormData(prev => ({ ...prev, sku: newSKU }));
+	};
 
 	if (!isOpen) return null;
 
@@ -177,11 +204,33 @@ export function ProductModal({ product, isOpen, onClose, onSave }: ProductModalP
 						</div>
 						<div className="space-y-2">
 							<label className="text-sm font-medium">SKU</label>
+							<div className="flex gap-2">
+								<input
+									type="text"
+									className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring font-mono"
+									value={formData.sku || ''}
+									onChange={e => setFormData({ ...formData, sku: e.target.value })}
+									placeholder="Auto-generated"
+								/>
+								<button
+									type="button"
+									onClick={handleGenerateSKU}
+									className="px-3 py-2 bg-secondary text-secondary-foreground rounded-md text-xs font-medium hover:bg-secondary/80 whitespace-nowrap"
+									title="Generate SKU from attributes"
+								>
+									Generate
+								</button>
+							</div>
+						</div>
+
+						<div className="space-y-2">
+							<label className="text-sm font-medium">Variant</label>
 							<input
 								type="text"
 								className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-								value={formData.sku || ''}
-								onChange={e => setFormData({ ...formData, sku: e.target.value })}
+								value={formData.variant || ''}
+								onChange={e => setFormData({ ...formData, variant: e.target.value })}
+								placeholder="e.g. Red, XL, 500GB"
 							/>
 						</div>
 
@@ -206,16 +255,41 @@ export function ProductModal({ product, isOpen, onClose, onSave }: ProductModalP
 						</div>
 					</div>
 
-					<div className="space-y-2">
+					<div className="space-y-2 relative group">
 						<label className="text-sm font-medium">Category</label>
-						<input
-							type="text"
-							required
-							placeholder="Google Product Category"
-							className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-							value={formData.category || ''}
-							onChange={e => setFormData({ ...formData, category: e.target.value })}
-						/>
+						<div className="relative">
+							<input
+								type="text"
+								required
+								className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+								value={formData.category || ''}
+								onChange={e => {
+									setFormData({ ...formData, category: e.target.value });
+									setVisibleCategoriesCount(10);
+								}}
+								placeholder="Start typing to search categories..."
+							/>
+							{filteredCategories.length > 0 && (
+								<div
+									className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-60 overflow-y-auto hidden group-focus-within:block"
+									onScroll={handleScroll}
+								>
+									{filteredCategories.map(category => (
+										<button
+											key={category}
+											type="button"
+											className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground truncate block"
+											title={category}
+											onClick={() => setFormData({ ...formData, category })}
+											// Prevent input blur matching
+											onMouseDown={(e) => e.preventDefault()}
+										>
+											{category}
+										</button>
+									))}
+								</div>
+							)}
+						</div>
 					</div>
 
 					<div className="space-y-2">
@@ -223,7 +297,7 @@ export function ProductModal({ product, isOpen, onClose, onSave }: ProductModalP
 						<select
 							className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 							value={formData.status || 'draft'}
-							onChange={e => setFormData({ ...formData, status: e.target.value as any })}
+							onChange={e => setFormData({ ...formData, status: e.target.value as Product['status'] })}
 						>
 							<option value="active">Active</option>
 							<option value="inactive">Inactive</option>

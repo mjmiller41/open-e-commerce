@@ -5,6 +5,8 @@ import { Plus, Search, Edit2, Trash2, Package, Minus, X, ArrowUp, ArrowDown } fr
 import logger from '../lib/logger';
 import { ProductModal } from './ProductModal';
 import { useSortableData } from '../hooks/useSortableData';
+import Papa from 'papaparse';
+import { Download, Upload } from 'lucide-react';
 
 export function AdminInventory() {
 	const [products, setProducts] = useState<Product[]>([]);
@@ -164,6 +166,130 @@ export function AdminInventory() {
 		setIsModalOpen(true);
 	};
 
+	const handleExport = () => {
+		const csvData = sortedProducts.map(p => ({
+			id: p.id,
+			name: p.name,
+			sku: p.sku,
+			variant: p.variant,
+			category: p.category,
+			price: p.price,
+			cost: p.cost,
+			on_hand: p.on_hand,
+			brand: p.brand,
+			description: p.description,
+			status: p.status,
+			image: p.image || p.images?.[0] || '',
+			images: p.images?.join('|'),
+			weight: p.weight,
+			gtin: p.gtin,
+			mpn: p.mpn,
+			condition: p.condition,
+			product_type: p.product_type,
+			tags: p.tags?.join('|')
+		}));
+
+		const csv = Papa.unparse(csvData);
+		const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement('a');
+		link.setAttribute('href', url);
+		link.setAttribute('download', `inventory_export_${new Date().toISOString().split('T')[0]}.csv`);
+		link.style.visibility = 'hidden';
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+	};
+
+	const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+		const file = event.target.files?.[0];
+		if (!file) return;
+
+		setLoading(true);
+		Papa.parse(file, {
+			header: true,
+			skipEmptyLines: true,
+			complete: async (results) => {
+				const rows = results.data as any[];
+				let successCount = 0;
+				let failureCount = 0;
+
+				for (const row of rows) {
+					try {
+						// Basic validation
+						if (!row.name || !row.price) {
+							console.warn('Skipping invalid row:', row);
+							failureCount++;
+							continue;
+						}
+
+						const productData: Partial<Product> = {
+							name: row.name,
+							sku: row.sku || null,
+							variant: row.variant || null,
+							category: row.category,
+							price: parseFloat(row.price),
+							cost: row.cost ? parseFloat(row.cost) : undefined,
+							on_hand: row.on_hand ? parseInt(row.on_hand) : 0,
+							brand: row.brand || null,
+							description: row.description || '',
+							status: row.status || 'draft',
+							image: row.image || null,
+							images: row.images ? row.images.split('|') : [],
+							weight: row.weight ? parseFloat(row.weight) : undefined,
+							gtin: row.gtin || null,
+							mpn: row.mpn || null,
+							condition: row.condition || 'new',
+							product_type: row.product_type || null,
+							tags: row.tags ? row.tags.split('|') : []
+						};
+
+						// Try to find existing product by SKU if provided
+						let existingProduct = null;
+						if (productData.sku) {
+							const { data } = await supabase
+								.from('products')
+								.select('id')
+								.eq('sku', productData.sku)
+								.single();
+							existingProduct = data;
+						}
+
+						if (existingProduct) {
+							// Update
+							const { error } = await supabase
+								.from('products')
+								.update(productData)
+								.eq('id', existingProduct.id);
+							if (error) throw error;
+						} else {
+							// Insert
+							const { error } = await supabase
+								.from('products')
+								.insert([productData]);
+							if (error) throw error;
+						}
+						successCount++;
+					} catch (err) {
+						console.error('Error importing row:', row, err);
+						failureCount++;
+					}
+				}
+
+				alert(`Import complete.\nSuccess: ${successCount}\nFailed: ${failureCount}`);
+				fetchProducts();
+				setLoading(false);
+				// Reset input
+				event.target.value = '';
+			},
+			error: (error) => {
+				console.error('CSV Parse Error:', error);
+				alert('Failed to parse CSV file.');
+				setLoading(false);
+			}
+		});
+	};
+
 	if (loading) {
 		return <div className="p-8 text-center">Loading inventory...</div>;
 	}
@@ -185,13 +311,37 @@ export function AdminInventory() {
 						onChange={(e) => setSearchQuery(e.target.value)}
 					/>
 				</div>
-				<button
-					onClick={handleAdd}
-					className="w-full sm:w-auto px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 font-medium"
-				>
-					<Plus size={18} />
-					Add Product
-				</button>
+				<div className="flex gap-2 w-full sm:w-auto">
+					<div className="relative">
+						<input
+							type="file"
+							accept=".csv"
+							onChange={handleImport}
+							className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+							title="Import CSV"
+						/>
+						<button
+							className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 transition-colors flex items-center justify-center gap-2 font-medium w-full"
+						>
+							<Upload size={18} />
+							Import
+						</button>
+					</div>
+					<button
+						onClick={handleExport}
+						className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/90 transition-colors flex items-center justify-center gap-2 font-medium"
+					>
+						<Download size={18} />
+						Export
+					</button>
+					<button
+						onClick={handleAdd}
+						className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 font-medium flex-1 sm:flex-none"
+					>
+						<Plus size={18} />
+						Add Product
+					</button>
+				</div>
 			</div>
 
 			{/* Filters */}
@@ -205,7 +355,7 @@ export function AdminInventory() {
 					>
 						<option value="">Select Status...</option>
 						{['active', 'inactive', 'draft', 'archived']
-							.filter(s => availableStatuses.includes(s as any) || statusFilter.includes(s))
+							.filter(s => availableStatuses.includes(s as Product['status']) || statusFilter.includes(s))
 							.map(status => (
 								<option key={status} value={status} className="capitalize">{status}</option>
 							))}
@@ -310,6 +460,7 @@ export function AdminInventory() {
 								{renderSortableHeader("Cost", "cost", "text-right")}
 								{renderSortableHeader("Stock", "on_hand", "text-center")}
 								{renderSortableHeader("SKU", "sku")}
+								{renderSortableHeader("Variant", "variant")}
 								{renderSortableHeader("GTIN", "gtin")}
 								{renderSortableHeader("MPN", "mpn")}
 								{renderSortableHeader("Weight", "weight")}
@@ -395,6 +546,9 @@ export function AdminInventory() {
 									</td>
 									<td className="px-4 py-3 text-sm font-mono whitespace-nowrap text-muted-foreground">
 										{product.sku || '-'}
+									</td>
+									<td className="px-4 py-3 text-sm whitespace-nowrap text-muted-foreground">
+										{product.variant || '-'}
 									</td>
 									<td className="px-4 py-3 text-sm font-mono whitespace-nowrap text-muted-foreground">
 										{product.gtin || '-'}

@@ -134,6 +134,7 @@ export function ProductDetail() {
 							{product.category}
 						</Link>
 						{product.brand && <div className="text-muted-foreground font-medium text-sm">{product.brand}</div>}
+						{product.variant && <span className="inline-block px-2 py-0.5 rounded bg-muted text-muted-foreground text-xs font-medium w-fit mt-1">{product.variant}</span>}
 					</div>
 
 					<h1 className="text-4xl font-bold mb-4 leading-tight">{product.name}</h1>

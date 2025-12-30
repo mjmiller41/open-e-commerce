@@ -38,6 +38,7 @@ export interface Product {
   gtin?: string;
   mpn?: string;
   condition?: string;
+  variant?: string;
   status: "active" | "inactive" | "draft" | "archived";
 }
 
