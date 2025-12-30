@@ -1,37 +1,101 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase, type Order } from '../lib/supabase';
+import { supabase, type Order, type Profile } from '../lib/supabase';
+import { X } from 'lucide-react';
 import logger from '../lib/logger';
 
 export function AdminOrders() {
 	const [orders, setOrders] = useState<Order[]>([]);
+	const [profiles, setProfiles] = useState<Record<string, Profile>>({});
 	const [loading, setLoading] = useState(true);
-	const [filter, setFilter] = useState<Order['status'] | 'all'>('all');
+
+	const [statusFilter, setStatusFilter] = useState<Order['status'][]>([]);
+	const [customerFilter, setCustomerFilter] = useState<string[]>([]);
 
 	useEffect(() => {
-		const fetchOrders = async () => {
+		const fetchOrdersAndProfiles = async () => {
 			setLoading(true);
-			let query = supabase
-				.from('orders')
-				.select('*')
-				.order('created_at', { ascending: false });
+			try {
+				// Fetch all orders
+				const { data: ordersData, error: ordersError } = await supabase
+					.from('orders')
+					.select('*')
+					.order('created_at', { ascending: false });
 
-			if (filter !== 'all') {
-				query = query.eq('status', filter);
+				if (ordersError) throw ordersError;
+
+				const fetchedOrders = ordersData || [];
+				setOrders(fetchedOrders);
+
+				// Extract unique user IDs
+				const userIds = Array.from(new Set(fetchedOrders.map(o => o.user_id)));
+
+				if (userIds.length > 0) {
+					const { data: profilesData, error: profilesError } = await supabase
+						.from('profiles')
+						.select('*')
+						.in('id', userIds);
+
+					if (profilesError) {
+						logger.error('Error fetching profiles for orders:', profilesError);
+					} else {
+						const profilesMap = (profilesData || []).reduce((acc, p) => ({
+							...acc,
+							[p.id]: p
+						}), {} as Record<string, Profile>);
+						setProfiles(profilesMap);
+					}
+				}
+			} catch (error) {
+				logger.error('Error fetching data:', error);
+			} finally {
+				setLoading(false);
 			}
-
-			const { data, error } = await query;
-
-			if (error) {
-				logger.error('Error fetching orders:', error);
-			} else {
-				setOrders(data || []);
-			}
-			setLoading(false);
 		};
 
-		fetchOrders();
-	}, [filter]);
+		fetchOrdersAndProfiles();
+	}, []);
+
+	// Faceted Search Logic
+	const getFilteredOrders = (ignoreType: 'status' | 'customer' | null) => {
+		return orders.filter(order => {
+			const matchesStatus = ignoreType === 'status' || statusFilter.length === 0 || statusFilter.includes(order.status);
+			const matchesCustomer = ignoreType === 'customer' || customerFilter.length === 0 || customerFilter.includes(order.user_id);
+			return matchesStatus && matchesCustomer;
+		});
+	};
+
+	// Available options based on OTHER active filters
+	// For "Status Filter" options, we look at orders filtered by Customer (ignoring Status)
+	// For "Customer Filter" options, we look at orders filtered by Status (ignoring Customer)
+	// Actually for simplicity in this specific UI (dropdowns), often we want to see valid options that would result in > 0 results.
+
+	// const availableStatuses = ... (Since we hardcode status options, we might just keep them constant, or gray out unused ones. For now, let's keep status options static as they are enum vals).
+
+	// For Customers, we SHOULD only show customers that match the current Status Filter (if any).
+	const ordersForCustomerOptions = getFilteredOrders('customer'); // Filtered by Status
+	const uniqueCustomers = Array.from(new Set(ordersForCustomerOptions.map(o => o.user_id)));
+
+	const finalFilteredOrders = getFilteredOrders(null);
+
+	const addFilter = <T extends string>(
+		currentFilters: T[],
+		setFilter: (filters: T[]) => void,
+		value: T
+	) => {
+		if (value && value !== 'all' && !currentFilters.includes(value)) {
+			setFilter([...currentFilters, value]);
+		}
+	};
+
+	const removeFilter = <T extends string>(
+		currentFilters: T[],
+		setFilter: (filters: T[]) => void,
+		value: T
+	) => {
+		setFilter(currentFilters.filter(item => item !== value));
+	};
+
 
 	const updateStatus = async (orderId: number, newStatus: Order['status']) => {
 		// Optimistic update
@@ -59,30 +123,95 @@ export function AdminOrders() {
 	};
 
 	return (
-
 		<div className="space-y-6">
-			<div className="flex items-center justify-between mb-6">
+			<div className="flex items-center justify-between">
 				<h2 className="text-xl font-bold">Order Management</h2>
-				<div className="flex items-center gap-2">
-					<label className="text-sm font-medium">Filter by Status:</label>
+			</div>
+
+			<div className="flex flex-col sm:flex-row gap-4 items-start">
+				<div className="space-y-2 w-full sm:flex-1">
+					<label className="text-sm font-medium text-muted-foreground">Status</label>
 					<select
-						value={filter}
-						onChange={(e) => setFilter(e.target.value as Order['status'] | 'all')}
-						className="h-9 px-3 rounded-md border border-input bg-background text-sm"
+						value=""
+						onChange={(e) => addFilter(statusFilter, setStatusFilter, e.target.value as Order['status'])}
+						className="input"
 					>
-						<option value="all">All Statuses</option>
-						<option value="pending">Pending</option>
-						<option value="processing">Processing</option>
-						<option value="shipped">Shipped</option>
-						<option value="cancelled">Cancelled</option>
+						<option value="">Select Status...</option>
+						{['pending', 'processing', 'shipped', 'cancelled']
+							.filter(s => statusFilter.indexOf(s as Order['status']) === -1)
+							.map(status => (
+								<option key={status} value={status} className="capitalize">{status}</option>
+							))}
 					</select>
+					{statusFilter.length > 0 && (
+						<div className="flex flex-wrap gap-2">
+							{statusFilter.map(status => (
+								<button
+									key={status}
+									onClick={() => removeFilter(statusFilter, setStatusFilter, status)}
+									className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-foreground/10 hover:bg-destructive/15 hover:text-destructive text-foreground text-xs font-medium transition-colors cursor-pointer group"
+								>
+									<span className="capitalize">{status}</span>
+									<X size={14} className="opacity-50 group-hover:opacity-100" />
+								</button>
+							))}
+						</div>
+					)}
 				</div>
+
+				<div className="space-y-2 w-full sm:flex-1">
+					<label className="text-sm font-medium text-muted-foreground">Customer</label>
+					<select
+						value=""
+						onChange={(e) => addFilter(customerFilter, setCustomerFilter, e.target.value)}
+						className="input"
+					>
+						<option value="">Select Customer...</option>
+						{uniqueCustomers
+							.filter(userId => !customerFilter.includes(userId))
+							.map(userId => {
+								const profile = profiles[userId];
+								return (
+									<option key={userId} value={userId}>
+										{profile?.full_name || profile?.email || userId}
+									</option>
+								);
+							})}
+					</select>
+					{customerFilter.length > 0 && (
+						<div className="flex flex-wrap gap-2">
+							{customerFilter.map(userId => {
+								const profile = profiles[userId];
+								return (
+									<button
+										key={userId}
+										onClick={() => removeFilter(customerFilter, setCustomerFilter, userId)}
+										className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-foreground/10 hover:bg-destructive/15 hover:text-destructive text-foreground text-xs font-medium transition-colors cursor-pointer group"
+									>
+										{profile?.full_name || profile?.email || userId}
+										<X size={14} className="opacity-50 group-hover:opacity-100" />
+									</button>
+								);
+							})}
+						</div>
+					)}
+				</div>
+
+				<button
+					onClick={() => {
+						setStatusFilter([]);
+						setCustomerFilter([]);
+					}}
+					className="btn btn-primary h-[38px] whitespace-nowrap shrink-0 mt-[28px]"
+				>
+					Clear Filters
+				</button>
 			</div>
 
 			{loading ? (
 				<div className="text-center p-8">Loading orders...</div>
-			) : orders.length === 0 ? (
-				<div className="text-center p-8 text-muted-foreground">No orders found.</div>
+			) : finalFilteredOrders.length === 0 ? (
+				<div className="text-center p-8 text-muted-foreground">No orders found matching your filters.</div>
 			) : (
 				<div className="overflow-x-auto border border-border rounded-lg">
 					<table className="w-full text-left">
@@ -90,48 +219,58 @@ export function AdminOrders() {
 							<tr className="bg-muted">
 								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Order ID</th>
 								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Date</th>
-								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Customer (ID)</th>
+								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Customer</th>
 								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Total</th>
 								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Status</th>
 								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Actions</th>
 							</tr>
 						</thead>
 						<tbody>
-							{orders.map((order) => (
-								<tr key={order.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
-									<td className="p-3 text-sm">
-										<Link to={`/order/${order.id}`} className="hover:underline text-primary">
-											#{order.id}
-										</Link>
-									</td>
-									<td className="p-3 text-sm">{new Date(order.created_at).toLocaleDateString()}</td>
-									<td className="p-3 text-sm font-mono text-xs">{order.user_id.split('-')[0]}...</td>
-									<td className="p-3 text-sm font-medium">${order.total_amount.toFixed(2)}</td>
-									<td className="p-3 text-sm">
-										<span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-											${order.status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' : ''}
-											${order.status === 'processing' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' : ''}
-											${order.status === 'shipped' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : ''}
-											${order.status === 'cancelled' ? 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400' : ''}
-										`}>
-											{order.status}
-										</span>
-									</td>
-									<td className="p-3 text-sm">
-										<select
-											name="status-select"
-											value={order.status}
-											onChange={(e) => updateStatus(order.id, e.target.value as Order['status'])}
-											className="h-8 px-2 text-xs rounded border border-input bg-background focus:ring-2 focus:ring-ring"
-										>
-											<option value="pending">Pending</option>
-											<option value="processing">Processing</option>
-											<option value="shipped">Shipped</option>
-											<option value="cancelled">Cancelled</option>
-										</select>
-									</td>
-								</tr>
-							))}
+							{finalFilteredOrders.map((order) => {
+								const profile = profiles[order.user_id];
+								return (
+									<tr key={order.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
+										<td className="p-3 text-sm">
+											<Link to={`/order/${order.id}`} className="hover:underline text-primary">
+												#{order.id}
+											</Link>
+										</td>
+										<td className="p-3 text-sm">{new Date(order.created_at).toLocaleDateString()}</td>
+										<td className="p-3 text-sm">
+											<div className="font-medium text-foreground">
+												{profile?.full_name || 'Unknown User'}
+											</div>
+											<div className="text-xs text-muted-foreground font-mono">
+												{profile?.email || order.user_id.split('-')[0]}
+											</div>
+										</td>
+										<td className="p-3 text-sm font-medium">${order.total_amount.toFixed(2)}</td>
+										<td className="p-3 text-sm">
+											<span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
+												${order.status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' : ''}
+												${order.status === 'processing' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' : ''}
+												${order.status === 'shipped' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : ''}
+												${order.status === 'cancelled' ? 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400' : ''}
+											`}>
+												{order.status}
+											</span>
+										</td>
+										<td className="p-3 text-sm">
+											<select
+												name="status-select"
+												value={order.status}
+												onChange={(e) => updateStatus(order.id, e.target.value as Order['status'])}
+												className="h-8 px-2 text-xs rounded border border-input bg-background focus:ring-2 focus:ring-ring"
+											>
+												<option value="pending">Pending</option>
+												<option value="processing">Processing</option>
+												<option value="shipped">Shipped</option>
+												<option value="cancelled">Cancelled</option>
+											</select>
+										</td>
+									</tr>
+								);
+							})}
 						</tbody>
 					</table>
 				</div>

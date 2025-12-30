@@ -143,13 +143,17 @@ export function AdminInventory() {
 
 	return (
 		<div className="space-y-6">
+			<div className="flex items-center justify-between">
+				<h2 className="text-xl font-bold">Inventory Management</h2>
+			</div>
+
 			<div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
 				<div className="relative w-full sm:w-72">
 					<Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
 					<input
 						type="text"
 						placeholder="Search products..."
-						className="w-full pl-10 pr-4 py-2 rounded-lg border border-input bg-background"
+						className="input pl-10"
 						value={searchQuery}
 						onChange={(e) => setSearchQuery(e.target.value)}
 					/>
@@ -168,7 +172,7 @@ export function AdminInventory() {
 				<div className="space-y-2 w-full sm:flex-1">
 					<label className="text-sm font-medium text-muted-foreground">Status</label>
 					<select
-						className="input w-full p-2 border rounded-md"
+						className="input"
 						value=""
 						onChange={(e) => addFilter(statusFilter, setStatusFilter, e.target.value)}
 					>
@@ -198,7 +202,7 @@ export function AdminInventory() {
 				<div className="space-y-2 w-full sm:flex-1">
 					<label className="text-sm font-medium text-muted-foreground">Type</label>
 					<select
-						className="input w-full p-2 border rounded-md"
+						className="input"
 						value=""
 						onChange={(e) => addFilter(typeFilter, setTypeFilter, e.target.value)}
 					>
@@ -226,7 +230,7 @@ export function AdminInventory() {
 				<div className="space-y-2 w-full sm:flex-1">
 					<label className="text-sm font-medium text-muted-foreground">Tag</label>
 					<select
-						className="input w-full p-2 border rounded-md"
+						className="input"
 						value=""
 						onChange={(e) => addFilter(tagFilter, setTagFilter, e.target.value)}
 					>
@@ -258,7 +262,7 @@ export function AdminInventory() {
 						setTagFilter([]);
 						setSearchQuery('');
 					}}
-					className="btn btn-primary h-[42px] whitespace-nowrap shrink-0 mt-[26px]"
+					className="btn btn-primary h-[38px] whitespace-nowrap shrink-0 mt-[28px]"
 				>
 					Clear Filters
 				</button>

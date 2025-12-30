@@ -3,14 +3,15 @@ import { Link } from 'react-router-dom';
 import { supabase, type Profile } from '../lib/supabase';
 import logger from '../lib/logger';
 import { useAuth } from '../context/AuthContext';
+import { X } from 'lucide-react';
 
 export function AdminCustomers() {
 	const { isAdmin } = useAuth();
 	const [profiles, setProfiles] = useState<Profile[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
-	const [roleFilter, setRoleFilter] = useState<string>('all');
-	const [verificationFilter, setVerificationFilter] = useState<string>('all');
+	const [roleFilter, setRoleFilter] = useState<string[]>([]);
+	const [verificationFilter, setVerificationFilter] = useState<string[]>([]);
 
 	useEffect(() => {
 		const fetchProfiles = async () => {
@@ -36,14 +37,30 @@ export function AdminCustomers() {
 
 	// Filter profiles
 	const filteredProfiles = profiles.filter(p => {
-		const matchesRole = roleFilter === 'all' || p.role === roleFilter;
-		const matchesVerification = verificationFilter === 'all'
+		const matchesRole = roleFilter.length === 0 || roleFilter.includes(p.role);
+		const matchesVerification = verificationFilter.length === 0
 			? true
-			: verificationFilter === 'verified'
-				? p.email_verified
-				: !p.email_verified;
+			: verificationFilter.includes(p.email_verified ? 'verified' : 'unverified');
 		return matchesRole && matchesVerification;
 	});
+
+	const addFilter = <T extends string>(
+		currentFilters: T[],
+		setFilter: (filters: T[]) => void,
+		value: T
+	) => {
+		if (value && value !== 'all' && !currentFilters.includes(value)) {
+			setFilter([...currentFilters, value]);
+		}
+	};
+
+	const removeFilter = <T extends string>(
+		currentFilters: T[],
+		setFilter: (filters: T[]) => void,
+		value: T
+	) => {
+		setFilter(currentFilters.filter(item => item !== value));
+	};
 
 	const updateProfile = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -94,32 +111,80 @@ export function AdminCustomers() {
 
 	return (
 		<div className="space-y-6">
-			<div className="flex items-center justify-between mb-6">
+			<div className="flex items-center justify-between">
 				<h2 className="text-xl font-bold">Customer Management</h2>
-				<div className="flex items-center gap-2">
-					<label className="text-sm font-medium">Filter by Role:</label>
-					<select
-						value={roleFilter}
-						onChange={(e) => setRoleFilter(e.target.value)}
-						className="h-9 px-3 rounded-md border border-input bg-background text-sm"
-					>
-						<option value="all">All Roles</option>
-						{availableRoles.map(role => (
-							<option key={role} value={role}>{role}</option>
-						))}
-					</select>
+			</div>
 
-					<label className="text-sm font-medium ml-2">Status:</label>
+			<div className="flex flex-col sm:flex-row gap-4 items-start">
+				<div className="space-y-2 w-full sm:flex-1">
+					<label className="text-sm font-medium text-muted-foreground">Filter by Role</label>
 					<select
-						value={verificationFilter}
-						onChange={(e) => setVerificationFilter(e.target.value)}
-						className="h-9 px-3 rounded-md border border-input bg-background text-sm"
+						value=""
+						onChange={(e) => addFilter(roleFilter, setRoleFilter, e.target.value)}
+						className="input"
 					>
-						<option value="all">All Statuses</option>
-						<option value="verified">Verified</option>
-						<option value="unverified">Unverified</option>
+						<option value="">Select Role...</option>
+						{availableRoles
+							.filter(r => !roleFilter.includes(r))
+							.map(role => (
+								<option key={role} value={role}>{role}</option>
+							))}
 					</select>
+					{roleFilter.length > 0 && (
+						<div className="flex flex-wrap gap-2">
+							{roleFilter.map(role => (
+								<button
+									key={role}
+									onClick={() => removeFilter(roleFilter, setRoleFilter, role)}
+									className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-foreground/10 hover:bg-destructive/15 hover:text-destructive text-foreground text-xs font-medium transition-colors cursor-pointer group"
+								>
+									{role}
+									<X size={14} className="opacity-50 group-hover:opacity-100" />
+								</button>
+							))}
+						</div>
+					)}
 				</div>
+
+				<div className="space-y-2 w-full sm:flex-1">
+					<label className="text-sm font-medium text-muted-foreground">Status</label>
+					<select
+						value=""
+						onChange={(e) => addFilter(verificationFilter, setVerificationFilter, e.target.value)}
+						className="input"
+					>
+						<option value="">Select Status...</option>
+						{['verified', 'unverified']
+							.filter(s => !verificationFilter.includes(s))
+							.map(status => (
+								<option key={status} value={status} className="capitalize">{status}</option>
+							))}
+					</select>
+					{verificationFilter.length > 0 && (
+						<div className="flex flex-wrap gap-2">
+							{verificationFilter.map(status => (
+								<button
+									key={status}
+									onClick={() => removeFilter(verificationFilter, setVerificationFilter, status)}
+									className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-foreground/10 hover:bg-destructive/15 hover:text-destructive text-foreground text-xs font-medium transition-colors cursor-pointer group"
+								>
+									<span className="capitalize">{status}</span>
+									<X size={14} className="opacity-50 group-hover:opacity-100" />
+								</button>
+							))}
+						</div>
+					)}
+				</div>
+
+				<button
+					onClick={() => {
+						setRoleFilter([]);
+						setVerificationFilter([]);
+					}}
+					className="btn btn-primary h-[38px] whitespace-nowrap shrink-0 mt-[28px]"
+				>
+					Clear Filters
+				</button>
 			</div>
 
 			{

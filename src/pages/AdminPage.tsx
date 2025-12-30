@@ -16,33 +16,35 @@ export default function AdminPage() {
 			<h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
 
 			<div className="flex gap-4 mb-6">
-				<button
-					onClick={() => handleTabChange('orders')}
-					className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === 'orders'
-						? 'bg-primary text-primary-foreground'
-						: 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-						}`}
-				>
-					Orders
-				</button>
-				<button
-					onClick={() => handleTabChange('customers')}
-					className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === 'customers'
-						? 'bg-primary text-primary-foreground'
-						: 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-						}`}
-				>
-					Customers
-				</button>
-				<button
-					onClick={() => handleTabChange('inventory')}
-					className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === 'inventory'
-						? 'bg-primary text-primary-foreground'
-						: 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-						}`}
-				>
-					Inventory
-				</button>
+				<div className="bg-muted p-1 rounded-lg inline-flex">
+					<button
+						onClick={() => handleTabChange('orders')}
+						className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'orders'
+							? 'bg-background text-foreground shadow-sm'
+							: 'text-muted-foreground hover:text-foreground'
+							}`}
+					>
+						Orders
+					</button>
+					<button
+						onClick={() => handleTabChange('customers')}
+						className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'customers'
+							? 'bg-background text-foreground shadow-sm'
+							: 'text-muted-foreground hover:text-foreground'
+							}`}
+					>
+						Customers
+					</button>
+					<button
+						onClick={() => handleTabChange('inventory')}
+						className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'inventory'
+							? 'bg-background text-foreground shadow-sm'
+							: 'text-muted-foreground hover:text-foreground'
+							}`}
+					>
+						Inventory
+					</button>
+				</div>
 			</div>
 
 			<div className="card p-6">
