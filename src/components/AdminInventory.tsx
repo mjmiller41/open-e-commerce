@@ -41,11 +41,25 @@ export function AdminInventory() {
 				.delete()
 				.eq('id', productId);
 
-			if (error) throw error;
+			if (error) {
+				if (error.code === '23503') { // Foreign key violation
+					if (confirm(`"${productName}" cannot be deleted because it is in existing orders. Would you like to archive (deactivate) it instead?`)) {
+						const { error: archiveError } = await supabase
+							.from('products')
+							.update({ is_active: false })
+							.eq('id', productId);
+
+						if (archiveError) throw archiveError;
+						fetchProducts();
+						return;
+					}
+				}
+				throw error;
+			}
 			fetchProducts();
-		} catch (error) {
+		} catch (error: any) {
 			logger.error('Error deleting product:', error);
-			alert('Failed to delete product. Please try again.');
+			alert(error.message || 'Failed to delete product. Please try again.');
 		}
 	};
 
@@ -76,10 +90,7 @@ export function AdminInventory() {
 		product.category.toLowerCase().includes(searchQuery.toLowerCase())
 	);
 
-	const handleEdit = (product: Product) => {
-		setSelectedProduct(product);
-		setIsModalOpen(true);
-	};
+
 
 	const handleAdd = () => {
 		setSelectedProduct(null);
@@ -114,48 +125,77 @@ export function AdminInventory() {
 
 			<div className="rounded-lg border border-border overflow-hidden">
 				<div className="overflow-x-auto">
-					<table className="w-full">
+					<table className="w-full min-w-max">
 						<thead className="bg-muted/50">
 							<tr className="text-left text-sm font-medium text-muted-foreground">
-								<th className="px-4 py-3">Product</th>
-								<th className="px-4 py-3">Category</th>
-								<th className="px-4 py-3 text-right">Price</th>
-								<th className="px-4 py-3 text-center">Stock</th>
-								<th className="px-4 py-3 text-right">Actions</th>
+								<th className="px-4 py-3 whitespace-nowrap">Image</th>
+								<th className="px-4 py-3 whitespace-nowrap">Title</th>
+								<th className="px-4 py-3 whitespace-nowrap">Description</th>
+								<th className="px-4 py-3 whitespace-nowrap text-center">Images</th>
+								<th className="px-4 py-3 whitespace-nowrap">Category</th>
+								<th className="px-4 py-3 whitespace-nowrap">Brand</th>
+								<th className="px-4 py-3 whitespace-nowrap text-right">Price</th>
+								<th className="px-4 py-3 whitespace-nowrap text-right">Cost</th>
+								<th className="px-4 py-3 whitespace-nowrap text-center">Stock</th>
+								<th className="px-4 py-3 whitespace-nowrap">SKU</th>
+								<th className="px-4 py-3 whitespace-nowrap">GTIN</th>
+								<th className="px-4 py-3 whitespace-nowrap">MPN</th>
+								<th className="px-4 py-3 whitespace-nowrap">Weight</th>
+								<th className="px-4 py-3 whitespace-nowrap">Condition</th>
+								<th className="px-4 py-3 whitespace-nowrap">Type</th>
+								<th className="px-4 py-3 whitespace-nowrap">Tags</th>
+								<th className="px-4 py-3 whitespace-nowrap text-center">Active</th>
+								<th className="px-4 py-3 whitespace-nowrap text-right">Actions</th>
 							</tr>
 						</thead>
 						<tbody className="divide-y divide-border">
 							{filteredProducts.map(product => (
 								<tr key={product.id} className="hover:bg-muted/30 transition-colors">
 									<td className="px-4 py-3">
-										<Link to={`/product/${product.id}`} className="flex items-center gap-3 group">
-											<div className="w-10 h-10 rounded-md bg-muted overflow-hidden shrink-0">
-												<img
-													src={product.image || 'https://placehold.co/100x100?text=No+Image'}
-													alt={product.name}
-													className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-													onError={(e) => {
-														e.currentTarget.src = 'https://placehold.co/100x100?text=Error';
-													}}
-												/>
-											</div>
-											<div>
-												<div className="font-medium text-foreground group-hover:text-primary transition-colors">{product.name}</div>
-												<div className="text-xs text-muted-foreground truncate max-w-[200px]">
-													{product.description}
-												</div>
-											</div>
+										<Link to={`/admin/product/${product.id}`} className="block w-10 h-10 rounded-md bg-muted overflow-hidden shrink-0 group">
+											<img
+												src={product.images?.[0] || product.image || 'https://placehold.co/100x100?text=No+Image'}
+												alt={product.name}
+												className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+												onError={(e) => {
+													e.currentTarget.src = 'https://placehold.co/100x100?text=Error';
+												}}
+											/>
 										</Link>
 									</td>
-									<td className="px-4 py-3 text-sm">
-										<span className="px-2 py-1 rounded-full bg-accent/50 text-accent-foreground text-xs font-medium">
+									<td className="px-4 py-3 font-medium text-foreground max-w-[200px]">
+										<Link to={`/admin/product/${product.id}`} className="hover:text-primary transition-colors truncate block" title={product.name}>
+											{product.name}
+										</Link>
+									</td>
+									<td className="px-4 py-3 text-sm text-muted-foreground max-w-[300px]">
+										<div className="truncate" title={product.description}>
+											{product.description}
+										</div>
+									</td>
+									<td className="px-4 py-3 text-center text-sm">
+										<span className="inline-flex items-center justify-center px-2 py-1 rounded-md bg-muted text-muted-foreground text-xs font-medium">
+											{product.images?.length || 0}
+										</span>
+									</td>
+									<td className="px-4 py-3 text-sm max-w-[200px]">
+										<span
+											className="px-2 py-1 rounded-full bg-accent/50 text-accent-foreground text-xs font-medium truncate block"
+											title={product.category}
+										>
 											{product.category}
 										</span>
 									</td>
-									<td className="px-4 py-3 text-sm text-right font-medium">
+									<td className="px-4 py-3 text-sm whitespace-nowrap">
+										{product.brand || '-'}
+									</td>
+									<td className="px-4 py-3 text-sm text-right font-medium whitespace-nowrap">
 										${product.price.toFixed(2)}
 									</td>
-									<td className="px-4 py-3 text-center">
+									<td className="px-4 py-3 text-sm text-right text-muted-foreground whitespace-nowrap">
+										{product.cost ? `$${product.cost.toFixed(2)}` : '-'}
+									</td>
+									<td className="px-4 py-3 text-center whitespace-nowrap">
 										<div className="flex items-center justify-center gap-2">
 											<button
 												onClick={() => handleStockAdjustment(product, -1)}
@@ -181,15 +221,52 @@ export function AdminInventory() {
 											</button>
 										</div>
 									</td>
-									<td className="px-4 py-3 text-right">
+									<td className="px-4 py-3 text-sm font-mono whitespace-nowrap text-muted-foreground">
+										{product.sku || '-'}
+									</td>
+									<td className="px-4 py-3 text-sm font-mono whitespace-nowrap text-muted-foreground">
+										{product.gtin || '-'}
+									</td>
+									<td className="px-4 py-3 text-sm font-mono whitespace-nowrap text-muted-foreground">
+										{product.mpn || '-'}
+									</td>
+									<td className="px-4 py-3 text-sm whitespace-nowrap">
+										{product.weight ? `${product.weight} lb` : '-'}
+									</td>
+									<td className="px-4 py-3 text-sm capitalize whitespace-nowrap">
+										{product.condition || 'new'}
+									</td>
+									<td className="px-4 py-3 text-sm whitespace-nowrap">
+										{product.product_type || '-'}
+									</td>
+									<td className="px-4 py-3 text-xs whitespace-nowrap max-w-[200px] overflow-hidden">
+										{product.tags && product.tags.length > 0 ? (
+											<div className="flex gap-1 overflow-x-auto no-scrollbar">
+												{product.tags.map(tag => (
+													<span key={tag} className="px-1 py-0.5 rounded bg-muted text-muted-foreground whitespace-nowrap">
+														{tag}
+													</span>
+												))}
+											</div>
+										) : '-'}
+									</td>
+									<td className="px-4 py-3 text-center whitespace-nowrap">
+										<span className={`px-2 py-0.5 rounded-full text-xs border ${product.is_active
+											? 'bg-green-500/10 text-green-600 border-green-200'
+											: 'bg-muted text-muted-foreground border-border'
+											}`}>
+											{product.is_active ? 'Active' : 'Draft'}
+										</span>
+									</td>
+									<td className="px-4 py-3 text-right sticky right-0 bg-background/95 backdrop-blur-sm border-l shadow-sm">
 										<div className="flex justify-end gap-2">
-											<button
-												onClick={() => handleEdit(product)}
+											<Link
+												to={`/admin/product/${product.id}`}
 												className="p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-md transition-colors"
 												title="Edit Product"
 											>
 												<Edit2 size={16} />
-											</button>
+											</Link>
 											<button
 												onClick={() => handleDelete(product.id, product.name)}
 												className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors"
@@ -204,7 +281,7 @@ export function AdminInventory() {
 
 							{filteredProducts.length === 0 && (
 								<tr>
-									<td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
+									<td colSpan={18} className="px-4 py-8 text-center text-muted-foreground">
 										No products found matching your search.
 									</td>
 								</tr>

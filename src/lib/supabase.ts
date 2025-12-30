@@ -20,12 +20,25 @@ export interface Product {
   /** The unique identifier of the product. */
   id: number;
   /** The name of the product. */
+  /** The name of the product. */
   name: string;
   price: number;
   description: string;
+  /** @deprecated use images instead */
   image: string;
+  images: string[];
   category: string;
   on_hand: number;
+  cost?: number;
+  sku?: string;
+  tags?: string[];
+  weight?: number;
+  product_type?: string;
+  brand?: string;
+  gtin?: string;
+  mpn?: string;
+  condition?: string;
+  is_active?: boolean;
 }
 
 export type OrderStatus = "pending" | "processing" | "shipped" | "cancelled";

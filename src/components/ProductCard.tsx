@@ -31,7 +31,7 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 		<Link to={`/product/${product.id}`} className="card flex flex-col h-full group hover:shadow-lg hover:border-accent/50 transition-all duration-300">
 			<div className="relative aspect-square bg-muted overflow-hidden">
 				<img
-					src={product.image || 'https://placehold.co/400x400?text=No+Image'}
+					src={product.images?.[0] || product.image || 'https://placehold.co/400x400?text=No+Image'}
 					alt={product.name}
 					className="w-full h-full object-cover transition-transform duration-500 mix-blend-multiply dark:mix-blend-normal group-hover:scale-105"
 					loading="lazy"

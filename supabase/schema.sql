@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict xLt1osnZWg4vzn9gmesHw52Ib8zQS8MLbd6lnNumxh7NjhBNgje9eDDUacZsO5h
+\restrict 6gzVzR5x9gyhIoHBYoUs7I2C3klNdbNQvRD4fZ0oiGu9RMm4ZPpPfXSfhbKeZv2
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.7 (Ubuntu 17.7-3.pgdg24.04+1)
@@ -3292,7 +3292,18 @@ CREATE TABLE public.products (
     description text,
     image text,
     category text,
-    on_hand integer DEFAULT 0
+    on_hand integer DEFAULT 0,
+    images text[] DEFAULT '{}'::text[],
+    cost numeric,
+    sku text,
+    tags text[] DEFAULT '{}'::text[],
+    weight numeric,
+    product_type text,
+    brand text,
+    gtin text,
+    mpn text,
+    condition text DEFAULT 'new'::text,
+    is_active boolean DEFAULT true
 );
 
 
@@ -4320,6 +4331,27 @@ CREATE INDEX idx_order_items_user_id ON public.order_items USING btree (user_id)
 --
 
 CREATE INDEX idx_orders_user_id ON public.orders USING btree (user_id);
+
+
+--
+-- Name: products_brand_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX products_brand_idx ON public.products USING btree (brand);
+
+
+--
+-- Name: products_gtin_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX products_gtin_idx ON public.products USING btree (gtin);
+
+
+--
+-- Name: products_sku_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX products_sku_idx ON public.products USING btree (sku);
 
 
 --
@@ -6464,4 +6496,4 @@ ALTER EVENT TRIGGER pgrst_drop_watch OWNER TO supabase_admin;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict xLt1osnZWg4vzn9gmesHw52Ib8zQS8MLbd6lnNumxh7NjhBNgje9eDDUacZsO5h
+\unrestrict 6gzVzR5x9gyhIoHBYoUs7I2C3klNdbNQvRD4fZ0oiGu9RMm4ZPpPfXSfhbKeZv2

@@ -1,0 +1,398 @@
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { supabase, type Product } from '../lib/supabase';
+import { ArrowLeft, Save, Trash2, Loader2, Image as ImageIcon } from 'lucide-react';
+import logger from '../lib/logger';
+import taxonomy from '../assets/taxonomy.json';
+
+export function AdminProductDetail() {
+	const { id } = useParams<{ id: string }>();
+	const navigate = useNavigate();
+	const [loading, setLoading] = useState(true);
+	const [saving, setSaving] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+	const [success, setSuccess] = useState<boolean>(false);
+
+	const [formData, setFormData] = useState<Partial<Product>>({
+		name: '',
+		description: '',
+		price: 0,
+		category: '',
+		image: '',
+		images: [],
+		on_hand: 0,
+		cost: 0,
+		sku: '',
+		brand: '',
+		weight: 0,
+		gtin: '',
+		mpn: '',
+		condition: 'new',
+		product_type: '',
+		tags: [],
+		is_active: true
+	});
+
+	useEffect(() => {
+		async function fetchProduct() {
+			if (!id) return;
+			try {
+				const { data, error } = await supabase
+					.from('products')
+					.select('*')
+					.eq('id', id)
+					.single();
+
+				if (error) throw error;
+				if (data) {
+					setFormData(data);
+				}
+			} catch (err) {
+				logger.error('Error fetching product:', err);
+				setError('Failed to load product');
+			} finally {
+				setLoading(false);
+			}
+		}
+		fetchProduct();
+	}, [id]);
+
+	const handleSave = async (e: React.FormEvent) => {
+		e.preventDefault();
+		setSaving(true);
+		setError(null);
+		setSuccess(false);
+
+		try {
+			const { error: updateError } = await supabase
+				.from('products')
+				.update(formData)
+				.eq('id', id);
+
+			if (updateError) throw updateError;
+			setSuccess(true);
+			setTimeout(() => setSuccess(false), 3000);
+		} catch (err) {
+			logger.error('Error saving product:', err);
+			setError('Failed to save product');
+		} finally {
+			setSaving(false);
+		}
+	};
+
+	const handleDelete = async () => {
+		if (!confirm('Are you sure you want to delete this product? This cannot be undone.')) return;
+
+		try {
+			const { error: deleteError } = await supabase
+				.from('products')
+				.delete()
+				.eq('id', id);
+
+			if (deleteError) {
+				if (deleteError.code === '23503') { // Foreign key violation
+					if (confirm('This product cannot be deleted because it is part of existing orders. Would you like to archive it instead?')) {
+						const { error: archiveError } = await supabase
+							.from('products')
+							.update({ is_active: false })
+							.eq('id', id);
+
+						if (archiveError) throw archiveError;
+
+						setSuccess(true);
+						setTimeout(() => navigate('/admin?tab=inventory'), 1500);
+						return;
+					}
+				}
+				throw deleteError;
+			}
+			navigate('/admin?tab=inventory');
+		} catch (err: any) {
+			logger.error('Error deleting product:', err);
+			setError(err.message || 'Failed to delete product');
+		}
+	};
+
+	if (loading) return <div className="p-8 text-center">Loading product...</div>;
+
+	return (
+		<div className="max-w-4xl mx-auto pb-16 animate-in fade-in duration-500">
+			<div className="flex items-center justify-between mb-6">
+				<Link to="/admin?tab=inventory" className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
+					<ArrowLeft size={20} /> Back to Inventory
+				</Link>
+				<button
+					onClick={handleDelete}
+					className="text-destructive hover:bg-destructive/10 px-3 py-2 rounded-md transition-colors flex items-center gap-2 text-sm font-medium"
+				>
+					<Trash2 size={16} /> Delete Product
+				</button>
+			</div>
+
+			<div className="flex items-center justify-between mb-8">
+				<h1 className="text-3xl font-bold">Edit Product</h1>
+				<button
+					onClick={handleSave}
+					disabled={saving}
+					className="btn btn-primary flex items-center gap-2"
+				>
+					{saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+					Save Changes
+				</button>
+			</div>
+
+			{error && (
+				<div className="bg-destructive/10 text-destructive p-4 rounded-lg mb-6 border border-destructive/20">
+					{error}
+				</div>
+			)}
+
+			{success && (
+				<div className="bg-green-500/10 text-green-600 p-4 rounded-lg mb-6 border border-green-500/20">
+					Product saved successfully!
+				</div>
+			)}
+
+			<form onSubmit={handleSave} className="space-y-8">
+				{/* Basic Info Section */}
+				<section className="bg-card border border-border rounded-xl p-6 shadow-sm">
+					<h2 className="text-lg font-semibold mb-4 border-b border-border pb-2">Basic Information</h2>
+					<div className="space-y-4">
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<div className="space-y-2">
+								<label className="text-sm font-medium">Product Name</label>
+								<input
+									type="text"
+									required
+									className="input w-full"
+									value={formData.name || ''}
+									onChange={e => setFormData({ ...formData, name: e.target.value })}
+								/>
+							</div>
+							<div className="space-y-2">
+								<label className="text-sm font-medium">Brand</label>
+								<input
+									type="text"
+									className="input w-full"
+									value={formData.brand || ''}
+									onChange={e => setFormData({ ...formData, brand: e.target.value })}
+								/>
+							</div>
+						</div>
+
+						<div className="space-y-2">
+							<label className="text-sm font-medium">Description</label>
+							<textarea
+								required
+								className="input w-full min-h-[120px]"
+								value={formData.description || ''}
+								onChange={e => setFormData({ ...formData, description: e.target.value })}
+							/>
+						</div>
+					</div>
+				</section>
+
+				{/* Pricing & Inventory */}
+				<section className="bg-card border border-border rounded-xl p-6 shadow-sm">
+					<h2 className="text-lg font-semibold mb-4 border-b border-border pb-2">Pricing & Inventory</h2>
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+						<div className="space-y-2">
+							<label className="text-sm font-medium">Price ($)</label>
+							<input
+								type="number"
+								min="0"
+								step="0.01"
+								required
+								className="input w-full"
+								value={formData.price || 0}
+								onChange={e => setFormData({ ...formData, price: parseFloat(e.target.value) })}
+							/>
+						</div>
+						<div className="space-y-2">
+							<label className="text-sm font-medium text-muted-foreground">Cost ($)</label>
+							<input
+								type="number"
+								min="0"
+								step="0.01"
+								className="input w-full"
+								value={formData.cost || 0}
+								onChange={e => setFormData({ ...formData, cost: parseFloat(e.target.value) })}
+							/>
+						</div>
+						<div className="space-y-2">
+							<label className="text-sm font-medium">Stock (On Hand)</label>
+							<input
+								type="number"
+								min="0"
+								required
+								className="input w-full"
+								value={formData.on_hand || 0}
+								onChange={e => setFormData({ ...formData, on_hand: parseInt(e.target.value) })}
+							/>
+						</div>
+					</div>
+				</section>
+
+				{/* Identification & Shipping */}
+				<section className="bg-card border border-border rounded-xl p-6 shadow-sm">
+					<h2 className="text-lg font-semibold mb-4 border-b border-border pb-2">Identification & Shipping</h2>
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+						<div className="space-y-2">
+							<label className="text-sm font-medium">SKU</label>
+							<input
+								type="text"
+								className="input w-full font-mono"
+								value={formData.sku || ''}
+								onChange={e => setFormData({ ...formData, sku: e.target.value })}
+							/>
+						</div>
+						<div className="space-y-2">
+							<label className="text-sm font-medium">GTIN / UPC</label>
+							<input
+								type="text"
+								className="input w-full font-mono"
+								value={formData.gtin || ''}
+								onChange={e => setFormData({ ...formData, gtin: e.target.value })}
+							/>
+						</div>
+						<div className="space-y-2">
+							<label className="text-sm font-medium">MPN</label>
+							<input
+								type="text"
+								className="input w-full font-mono"
+								value={formData.mpn || ''}
+								onChange={e => setFormData({ ...formData, mpn: e.target.value })}
+							/>
+						</div>
+						<div className="space-y-2">
+							<label className="text-sm font-medium">Weight (lb)</label>
+							<input
+								type="number"
+								step="0.01"
+								className="input w-full"
+								value={formData.weight || 0}
+								onChange={e => setFormData({ ...formData, weight: parseFloat(e.target.value) })}
+							/>
+						</div>
+						<div className="space-y-2">
+							<label className="text-sm font-medium">Condition</label>
+							<select
+								className="input w-full"
+								value={formData.condition || 'new'}
+								onChange={e => setFormData({ ...formData, condition: e.target.value })}
+							>
+								<option value="new">New</option>
+								<option value="used">Used</option>
+								<option value="refurbished">Refurbished</option>
+							</select>
+						</div>
+						<div className="space-y-2">
+							<label className="text-sm font-medium">Product Type</label>
+							<input
+								type="text"
+								className="input w-full"
+								value={formData.product_type || ''}
+								onChange={e => setFormData({ ...formData, product_type: e.target.value })}
+							/>
+						</div>
+					</div>
+				</section>
+
+				{/* Media */}
+				<section className="bg-card border border-border rounded-xl p-6 shadow-sm">
+					<h2 className="text-lg font-semibold mb-4 border-b border-border pb-2 flex items-center gap-2">
+						<ImageIcon size={18} /> Media
+					</h2>
+					<div className="space-y-4">
+						<div className="space-y-2">
+							<label className="text-sm font-medium">Image URLs (One per line)</label>
+							<textarea
+								className="input w-full min-h-[100px] font-mono text-xs"
+								placeholder="https://example.com/image1.jpg"
+								value={formData.images?.join('\n') || ''}
+								onChange={e => {
+									const urls = e.target.value.split('\n').map(s => s.trim()).filter(Boolean);
+									setFormData({ ...formData, images: urls, image: urls[0] || '' });
+								}}
+							/>
+						</div>
+
+						{formData.images && formData.images.length > 0 && (
+							<div className="flex gap-4 overflow-x-auto py-2">
+								{formData.images.map((url, i) => (
+									<div key={i} className="relative w-24 h-24 shrink-0 rounded-lg border overflow-hidden bg-muted group">
+										<img src={url} alt="" className="w-full h-full object-cover" />
+										<div className="absolute inset-x-0 bottom-0 bg-black/50 text-white text-[10px] p-1 text-center truncate px-2 opacity-0 group-hover:opacity-100 transition-opacity">
+											Image {i + 1}
+										</div>
+									</div>
+								))}
+							</div>
+						)}
+					</div>
+				</section>
+
+				{/* Organization */}
+				<section className="bg-card border border-border rounded-xl p-6 shadow-sm">
+					<h2 className="text-lg font-semibold mb-4 border-b border-border pb-2">Organization</h2>
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div className="space-y-2 relative group">
+							<label className="text-sm font-medium">Category</label>
+							<div className="relative">
+								<input
+									type="text"
+									required
+									className="input w-full"
+									value={formData.category || ''}
+									onChange={e => setFormData({ ...formData, category: e.target.value })}
+									placeholder="Start typing to search categories..."
+									title={formData.category}
+								/>
+								{formData.category && formData.category.length > 2 && (
+									<div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-60 overflow-y-auto hidden group-focus-within:block">
+										{taxonomy
+											.filter(c => c.toLowerCase().includes((formData.category || '').toLowerCase()))
+											.slice(0, 50)
+											.map(category => (
+												<button
+													key={category}
+													type="button"
+													className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground truncate block"
+													title={category}
+													onClick={() => setFormData({ ...formData, category })}
+												>
+													{category}
+												</button>
+											))}
+									</div>
+								)}
+							</div>
+						</div>
+						<div className="space-y-2">
+							<label className="text-sm font-medium">Tags (comma separated)</label>
+							<input
+								type="text"
+								className="input w-full"
+								value={formData.tags?.join(', ') || ''}
+								onChange={e => {
+									const tags = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+									setFormData({ ...formData, tags });
+								}}
+							/>
+						</div>
+						<div className="flex items-center gap-2 mt-4">
+							<input
+								type="checkbox"
+								id="isActive"
+								className="w-4 h-4 rounded border-input"
+								checked={formData.is_active ?? true}
+								onChange={e => setFormData({ ...formData, is_active: e.target.checked })}
+							/>
+							<label htmlFor="isActive" className="text-sm font-medium">Is Active (Visible in store)</label>
+						</div>
+					</div>
+				</section>
+			</form>
+		</div>
+	);
+}

@@ -12,6 +12,7 @@ import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import OrderDetailPage from './pages/OrderDetailPage';
+import { AdminProductDetail } from './pages/AdminProductDetail';
 
 
 
@@ -38,6 +39,7 @@ function App() {
 								{/* Protected Admin Route */}
 								<Route element={<ProtectedRoute requireAdmin />}>
 									<Route path="admin" element={<AdminPage />} />
+									<Route path="admin/product/:id" element={<AdminProductDetail />} />
 								</Route>
 
 								{/* Protected User Routes */}

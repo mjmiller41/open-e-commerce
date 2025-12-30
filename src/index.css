@@ -3,33 +3,33 @@
 @theme {
   --color-background: var(--bg-primary);
   --color-foreground: var(--text-primary);
-  
+
   --color-card: var(--bg-card);
   --color-card-foreground: var(--text-primary);
-  
+
   --color-popover: var(--bg-card);
   --color-popover-foreground: var(--text-primary);
-  
+
   --color-primary: var(--accent);
   --color-primary-foreground: var(--accent-foreground);
-  
+
   --color-secondary: var(--bg-secondary);
   --color-secondary-foreground: var(--text-secondary);
-  
+
   --color-muted: var(--bg-secondary);
   --color-muted-foreground: var(--text-muted);
-  
+
   --color-accent: var(--bg-secondary);
   --color-accent-foreground: var(--text-primary);
   --color-accent-hover: var(--accent-hover);
-  
+
   --color-destructive: #ef4444;
   --color-destructive-foreground: #ffffff;
-  
+
   --color-border: var(--border);
   --color-input: var(--border);
   --color-ring: var(--accent);
-  
+
   --radius-lg: var(--radius-lg);
   --radius-md: var(--radius);
   --radius-sm: calc(var(--radius) - 2px);
@@ -96,12 +96,17 @@
   .btn-ghost {
     @apply text-foreground hover:bg-secondary;
   }
-  
+
   .card {
     @apply bg-card border border-border rounded-lg overflow-hidden transition-all duration-300;
   }
 
-  .form-input {
-    @apply block w-full px-3 py-2 rounded-md border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring placeholder:text-muted-foreground;
+  .form-input,
+  .input {
+    @apply flex w-full px-3 py-2 rounded-md border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring placeholder:text-muted-foreground transition-all;
+  }
+
+  textarea.input {
+    @apply min-h-[80px];
   }
 }
