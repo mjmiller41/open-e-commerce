@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { supabase, type Profile } from '../lib/supabase';
 import logger from '../lib/logger';
 import { useAuth } from '../context/AuthContext';
-import { X } from 'lucide-react';
+import { X, ArrowUp, ArrowDown } from 'lucide-react';
+import { useSortableData } from '../hooks/useSortableData';
 
 export function AdminCustomers() {
 	const { isAdmin } = useAuth();
@@ -43,6 +44,31 @@ export function AdminCustomers() {
 			: verificationFilter.includes(p.email_verified ? 'verified' : 'unverified');
 		return matchesRole && matchesVerification;
 	});
+
+	const { items: sortedProfiles, requestSort, sortConfig } = useSortableData(
+		filteredProfiles,
+		{ key: 'full_name', direction: 'ascending' },
+		{
+			email_verified_status: (p) => p.email_verified ? 'Verified' : 'Unverified'
+		}
+	);
+
+	const renderSortIcon = (key: string) => {
+		if (sortConfig?.key !== key) return null;
+		return sortConfig.direction === 'ascending' ? <ArrowUp size={14} /> : <ArrowDown size={14} />;
+	};
+
+	const renderSortableHeader = (label: string, sortKey: string, className = "") => (
+		<th
+			className={`p-3 text-sm font-semibold text-muted-foreground border-b border-border cursor-pointer hover:text-foreground transition-colors select-none ${className}`}
+			onClick={() => requestSort(sortKey)}
+		>
+			<div className="flex items-center gap-1">
+				{label}
+				{renderSortIcon(sortKey)}
+			</div>
+		</th>
+	);
 
 	const addFilter = <T extends string>(
 		currentFilters: T[],
@@ -197,16 +223,16 @@ export function AdminCustomers() {
 						<table className="w-full text-left">
 							<thead>
 								<tr className="bg-muted">
-									<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Name</th>
-									<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Email</th>
-									<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Role</th>
-									<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Phone</th>
-									<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Status</th>
+									{renderSortableHeader("Name", "full_name")}
+									{renderSortableHeader("Email", "email")}
+									{renderSortableHeader("Role", "role")}
+									{renderSortableHeader("Phone", "phone_number")}
+									{renderSortableHeader("Status", "email_verified_status")}
 									<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Actions</th>
 								</tr>
 							</thead>
 							<tbody>
-								{filteredProfiles.map((profile) => (
+								{sortedProfiles.map((profile) => (
 									<tr key={profile.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
 										<td className="p-3 text-sm font-medium">
 											<Link to={`/profile/${profile.id}`} className="hover:underline text-primary">

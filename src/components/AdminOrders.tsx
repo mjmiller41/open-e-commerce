@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase, type Order, type Profile } from '../lib/supabase';
-import { X } from 'lucide-react';
+import { X, ArrowUp, ArrowDown } from 'lucide-react';
 import logger from '../lib/logger';
+import { useSortableData } from '../hooks/useSortableData';
 
 export function AdminOrders() {
 	const [orders, setOrders] = useState<Order[]>([]);
@@ -77,6 +78,19 @@ export function AdminOrders() {
 	const uniqueCustomers = Array.from(new Set(ordersForCustomerOptions.map(o => o.user_id)));
 
 	const finalFilteredOrders = getFilteredOrders(null);
+
+	const { items: sortedOrders, requestSort, sortConfig } = useSortableData(
+		finalFilteredOrders,
+		{ key: 'created_at', direction: 'descending' },
+		{
+			customer_name: (order) => profiles[order.user_id]?.full_name || profiles[order.user_id]?.email || order.user_id
+		}
+	);
+
+	const renderSortIcon = (key: string) => {
+		if (sortConfig?.key !== key) return null;
+		return sortConfig.direction === 'ascending' ? <ArrowUp size={14} /> : <ArrowDown size={14} />;
+	};
 
 	const addFilter = <T extends string>(
 		currentFilters: T[],
@@ -217,16 +231,41 @@ export function AdminOrders() {
 					<table className="w-full text-left">
 						<thead>
 							<tr className="bg-muted">
-								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Order ID</th>
-								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Date</th>
-								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Customer</th>
-								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Total</th>
-								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Status</th>
+								<th
+									className="p-3 text-sm font-semibold text-muted-foreground border-b border-border cursor-pointer hover:text-foreground transition-colors select-none"
+									onClick={() => requestSort('id')}
+								>
+									<div className="flex items-center gap-1">Order ID {renderSortIcon('id')}</div>
+								</th>
+								<th
+									className="p-3 text-sm font-semibold text-muted-foreground border-b border-border cursor-pointer hover:text-foreground transition-colors select-none"
+									onClick={() => requestSort('created_at')}
+								>
+									<div className="flex items-center gap-1">Date {renderSortIcon('created_at')}</div>
+								</th>
+								<th
+									className="p-3 text-sm font-semibold text-muted-foreground border-b border-border cursor-pointer hover:text-foreground transition-colors select-none"
+									onClick={() => requestSort('customer_name')}
+								>
+									<div className="flex items-center gap-1">Customer {renderSortIcon('customer_name')}</div>
+								</th>
+								<th
+									className="p-3 text-sm font-semibold text-muted-foreground border-b border-border cursor-pointer hover:text-foreground transition-colors select-none"
+									onClick={() => requestSort('total_amount')}
+								>
+									<div className="flex items-center gap-1">Total {renderSortIcon('total_amount')}</div>
+								</th>
+								<th
+									className="p-3 text-sm font-semibold text-muted-foreground border-b border-border cursor-pointer hover:text-foreground transition-colors select-none"
+									onClick={() => requestSort('status')}
+								>
+									<div className="flex items-center gap-1">Status {renderSortIcon('status')}</div>
+								</th>
 								<th className="p-3 text-sm font-semibold text-muted-foreground border-b border-border">Actions</th>
 							</tr>
 						</thead>
 						<tbody>
-							{finalFilteredOrders.map((order) => {
+							{sortedOrders.map((order) => {
 								const profile = profiles[order.user_id];
 								return (
 									<tr key={order.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">

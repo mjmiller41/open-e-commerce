@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase, type Product } from '../lib/supabase';
-import { Plus, Search, Edit2, Trash2, Package, Minus, X } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Package, Minus, X, ArrowUp, ArrowDown } from 'lucide-react';
 import logger from '../lib/logger';
 import { ProductModal } from './ProductModal';
+import { useSortableData } from '../hooks/useSortableData';
 
 export function AdminInventory() {
 	const [products, setProducts] = useState<Product[]>([]);
@@ -111,8 +112,34 @@ export function AdminInventory() {
 	const availableTypes = Array.from(new Set(getFilteredCtx('type').map(p => p.product_type || '').filter(Boolean)));
 	const availableTags = Array.from(new Set(getFilteredCtx('tag').flatMap(p => p.tags || [])));
 
-	// Final filtered list for display (respects ALL filters)
 	const filteredProducts = getFilteredCtx(null);
+
+	const { items: sortedProducts, requestSort, sortConfig } = useSortableData(
+		filteredProducts,
+		{ key: 'name', direction: 'ascending' },
+		{
+			image: (p) => p.images?.[0] || p.image || '',
+			images_count: (p) => p.images?.length || 0,
+			tags_string: (p) => p.tags?.join(', ') || ''
+		}
+	);
+
+	const renderSortIcon = (key: string) => {
+		if (sortConfig?.key !== key) return null;
+		return sortConfig.direction === 'ascending' ? <ArrowUp size={14} className="inline ml-1" /> : <ArrowDown size={14} className="inline ml-1" />;
+	};
+
+	const renderSortableHeader = (label: string, sortKey: string, className = "") => (
+		<th
+			className={`px-4 py-3 whitespace-nowrap cursor-pointer hover:text-foreground transition-colors select-none ${className}`}
+			onClick={() => requestSort(sortKey)}
+		>
+			<div className={`flex items-center gap-1 ${className.includes('text-right') ? 'justify-end' : className.includes('text-center') ? 'justify-center' : ''}`}>
+				{label}
+				{renderSortIcon(sortKey)}
+			</div>
+		</th>
+	);
 
 	const addFilter = (
 		currentFilters: string[],
@@ -273,28 +300,28 @@ export function AdminInventory() {
 					<table className="w-full min-w-max">
 						<thead className="bg-muted/50">
 							<tr className="text-left text-sm font-medium text-muted-foreground">
-								<th className="px-4 py-3 whitespace-nowrap">Image</th>
-								<th className="px-4 py-3 whitespace-nowrap">Title</th>
-								<th className="px-4 py-3 whitespace-nowrap">Description</th>
-								<th className="px-4 py-3 whitespace-nowrap text-center">Images</th>
-								<th className="px-4 py-3 whitespace-nowrap">Category</th>
-								<th className="px-4 py-3 whitespace-nowrap">Brand</th>
-								<th className="px-4 py-3 whitespace-nowrap text-right">Price</th>
-								<th className="px-4 py-3 whitespace-nowrap text-right">Cost</th>
-								<th className="px-4 py-3 whitespace-nowrap text-center">Stock</th>
-								<th className="px-4 py-3 whitespace-nowrap">SKU</th>
-								<th className="px-4 py-3 whitespace-nowrap">GTIN</th>
-								<th className="px-4 py-3 whitespace-nowrap">MPN</th>
-								<th className="px-4 py-3 whitespace-nowrap">Weight</th>
-								<th className="px-4 py-3 whitespace-nowrap">Condition</th>
-								<th className="px-4 py-3 whitespace-nowrap">Type</th>
-								<th className="px-4 py-3 whitespace-nowrap">Tags</th>
-								<th className="px-4 py-3 whitespace-nowrap">Status</th>
+								{renderSortableHeader("Image", "image")}
+								{renderSortableHeader("Title", "name")}
+								{renderSortableHeader("Description", "description")}
+								{renderSortableHeader("Images", "images_count", "text-center")}
+								{renderSortableHeader("Category", "category")}
+								{renderSortableHeader("Brand", "brand")}
+								{renderSortableHeader("Price", "price", "text-right")}
+								{renderSortableHeader("Cost", "cost", "text-right")}
+								{renderSortableHeader("Stock", "on_hand", "text-center")}
+								{renderSortableHeader("SKU", "sku")}
+								{renderSortableHeader("GTIN", "gtin")}
+								{renderSortableHeader("MPN", "mpn")}
+								{renderSortableHeader("Weight", "weight")}
+								{renderSortableHeader("Condition", "condition")}
+								{renderSortableHeader("Type", "product_type")}
+								{renderSortableHeader("Tags", "tags_string")}
+								{renderSortableHeader("Status", "status")}
 								<th className="px-4 py-3 whitespace-nowrap text-right">Actions</th>
 							</tr>
 						</thead>
 						<tbody className="divide-y divide-border">
-							{filteredProducts.map(product => (
+							{sortedProducts.map(product => (
 								<tr key={product.id} className="hover:bg-muted/30 transition-colors">
 									<td className="px-4 py-3">
 										<Link to={`/admin/product/${product.id}`} className="block w-10 h-10 rounded-md bg-muted overflow-hidden shrink-0 group">
@@ -428,7 +455,7 @@ export function AdminInventory() {
 								</tr>
 							))}
 
-							{filteredProducts.length === 0 && (
+							{sortedProducts.length === 0 && (
 								<tr>
 									<td colSpan={18} className="px-4 py-8 text-center text-muted-foreground">
 										No products found matching your search.
