@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, User, ChevronDown } from 'lucide-react';
-import { LogoIcon } from './LogoIcon';
 import { ThemeToggle } from './ThemeToggle';
 import { useCart } from '../context/useCart';
 import { appConfig } from '../lib/config';
@@ -45,7 +44,7 @@ export function Layout() {
 			<header className="sticky top-0 z-50 bg-[var(--bg-header)] backdrop-blur-md border-b border-border transition-colors duration-300">
 				<div className="container mx-auto px-4 h-16 flex items-center justify-between">
 					<Link to="/" className="flex items-center gap-2 font-bold text-xl text-primary">
-						<LogoIcon />
+						<img src="logo.png" alt="Logo" className="w-8 h-8" />
 						<span>{appConfig.siteTitle}</span>
 					</Link>
 
