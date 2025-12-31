@@ -178,6 +178,24 @@ export function StoreSettingsProvider({ children }: { children: React.ReactNode 
 				--input: ${s.colors_accent_1 ? s.colors_accent_1 : '#334155'};
 				--ring: ${s.colors_accent_2 ? s.colors_accent_2 : '#475569'};
 			}
+
+			:root {
+				/* Buttons & Inputs */
+				--btn-border-width: ${s.buttons_border_thickness}px;
+				--btn-opacity: ${s.buttons_opacity / 100};
+				--btn-radius: ${s.buttons_radius}px;
+				--btn-shadow-opacity: ${s.buttons_shadow_opacity / 100};
+				--btn-shadow-offset-x: ${s.buttons_shadow_horizontal_offset}px;
+				/* Shadow construction: offset-x | offset-y (0) | blur (4px) | spread (0) | color (black with opacity) */
+				--btn-shadow: ${s.buttons_shadow_horizontal_offset}px 4px 6px -1px rgba(0, 0, 0, ${s.buttons_shadow_opacity / 100});
+
+				/* Product Card */
+				--card-image-ratio: ${s.image_ratio === 'square' ? '1/1' : s.image_ratio === 'portrait' ? '3/4' : 'auto'};
+				--card-show-secondary-image: ${s.show_secondary_image ? '1' : '0'};
+				--card-show-vendor: ${s.show_vendor ? 'block' : 'none'};
+				--card-show-rating: ${s.show_rating ? 'flex' : 'none'}; /* Using flex for stars alignment */
+				--card-show-quick-add: ${s.enable_quick_add ? 'block' : 'none'};
+			}
 		`;
 
 		styleEl.innerHTML = fontFaces + lightCss + darkCss;

@@ -36,47 +36,99 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 
 	return (
 		<div className="card flex flex-col h-full group hover:shadow-lg hover:border-accent/50 transition-all duration-300 relative">
-			<Link to={`/product/${product.id}`} className="relative aspect-square bg-muted overflow-hidden block">
+			<Link
+				to={`/product/${product.id}`}
+				className="relative bg-muted overflow-hidden block"
+				style={{ aspectRatio: "var(--card-image-ratio, auto)" } as React.CSSProperties}
+			>
+				{/* Primary Image */}
 				<img
 					src={product.images?.[0] || product.image || `${import.meta.env.BASE_URL}logo.png`}
 					alt={product.name}
-					className="w-full h-full object-cover transition-transform duration-500 mix-blend-multiply dark:mix-blend-normal group-hover:scale-105"
+					className="w-full h-full object-cover transition-all duration-500 mix-blend-multiply dark:mix-blend-normal group-hover:scale-105"
 					loading="lazy"
 					onError={(e) => {
 						e.currentTarget.src = `${import.meta.env.BASE_URL}logo.png`;
-						e.currentTarget.onerror = null; // Prevent infinite loop
+						e.currentTarget.onerror = null;
 					}}
 				/>
+
+				{/* Secondary Image (Absolute overlay) */}
+				{product.images && product.images.length > 1 && (
+					<img
+						src={product.images[1]}
+						alt={product.name}
+						className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 mix-blend-multiply dark:mix-blend-normal opacity-0 group-hover:opacity-100"
+						style={{ opacity: "calc(var(--card-show-secondary-image, 0) * 1)" } as React.CSSProperties}
+						loading="lazy"
+					/>
+				)}
+
 				{product.on_hand <= 0 && (
-					<Badge variant="error" className="absolute top-2 right-2 backdrop-blur-sm tracking-wider">
+					<Badge variant="error" className="absolute top-2 right-2 backdrop-blur-sm tracking-wider z-10">
 						Out of Stock
 					</Badge>
 				)}
 			</Link>
 
 			<div className="p-4 flex flex-col flex-1">
-				{categorySegments.length > 0 ? (
-					<Link
-						to={categoryUrl}
-						className="text-primary font-semibold text-xs uppercase tracking-wider mb-2 hover:underline w-fit"
-					>
-						<h5>{leafCategory}</h5>
-					</Link>
-				) : (
-					<div className="flex flex-col gap-0.5 mb-2">
-						<div className="text-primary font-semibold text-xs uppercase tracking-wider">{product.category}</div>
-						{product.variant && <div className="text-[10px] text-muted-foreground uppercase font-medium">{product.variant}</div>}
+				{/* Category & Vendor */}
+				<div className="mb-2">
+					<div className="flex justify-between items-start gap-2">
+						{categorySegments.length > 0 ? (
+							<Link
+								to={categoryUrl}
+								className="text-primary font-semibold text-xs uppercase tracking-wider hover:underline block"
+							>
+								{leafCategory}
+							</Link>
+						) : (
+							<div className="text-primary font-semibold text-xs uppercase tracking-wider">{product.category}</div>
+						)}
+
+						{/* Vendor Display - Controlled by CSS Variable */}
+						<div
+							className="text-[10px] text-muted-foreground uppercase font-medium"
+							style={{ display: "var(--card-show-vendor, none)" }}
+						>
+							{product.brand || "Brand"}
+						</div>
 					</div>
-				)}
+					{product.variant && <div className="text-[10px] text-muted-foreground uppercase font-medium mt-0.5">{product.variant}</div>}
+				</div>
 
 				<Link to={`/product/${product.id}`} className="block mb-1">
 					<h3 className="font-semibold text-lg leading-snug group-hover:text-primary transition-colors">
 						{product.name}
 					</h3>
 				</Link>
-				<div className="font-bold text-xl">${product.price.toFixed(2)}</div>
 
-				<div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
+				{/* Rating Placeholder - Controlled by CSS Variable */}
+				<div
+					className="items-center gap-1 mb-2"
+					style={{ display: "var(--card-show-rating, none)" }}
+				>
+					{/* Mock Stars for visual confirmation if no rating data exists yet */}
+					<div className="flex text-yellow-400 text-xs">
+						{'★'.repeat(5)}
+					</div>
+					<span className="text-xs text-muted-foreground">(0)</span>
+				</div>
+
+				<div className="font-bold text-xl mt-auto">${product.price.toFixed(2)}</div>
+
+				{/* Quick Add / Quantity - Controlled by CSS Variable (partially) */}
+				{/* We always show the "space" for it, but toggle visibility? Or remove from flow? 
+				    The requirement is likely to HIDE the "Add to Cart" button if quick add is disabled, 
+					BUT usually that means user must click product to go to details to add. 
+					Let's wrap the entire footer in the variable control, OR just the 'Add to Cart' button.
+					If disabled, we probably hide the whole footer or just the button?
+					Let's hide the button container.
+				*/}
+				<div
+					className="mt-4 pt-4 border-t border-border"
+					style={{ display: "var(--card-show-quick-add, block)" }}
+				>
 					{cartQuantity > 0 ? (
 						<QuantityControl
 							quantity={cartQuantity}

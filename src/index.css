@@ -109,29 +109,40 @@
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center px-2 py-2 rounded-lg font-medium transition-all gap-2 text-sm;
+    @apply inline-flex items-center justify-center px-4 py-2 font-medium transition-all gap-2 text-sm;
+    border-radius: var(--btn-radius);
+    border-width: var(--btn-border-width);
+    opacity: var(--btn-opacity);
+    box-shadow: var(--btn-shadow);
   }
   .btn-primary {
-    @apply bg-primary text-primary-foreground border border-transparent hover:opacity-90 hover:-translate-y-px disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-primary text-primary-foreground border-transparent hover:opacity-90 hover:-translate-y-px disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-secondary {
-    @apply bg-card text-foreground border border-border hover:bg-secondary hover:border-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-card text-foreground border-border hover:bg-secondary hover:border-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-ghost {
     @apply text-foreground hover:bg-secondary;
+    box-shadow: none; /* No shadow for ghost buttons usually, but respecting global opacity/radius */
   }
 
   .btn-brand-secondary {
-    @apply bg-transparent border border-[var(--brand-secondary)] text-[var(--brand-secondary)] hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-transparent border-[var(--brand-secondary)] text-[var(--brand-secondary)] hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .card {
+     /* Using radius variable for consistency, or keep it separate? User asked for "Buttons & Inputs", not necessarily cards. 
+        Sticking to existing styles for card radius unless specified, but user might expect "corner radius" to affect everything.
+        Let's apply it to cards too for a cohesive look if it's a "theme settings" feature.
+        Actually, let's stick to the explicit "Buttons & Inputs" scope first. */
     @apply bg-card border border-border rounded-lg overflow-hidden transition-all duration-300;
   }
 
   .form-input,
   .input {
-    @apply flex w-full px-3 py-2 rounded-md border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring placeholder:text-muted-foreground transition-all;
+    @apply flex w-full px-3 py-2 border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring placeholder:text-muted-foreground transition-all;
+    border-radius: var(--btn-radius);
+    border-width: var(--btn-border-width);
   }
 
   textarea.input {
