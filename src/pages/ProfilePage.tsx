@@ -6,6 +6,7 @@ import AddressForm, { type AddressData } from "../components/AddressForm";
 import logger from "../lib/logger";
 import { Badge } from "../components/ui/Badge";
 import { PageHeader } from "../components/ui/PageHeader";
+import { SectionHeader } from "../components/ui/SectionHeader";
 
 export default function ProfilePage() {
 	const { id } = useParams();
@@ -296,8 +297,9 @@ export default function ProfilePage() {
 
 
 			{/* Profile Info Card */}
+			<SectionHeader title="Contact Information" />
 			<div className="card p-6 mb-8">
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
 					{(isOwnProfile || role === 'admin') && (
 						<div>
 							<label className="block text-sm font-medium text-muted-foreground mb-1">Email</label>
@@ -328,31 +330,22 @@ export default function ProfilePage() {
 						</div>
 					)}
 				</div>
-
-				<hr className="my-4 border-gray-200" />
-
 				{!isEditing ? (
-					<div>
-						<div className="flex items-center justify-between mb-4">
-							<h3 className="text-lg font-semibold">Contact Information</h3>
-							<button
-								onClick={() => setIsEditing(true)}
-								className="btn btn-secondary text-sm"
-							>
-								Edit Profile
-							</button>
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+						<div>
+							<label className="block text-sm font-medium text-muted-foreground mb-1">Full Name</label>
+							<div className="text-base font-medium text-foreground">{profile?.full_name || "-"}</div>
 						</div>
-
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-							<div>
-								<label className="block text-sm font-medium text-muted-foreground mb-1">Full Name</label>
-								<div className="text-base font-medium text-foreground">{profile?.full_name || "-"}</div>
-							</div>
-							<div>
-								<label className="block text-sm font-medium text-muted-foreground mb-1">Phone Number</label>
-								<div className="text-base font-medium text-foreground">{profile?.phone_number || "-"}</div>
-							</div>
+						<div>
+							<label className="block text-sm font-medium text-muted-foreground mb-1">Phone Number</label>
+							<div className="text-base font-medium text-foreground">{profile?.phone_number || "-"}</div>
 						</div>
+						<button
+							onClick={() => setIsEditing(true)}
+							className="btn btn-secondary text-sm w-max"
+						>
+							Edit Contact Info
+						</button>
 					</div>
 				) : (
 					<form onSubmit={handleSaveProfile} className="space-y-4">
@@ -405,10 +398,10 @@ export default function ProfilePage() {
 			</div>
 
 			{/* Security Card (Owner Only) */}
+			<SectionHeader title="Security" />
 			{
 				isOwnProfile && (
 					<div className="card p-6 mb-8">
-						<h3 className="text-lg font-semibold mb-4">Security</h3>
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 							{/* Change Email */}
 							<div>
@@ -470,7 +463,7 @@ export default function ProfilePage() {
 			{/* Saved Addresses Section */}
 			<div className="mb-8">
 				<div className="flex justify-between items-center mb-4">
-					<h2 className="text-2xl font-bold">Saved Addresses</h2>
+					<SectionHeader title="Saved Addresses" />
 					{!isAddingAddress && (
 						<button
 							onClick={() => setIsAddingAddress(true)}
@@ -532,10 +525,7 @@ export default function ProfilePage() {
 				)}
 			</div>
 
-			<div className="flex justify-between items-center mt-12 mb-4">
-				<h2 className="text-2xl font-bold">{isOwnProfile ? "My Orders" : "Customer Orders"}</h2>
-			</div>
-
+			<SectionHeader title={isOwnProfile ? "My Orders" : "Customer Orders"} />
 			{
 				loading ? (
 					<div className="text-center p-8">Loading orders...</div>
@@ -559,7 +549,7 @@ export default function ProfilePage() {
 								{orders.map((order) => (
 									<tr key={order.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
 										<td className="p-3 text-sm">
-											<Link to={`/order/${order.id}`} className="hover:underline text-primary">
+											<Link to={`/order/${order.id}`} className="hover:text-primary ">
 												#{order.id}
 											</Link>
 										</td>

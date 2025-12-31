@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { X } from 'lucide-react';
 import { useSortableData } from '../hooks/useSortableData';
 import { Badge } from './ui/Badge';
-import { PageHeader } from './ui/PageHeader';
+import { SectionHeader } from './ui/SectionHeader';
 import { SortableHeader } from './ui/SortableHeader';
 
 export function AdminCustomers() {
@@ -125,7 +125,7 @@ export function AdminCustomers() {
 
 	return (
 		<div className="space-y-6">
-			<PageHeader title="Customer Management" />
+			<SectionHeader title="Customer Management" />
 
 			<div className="filter-section">
 				<div className="space-y-2 w-full sm:flex-1">
@@ -221,7 +221,7 @@ export function AdminCustomers() {
 								{sortedProfiles.map((profile) => (
 									<tr key={profile.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
 										<td className="p-3 text-sm font-medium">
-											<Link to={`/profile/${profile.id}`} className="hover:underline text-primary">
+											<Link to={`/profile/${profile.id}`} className="hover:text-primary ">
 												{profile.full_name || <span className="text-muted-foreground italic">No Name</span>}
 											</Link>
 											<div className="text-xs text-muted-foreground font-mono mt-0.5">{profile.id.split('-')[0]}...</div>

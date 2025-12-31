@@ -203,4 +203,20 @@
   .filter-section {
     @apply flex flex-col sm:flex-row gap-4 items-start mb-6;
   }
+
+  /* Section Layouts */
+  .section-header {
+    @apply flex items-center justify-between mb-6;
+  }
+  .section-title {
+    @apply text-xl font-bold;
+  }
+
+  /* SubSection Layouts */
+  .sub-section-header {
+    @apply flex items-center justify-between mb-6;
+  }
+  .sub-section-title {
+    @apply font-semibold;
+  }
 }

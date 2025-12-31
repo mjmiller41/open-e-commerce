@@ -8,7 +8,7 @@ import { useSortableData } from '../hooks/useSortableData';
 import Papa from 'papaparse';
 import { Download, Upload } from 'lucide-react';
 import { Badge } from './ui/Badge';
-import { PageHeader } from './ui/PageHeader';
+import { SectionHeader } from './ui/SectionHeader';
 import { SortableHeader } from './ui/SortableHeader';
 
 // Internal component for handling sequential image fallback
@@ -350,7 +350,7 @@ export function AdminInventory() {
 
 	return (
 		<div className="space-y-6">
-			<PageHeader title="Inventory Management">
+			<SectionHeader title="Inventory Management">
 				<div className="flex flex-col sm:flex-row gap-4 items-center w-full sm:w-auto">
 					<div className="relative w-full sm:w-72">
 						<Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
@@ -394,7 +394,7 @@ export function AdminInventory() {
 						</button>
 					</div>
 				</div>
-			</PageHeader>
+			</SectionHeader>
 
 			{/* Filters */}
 			<div className="filter-section">

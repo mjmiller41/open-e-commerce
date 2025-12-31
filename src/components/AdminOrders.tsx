@@ -5,7 +5,7 @@ import { X } from 'lucide-react';
 import logger from '../lib/logger';
 import { useSortableData } from '../hooks/useSortableData';
 import { Badge } from './ui/Badge';
-import { PageHeader } from './ui/PageHeader';
+import { SectionHeader } from './ui/SectionHeader';
 import { SortableHeader } from './ui/SortableHeader';
 
 export function AdminOrders() {
@@ -138,7 +138,7 @@ export function AdminOrders() {
 
 	return (
 		<div className="space-y-6">
-			<PageHeader title="Order Management" />
+			<SectionHeader title="Order Management" />
 
 			<div className="filter-section">
 				<div className="space-y-2 w-full sm:flex-1">
@@ -243,7 +243,7 @@ export function AdminOrders() {
 								return (
 									<tr key={order.id} className="border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
 										<td className="p-3 text-sm">
-											<Link to={`/order/${order.id}`} className="hover:underline text-primary">
+											<Link to={`/order/${order.id}`} className="hover:text-primary ">
 												#{order.id}
 											</Link>
 										</td>

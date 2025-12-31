@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import { useStoreSettings } from "../context/StoreSettingsContext";
 import logger from "../lib/logger";
+import { SectionHeader } from "./ui/SectionHeader";
+import { SubSectionHeader } from "./ui/SubSectionHeader.tsx";
 
 export function AdminSettings() {
 	const { settings, updateSettings, loading } = useStoreSettings();
@@ -123,15 +125,14 @@ export function AdminSettings() {
 
 	return (
 		<div className="max-w-5xl">
-			<div className="mb-6">
-				<h2 className="text-2xl font-bold tracking-tight">Store Settings</h2>
+			<SectionHeader title="Store Settings">
 				<p className="text-muted-foreground">Manage your store's branding and configuration.</p>
-			</div>
+			</SectionHeader>
 
 			<form onSubmit={handleSubmit} className="space-y-8 pb-20">
 
 				<div className="card p-6 space-y-4">
-					<h3 className="font-semibold text-lg border-b pb-2">General Info</h3>
+					<SubSectionHeader title="General Info"></SubSectionHeader>
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<TextInput label="Store Name" name="store_name" value={formData.store_name} onChange={handleChange} required />
 						<TextInput label="Support Email" name="support_email" value={formData.support_email} onChange={handleChange} type="email" />
@@ -141,11 +142,11 @@ export function AdminSettings() {
 
 				{/* 1. Global Colors */}
 				<div className="card p-6 space-y-6">
-					<h3 className="font-semibold text-lg border-b pb-2">Global Colors</h3>
+					<SubSectionHeader title="Global Colors"></SubSectionHeader>
 
 					{/* Brand Colors */}
 					<div className="space-y-4">
-						<h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Brand Identity</h4>
+						<SubSectionHeader title="Brand Identity" level={2}></SubSectionHeader>
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 							<ColorInput label="Primary Color" name="primary_color" value={formData.primary_color} onChange={handleChange} />
 							<ColorInput label="Secondary Color" name="secondary_color" value={formData.secondary_color} onChange={handleChange} />
@@ -155,22 +156,22 @@ export function AdminSettings() {
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-6">
 						{/* Light Mode */}
 						<div className="space-y-4">
-							<h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Light Mode</h4>
+							<SubSectionHeader title="Light Mode" level={2}></SubSectionHeader>
 							<ColorInput label="Background" name="colors_background_light" value={formData.colors_background_light} onChange={handleChange} />
 							<ColorInput label="Text" name="colors_text_light" value={formData.colors_text_light} onChange={handleChange} />
 						</div>
 
 						{/* Dark Mode */}
 						<div className="space-y-4">
-							<h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Dark Mode</h4>
+							<SubSectionHeader title="Dark Mode" level={2}></SubSectionHeader>
 							<ColorInput label="Background" name="colors_background_dark" value={formData.colors_background_dark} onChange={handleChange} />
 							<ColorInput label="Text" name="colors_text_dark" value={formData.colors_text_dark} onChange={handleChange} />
 						</div>
 					</div>
 
 					{/* Theme Accents */}
-					<div className="space-y-4 pt-4 border-t">
-						<h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Theme Accents</h4>
+					<div className="space-y-4 pt-4">
+						<SubSectionHeader title="Theme Accents" level={2}></SubSectionHeader>
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 							<ColorInput label="Accent 1" name="colors_accent_1" value={formData.colors_accent_1} onChange={handleChange} />
 							<ColorInput label="Accent 2" name="colors_accent_2" value={formData.colors_accent_2} onChange={handleChange} />
@@ -185,7 +186,7 @@ export function AdminSettings() {
 
 				{/* 2. Typography */}
 				<div className="card p-6 space-y-4">
-					<h3 className="font-semibold text-lg border-b pb-2">Typography</h3>
+					<SubSectionHeader title="Typography"></SubSectionHeader>
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<div className="space-y-2">
 							<label className="text-sm font-medium">Header Font</label>
@@ -212,7 +213,7 @@ export function AdminSettings() {
 
 				{/* 3. Layout */}
 				<div className="card p-6 space-y-4">
-					<h3 className="font-semibold text-lg border-b pb-2">Layout</h3>
+					<SubSectionHeader title="Layout"></SubSectionHeader>
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<RangeInput label="Page Width (px)" name="page_width" value={formData.page_width} min={800} max={1600} step={10} onChange={handleChange} />
 						<RangeInput label="Grid Spacing Horizontal (px)" name="spacing_grid_horizontal" value={formData.spacing_grid_horizontal} min={0} max={100} step={1} onChange={handleChange} />
@@ -222,7 +223,7 @@ export function AdminSettings() {
 
 				{/* 4. Buttons & Inputs */}
 				<div className="card p-6 space-y-4">
-					<h3 className="font-semibold text-lg border-b pb-2">Buttons & Inputs</h3>
+					<SubSectionHeader title="Buttons & Inputs"></SubSectionHeader>
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<RangeInput label="Border Thickness (px)" name="buttons_border_thickness" value={formData.buttons_border_thickness} min={0} max={10} step={1} onChange={handleChange} />
 						<RangeInput label="Opacity (%)" name="buttons_opacity" value={formData.buttons_opacity} min={0} max={100} step={5} onChange={handleChange} />
@@ -234,7 +235,7 @@ export function AdminSettings() {
 
 				{/* 5. Product Card */}
 				<div className="card p-6 space-y-4">
-					<h3 className="font-semibold text-lg border-b pb-2">Product Card</h3>
+					<SubSectionHeader title="Product Card"></SubSectionHeader>
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<div className="space-y-2">
 							<label className="text-sm font-medium">Image Ratio</label>
@@ -255,7 +256,7 @@ export function AdminSettings() {
 
 				{/* 6. Social Media */}
 				<div className="card p-6 space-y-4">
-					<h3 className="font-semibold text-lg border-b pb-2">Social Media</h3>
+					<SubSectionHeader title="Social Media"></SubSectionHeader>
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<TextInput label="Facebook Link" name="social_facebook_link" value={formData.social_facebook_link} onChange={handleChange} placeholder="https://facebook.com/..." />
 						<TextInput label="Instagram Link" name="social_instagram_link" value={formData.social_instagram_link} onChange={handleChange} placeholder="https://instagram.com/..." />
@@ -268,7 +269,7 @@ export function AdminSettings() {
 
 				{/* 7. Miscellaneous */}
 				<div className="card p-6 space-y-4">
-					<h3 className="font-semibold text-lg border-b pb-2">Miscellaneous</h3>
+					<SubSectionHeader title="Miscellaneous"></SubSectionHeader>
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<div className="space-y-2 md:col-span-2">
 							<label className="text-sm font-medium">Favicon URL</label>

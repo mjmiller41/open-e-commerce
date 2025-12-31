@@ -147,9 +147,9 @@ export function ProductDetail() {
 							to={`/category/${product.category.split('>').map(s => encodeURIComponent(s.trim())).join('/')}`}
 							className="text-primary font-bold text-sm uppercase tracking-wider hover:underline"
 						>
-							<h3>{product.category}</h3>
+							<h4>{product.category}</h4>
 						</Link>
-						{product.brand && <h4 className="text-muted-foreground font-medium text-sm">{product.brand}</h4>}
+						{product.brand && <h4 className="text-muted-foreground font-medium text-base">{product.brand}</h4>}
 						{product.variant && <span className="inline-block px-2 py-0.5 rounded bg-muted text-muted-foreground text-xs font-medium w-fit mt-1">{product.variant}</span>}
 					</div>
 

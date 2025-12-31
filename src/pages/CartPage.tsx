@@ -116,7 +116,7 @@ export function CartPage() {
 								<Link to={`/product/${product.id}`} className="block mb-1 group">
 									<h3 className="font-semibold text-lg group-hover:text-primary transition-colors">{product.name}</h3>
 								</Link>
-								<div className="text-sm text-muted-foreground">{product.category}</div>
+								<Link to={`/category/${product.category.split('>').map(s => encodeURIComponent(s.trim())).join('/')}`} className="text-sm text-muted-foreground">{product.category}</Link>
 								<div className="text-primary font-bold mt-1">${product.price.toFixed(2)}</div>
 							</div>
 
