@@ -506,7 +506,7 @@ export default function ProfilePage() {
 										Default
 									</span>
 								)}
-								<div className="font-medium text-lg mb-1">{addr.address_line1}</div>
+								<h4 className="font-medium text-lg mb-1">{addr.address_line1}</h4>
 								{addr.address_line2 && <div className="text-muted-foreground">{addr.address_line2}</div>}
 								<div className="text-muted-foreground mb-3">{addr.city}, {addr.state} {addr.zip_code}</div>
 

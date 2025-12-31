@@ -62,7 +62,7 @@ export function CheckoutModal({ isOpen, onClose, totalAmount }: CheckoutModalPro
 
 	if (!isOpen) return null;
 
-	const handleCheckout = async (e: React.FormEvent) => {
+	const handleCheckout = async (e: React.FormEvent | React.MouseEvent) => {
 		e.preventDefault();
 		if (!user) return;
 
@@ -140,7 +140,7 @@ export function CheckoutModal({ isOpen, onClose, totalAmount }: CheckoutModalPro
 			<div className="bg-card w-full max-w-lg p-6 rounded-lg shadow-xl animate-in zoom-in-95 duration-300 border border-border max-h-[90vh] overflow-y-auto">
 				<h2 className="text-xl font-bold mb-6">Checkout</h2>
 
-				<form onSubmit={handleCheckout} className="space-y-6">
+				<div className="space-y-6">
 					<div className="space-y-2">
 						<label className="block text-sm font-medium text-muted-foreground">
 							Total Amount
@@ -272,14 +272,15 @@ export function CheckoutModal({ isOpen, onClose, totalAmount }: CheckoutModalPro
 							Cancel
 						</button>
 						<button
-							type="submit"
+							type="button"
+							onClick={handleCheckout}
 							disabled={isProcessing}
 							className="btn btn-primary"
 						>
 							{isProcessing ? 'Processing...' : 'Pay Now'}
 						</button>
 					</div>
-				</form>
+				</div>
 			</div>
 		</div>
 	);

@@ -147,13 +147,13 @@ export function ProductDetail() {
 							to={`/category/${product.category.split('>').map(s => encodeURIComponent(s.trim())).join('/')}`}
 							className="text-primary font-bold text-sm uppercase tracking-wider hover:underline"
 						>
-							{product.category}
+							<h3>{product.category}</h3>
 						</Link>
-						{product.brand && <div className="text-muted-foreground font-medium text-sm">{product.brand}</div>}
+						{product.brand && <h4 className="text-muted-foreground font-medium text-sm">{product.brand}</h4>}
 						{product.variant && <span className="inline-block px-2 py-0.5 rounded bg-muted text-muted-foreground text-xs font-medium w-fit mt-1">{product.variant}</span>}
 					</div>
 
-					<h1 className="text-4xl font-bold mb-4 leading-tight">{product.name}</h1>
+					<h2 className="text-4xl font-bold mb-4 leading-tight">{product.name}</h2>
 
 					<div className="flex items-baseline gap-4 mb-6">
 						<div className="text-3xl font-bold text-foreground">${product.price.toFixed(2)}</div>

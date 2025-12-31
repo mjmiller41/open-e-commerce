@@ -87,11 +87,11 @@ export function CartPage() {
 		<div className="animate-in fade-in duration-500">
 			<PageHeader
 				title={
-					<div className="flex items-center gap-4">
+					<span className="flex items-center gap-4">
 						<ShoppingBag className="text-primary" size={32} />
 						<span>Shopping Cart</span>
 						<span className="text-xl text-muted-foreground font-normal">({enrichedCartItems.length} items)</span>
-					</div>
+					</span>
 				}
 				className="mb-8"
 			/>
@@ -113,8 +113,8 @@ export function CartPage() {
 							</div>
 
 							<div className="flex-1">
-								<Link to={`/product/${product.id}`} className="font-semibold text-lg hover:text-primary mb-1 block">
-									{product.name}
+								<Link to={`/product/${product.id}`} className="block mb-1 group">
+									<h3 className="font-semibold text-lg group-hover:text-primary transition-colors">{product.name}</h3>
 								</Link>
 								<div className="text-sm text-muted-foreground">{product.category}</div>
 								<div className="text-primary font-bold mt-1">${product.price.toFixed(2)}</div>

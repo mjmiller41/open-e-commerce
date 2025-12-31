@@ -156,9 +156,9 @@ export function ProductList() {
 			{renderBreadcrumbs()}
 
 			<div className="text-center mb-12 max-w-2xl mx-auto">
-				<h1 className="text-4xl font-extrabold mb-4 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent capitalize">
+				<h2 className="text-4xl font-extrabold mb-4 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent capitalize">
 					{pageTitle}
-				</h1>
+				</h2>
 				<p className="text-muted-foreground text-lg">
 					{categoryPath
 						? `Explore our collection of ${pageTitle}.`

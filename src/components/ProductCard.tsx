@@ -60,7 +60,7 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 						to={categoryUrl}
 						className="text-primary font-semibold text-xs uppercase tracking-wider mb-2 hover:underline w-fit"
 					>
-						{leafCategory}
+						<h5>{leafCategory}</h5>
 					</Link>
 				) : (
 					<div className="flex flex-col gap-0.5 mb-2">

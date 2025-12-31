@@ -187,7 +187,7 @@ export function AdminProductDetail() {
 			</div>
 
 			<div className="flex items-center justify-between mb-8">
-				<h1 className="text-3xl font-bold">Edit Product</h1>
+				<h2 className="text-3xl font-bold">Edit Product</h2>
 				<div className="flex items-center gap-4">
 					{success && saveSource === 'top' && (
 						<span className="text-sm text-green-600 animate-in fade-in slide-in-from-right-2 flex items-center gap-1">
@@ -233,7 +233,7 @@ export function AdminProductDetail() {
 			<form onSubmit={(e) => { e.preventDefault(); handleSave('bottom'); }} className="space-y-8">
 				{/* Basic Info Section */}
 				<section className="bg-card border border-border rounded-xl p-6 shadow-sm">
-					<h2 className="text-lg font-semibold mb-4 border-b border-border pb-2">Basic Information</h2>
+					<h3 className="text-lg font-semibold mb-4 border-b border-border pb-2">Basic Information</h3>
 					<div className="space-y-4">
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 							<div className="space-y-2">
@@ -271,7 +271,7 @@ export function AdminProductDetail() {
 
 				{/* Pricing & Inventory */}
 				<section className="bg-card border border-border rounded-xl p-6 shadow-sm">
-					<h2 className="text-lg font-semibold mb-4 border-b border-border pb-2">Pricing & Inventory</h2>
+					<h3 className="text-lg font-semibold mb-4 border-b border-border pb-2">Pricing & Inventory</h3>
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 						<div className="space-y-2">
 							<label className="text-sm font-medium">Price ($)</label>
@@ -312,7 +312,7 @@ export function AdminProductDetail() {
 
 				{/* Identification & Shipping */}
 				<section className="bg-card border border-border rounded-xl p-6 shadow-sm">
-					<h2 className="text-lg font-semibold mb-4 border-b border-border pb-2">Identification & Shipping</h2>
+					<h3 className="text-lg font-semibold mb-4 border-b border-border pb-2">Identification & Shipping</h3>
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 						<div className="space-y-2">
 							<label className="text-sm font-medium">SKU</label>
@@ -397,9 +397,9 @@ export function AdminProductDetail() {
 
 				{/* Media */}
 				<section className="bg-card border border-border rounded-xl p-6 shadow-sm">
-					<h2 className="text-lg font-semibold mb-4 border-b border-border pb-2 flex items-center gap-2">
+					<h3 className="text-lg font-semibold mb-4 border-b border-border pb-2 flex items-center gap-2">
 						<ImageIcon size={18} /> Media
-					</h2>
+					</h3>
 					<div className="space-y-4">
 						<div className="space-y-2">
 							<div className="flex items-center justify-between">
@@ -469,7 +469,7 @@ export function AdminProductDetail() {
 
 				{/* Organization */}
 				<section className="bg-card border border-border rounded-xl p-6 shadow-sm">
-					<h2 className="text-lg font-semibold mb-4 border-b border-border pb-2">Organization</h2>
+					<h3 className="text-lg font-semibold mb-4 border-b border-border pb-2">Organization</h3>
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<div className="space-y-2 relative group">
 							<label className="text-sm font-medium">Category</label>

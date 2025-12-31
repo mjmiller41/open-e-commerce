@@ -5,6 +5,7 @@ import { ProductDetail } from './pages/ProductDetail';
 import { CartPage } from './pages/CartPage';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
+import { StoreSettingsProvider } from './context/StoreSettingsContext';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import AdminPage from './pages/AdminPage';
@@ -25,36 +26,38 @@ import { AdminProductDetail } from './pages/AdminProductDetail';
 function App() {
 	return (
 		<AuthProvider>
-			<CartProvider>
-				<ErrorBoundary>
-					<BrowserRouter basename={import.meta.env.BASE_URL}>
-						<Routes>
-							<Route path="/" element={<Layout />}>
-								<Route index element={<ProductList />} />
-								<Route path="category/*" element={<ProductList />} />
-								<Route path="product/:id" element={<ProductDetail />} />
-								<Route path="cart" element={<CartPage />} />
-								<Route path="login" element={<LoginPage />} />
-								<Route path="register" element={<RegisterPage />} />
+			<StoreSettingsProvider>
+				<CartProvider>
+					<ErrorBoundary>
+						<BrowserRouter basename={import.meta.env.BASE_URL}>
+							<Routes>
+								<Route path="/" element={<Layout />}>
+									<Route index element={<ProductList />} />
+									<Route path="category/*" element={<ProductList />} />
+									<Route path="product/:id" element={<ProductDetail />} />
+									<Route path="cart" element={<CartPage />} />
+									<Route path="login" element={<LoginPage />} />
+									<Route path="register" element={<RegisterPage />} />
 
-								{/* Protected Admin Route */}
-								<Route element={<ProtectedRoute requireAdmin />}>
-									<Route path="admin" element={<AdminPage />} />
-									<Route path="admin/product/:id" element={<AdminProductDetail />} />
+									{/* Protected Admin Route */}
+									<Route element={<ProtectedRoute requireAdmin />}>
+										<Route path="admin" element={<AdminPage />} />
+										<Route path="admin/product/:id" element={<AdminProductDetail />} />
+									</Route>
+
+									{/* Protected User Routes */}
+									<Route element={<ProtectedRoute />}>
+										<Route path="profile" element={<ProfilePage />} />
+										<Route path="profile/:id" element={<ProfilePage />} />
+										<Route path="order/:id" element={<OrderDetailPage />} />
+									</Route>
 								</Route>
+							</Routes>
+						</BrowserRouter>
+					</ErrorBoundary>
+				</CartProvider>
 
-								{/* Protected User Routes */}
-								<Route element={<ProtectedRoute />}>
-									<Route path="profile" element={<ProfilePage />} />
-									<Route path="profile/:id" element={<ProfilePage />} />
-									<Route path="order/:id" element={<OrderDetailPage />} />
-								</Route>
-							</Route>
-						</Routes>
-					</BrowserRouter>
-				</ErrorBoundary>
-			</CartProvider>
-
+			</StoreSettingsProvider>
 		</AuthProvider>
 	);
 }

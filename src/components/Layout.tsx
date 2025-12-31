@@ -5,6 +5,7 @@ import { ThemeToggle } from './ThemeToggle';
 import { useCart } from '../context/useCart';
 import { appConfig } from '../lib/config';
 import { useAuth } from '../context/AuthContext';
+import { useStoreSettings } from '../context/StoreSettingsContext';
 
 /**
  * The shared layout component for the application.
@@ -19,6 +20,7 @@ export function Layout() {
 	const dropdownRef = useRef<HTMLDivElement>(null);
 	const navigate = useNavigate();
 
+	const { settings } = useStoreSettings();
 	// Close dropdown when clicking outside
 	useEffect(() => {
 		function handleClickOutside(event: MouseEvent) {
@@ -43,9 +45,9 @@ export function Layout() {
 		<div className="flex flex-col min-h-screen">
 			<header className="sticky top-0 z-50 bg-[var(--bg-header)] backdrop-blur-md border-b border-border transition-colors duration-300">
 				<div className="container mx-auto px-4 h-16 flex items-center justify-between">
-					<Link to="/" className="flex items-center gap-2 font-bold text-xl text-primary">
-						<img src="logo.png" alt="Logo" className="w-8 h-8" />
-						<span>{appConfig.siteTitle}</span>
+					<Link to="/" className="flex items-center gap-2 text-primary hover:opacity-80 transition-opacity">
+						<img src={settings?.logo_url || "logo.png"} alt="Logo" className="w-8 h-8 object-contain" />
+						<h1 className="font-bold text-xl text-primary leading-none">{settings?.store_name || appConfig.siteTitle}</h1>
 					</Link>
 
 					<div className="flex items-center gap-4">

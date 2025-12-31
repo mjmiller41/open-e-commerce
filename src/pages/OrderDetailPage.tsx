@@ -101,7 +101,7 @@ export default function OrderDetailPage() {
 						<button onClick={() => navigate(-1)} className="text-muted-foreground hover:text-foreground">
 							&larr; Back
 						</button>
-						<h1 className="text-3xl font-bold">Order #{order.id}</h1>
+						<span className="text-3xl font-bold">Order #{order.id}</span>
 					</div>
 				}
 				className="mb-8"
@@ -149,7 +149,7 @@ export default function OrderDetailPage() {
 											Img
 										</div>
 										<div>
-											<div className="font-medium text-foreground">{item.product_name}</div>
+											<h4 className="font-medium text-foreground">{item.product_name}</h4>
 											<div className="text-sm text-muted-foreground">Qty: {item.quantity}</div>
 										</div>
 									</div>
