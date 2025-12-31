@@ -56,6 +56,7 @@ export interface StoreSettings {
 	social_snapchat_link: string;
 	social_tumblr_link: string;
 	social_vimeo_link: string;
+	social_github_link: string;
 
 	// Miscellaneous
 	favicon_url: string;

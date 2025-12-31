@@ -78,12 +78,12 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 						{categorySegments.length > 0 ? (
 							<Link
 								to={categoryUrl}
-								className="text-primary font-semibold text-xs uppercase tracking-wider hover:underline block"
+								className="font-semibold text-xs uppercase tracking-wider hover:underline block"
 							>
 								{leafCategory}
 							</Link>
 						) : (
-							<div className="text-primary font-semibold text-xs uppercase tracking-wider">{product.category}</div>
+							<div className="font-semibold text-xs uppercase tracking-wider">{product.category}</div>
 						)}
 
 						{/* Vendor Display - Controlled by CSS Variable */}

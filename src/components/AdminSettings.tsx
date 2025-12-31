@@ -60,6 +60,7 @@ export function AdminSettings() {
 		social_snapchat_link: "",
 		social_tumblr_link: "",
 		social_vimeo_link: "",
+		social_github_link: "",
 
 		// Miscellaneous
 		favicon_url: "",
@@ -89,6 +90,7 @@ export function AdminSettings() {
 				social_snapchat_link: settings.social_snapchat_link || "",
 				social_tumblr_link: settings.social_tumblr_link || "",
 				social_vimeo_link: settings.social_vimeo_link || "",
+				social_github_link: settings.social_github_link || "",
 			}));
 		}
 	}, [settings]);
@@ -263,6 +265,7 @@ export function AdminSettings() {
 						<TextInput label="TikTok Link" name="social_tiktok_link" value={formData.social_tiktok_link} onChange={handleChange} placeholder="https://tiktok.com/..." />
 						<TextInput label="Twitter (X) Link" name="social_twitter_link" value={formData.social_twitter_link} onChange={handleChange} placeholder="https://twitter.com/..." />
 						<TextInput label="Pinterest Link" name="social_pinterest_link" value={formData.social_pinterest_link} onChange={handleChange} placeholder="https://pinterest.com/..." />
+						<TextInput label="GitHub Link" name="social_github_link" value={formData.social_github_link} onChange={handleChange} placeholder="https://github.com/..." />
 					</div>
 				</div>
 

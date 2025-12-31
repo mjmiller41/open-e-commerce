@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Outlet, Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, User, ChevronDown } from 'lucide-react';
+import { ShoppingCart, User, ChevronDown, Facebook, Instagram, Twitter, Youtube, Pin, Ghost, Video, Type, Github } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { useCart } from '../context/useCart';
 import { appConfig } from '../lib/config';
@@ -125,7 +125,59 @@ export function Layout() {
 			</main>
 
 			<footer className="mt-auto border-t border-border py-8 bg-muted text-muted-foreground text-center text-sm">
-				<div className="mx-auto px-4" style={{ maxWidth: 'var(--container-width, 1200px)' }}>
+				<div className="mx-auto px-4 space-y-4" style={{ maxWidth: 'var(--container-width, 1200px)' }}>
+					<div className="flex justify-center gap-4">
+						{settings?.social_facebook_link && (
+							<a href={settings.social_facebook_link} target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors" aria-label="Facebook">
+								<Facebook size={20} />
+							</a>
+						)}
+						{settings?.social_instagram_link && (
+							<a href={settings.social_instagram_link} target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors" aria-label="Instagram">
+								<Instagram size={20} />
+							</a>
+						)}
+						{settings?.social_twitter_link && (
+							<a href={settings.social_twitter_link} target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors" aria-label="Twitter">
+								<Twitter size={20} />
+							</a>
+						)}
+						{settings?.social_youtube_link && (
+							<a href={settings.social_youtube_link} target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors" aria-label="YouTube">
+								<Youtube size={20} />
+							</a>
+						)}
+						{settings?.social_pinterest_link && (
+							<a href={settings.social_pinterest_link} target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors" aria-label="Pinterest">
+								<Pin size={20} />
+							</a>
+						)}
+						{settings?.social_tiktok_link && (
+							<a href={settings.social_tiktok_link} target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors" aria-label="TikTok">
+								<Video size={20} />
+							</a>
+						)}
+						{settings?.social_snapchat_link && (
+							<a href={settings.social_snapchat_link} target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors" aria-label="Snapchat">
+								<Ghost size={20} />
+							</a>
+						)}
+						{settings?.social_tumblr_link && (
+							<a href={settings.social_tumblr_link} target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors" aria-label="Tumblr">
+								<Type size={20} />
+							</a>
+						)}
+						{settings?.social_vimeo_link && (
+							<a href={settings.social_vimeo_link} target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors" aria-label="Vimeo">
+								<Video size={20} />
+							</a>
+						)}
+						{settings?.social_github_link && (
+							<a href={settings.social_github_link} target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors" aria-label="GitHub">
+								<Github size={20} />
+							</a>
+						)}
+					</div>
 					<p>&copy; {new Date().getFullYear()} {appConfig.footer?.text || appConfig.siteTitle}</p>
 				</div>
 			</footer>
