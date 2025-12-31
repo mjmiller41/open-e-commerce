@@ -149,7 +149,7 @@ export function ProductList() {
 
 	const pageTitle = categoryPath
 		? decodeURIComponent(categoryPath.split('/').pop() || 'Category')
-		: 'Featured Collection';
+		: 'Welcome to Open E-Commerce';
 
 	return (
 		<div className="animate-in fade-in duration-700">

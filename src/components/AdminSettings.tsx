@@ -319,7 +319,7 @@ function ColorInput({ label, name, value, onChange }: { label: string, name: str
 				<input
 					type="color"
 					name={name}
-					value={/^#[0-9A-F]{6}$/i.test(value) ? value : "#000000"}
+					value={webColorToHex(value)}
 					onChange={onChange}
 					className="w-10 h-10 p-1 rounded cursor-pointer border border-input"
 					title="Choose color"
@@ -389,4 +389,48 @@ function TextInput({ label, name, value, onChange, placeholder, type = "text", r
 			/>
 		</div>
 	);
+}
+
+let _ctx: CanvasRenderingContext2D | null = null;
+
+function webColorToHex(color: string): string {
+	if (!color) return "#000000";
+	// If it's already a valid 6-char hex, return it (preserving case if desired, or maximizing performance)
+	if (/^#[0-9A-F]{6}$/i.test(color)) return color;
+
+	if (typeof document === "undefined") return "#000000";
+
+	try {
+		if (!_ctx) {
+			_ctx = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
+		}
+		if (!_ctx) return "#000000";
+
+		_ctx.fillStyle = "#000000"; // Reset to black default
+		_ctx.fillStyle = color;
+		const computed = _ctx.fillStyle;
+
+		// Canvas returns hex for common colors, or rgb(...)
+		if (computed.startsWith("#")) {
+			// Ensure full 6-digit hex (canvas might return #fff sometimes? usually expands)
+			if (computed.length === 7) return computed;
+			// Expand 3-digit hex if somehow returned
+			if (computed.length === 4) {
+				return "#" + computed[1] + computed[1] + computed[2] + computed[2] + computed[3] + computed[3];
+			}
+		}
+
+		if (computed.startsWith("rgb")) {
+			const match = computed.match(/\d+/g);
+			if (match && match.length >= 3) {
+				const toHex = (n: string) => parseInt(n).toString(16).padStart(2, "0");
+				return `#${toHex(match[0])}${toHex(match[1])}${toHex(match[2])}`;
+			}
+		}
+	} catch {
+		// Fallback
+		return "#000000";
+	}
+
+	return "#000000";
 }

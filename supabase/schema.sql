@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict O6DE8YJbQS99aF6jPfM0JdzEjG0CHybGVcLeimOfDikbXPKUGeKrBXMfoYKASkt
+\restrict QCfCxRpN0VpSEsMuZwpDNtEt2v15K9VgZ5SJ0YQUH4TVmGx3DmXWpFMXjQccakg
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.7 (Ubuntu 17.7-3.pgdg24.04+1)
@@ -3368,6 +3368,46 @@ CREATE TABLE public.store_settings (
     secondary_color text DEFAULT '#f8fafc'::text NOT NULL,
     logo_url text,
     updated_at timestamp with time zone DEFAULT now(),
+    colors_background_1 text DEFAULT '#FFFFFF'::text,
+    colors_text text DEFAULT '#121212'::text,
+    colors_solid_button_labels text DEFAULT '#FFFFFF'::text,
+    colors_accent_1 text DEFAULT '#000000'::text,
+    colors_accent_2 text DEFAULT '#334FB4'::text,
+    gradient_background_1 text,
+    type_header_font text DEFAULT 'Assistant'::text,
+    type_body_font text DEFAULT 'Inter'::text,
+    type_header_scale integer DEFAULT 100,
+    type_body_scale integer DEFAULT 100,
+    page_width integer DEFAULT 1200,
+    spacing_grid_horizontal integer DEFAULT 8,
+    spacing_grid_vertical integer DEFAULT 8,
+    buttons_border_thickness integer DEFAULT 1,
+    buttons_opacity integer DEFAULT 100,
+    buttons_radius integer DEFAULT 0,
+    buttons_shadow_opacity integer DEFAULT 0,
+    buttons_shadow_horizontal_offset integer DEFAULT 0,
+    image_ratio text DEFAULT 'adapt'::text,
+    show_secondary_image boolean DEFAULT true,
+    show_vendor boolean DEFAULT false,
+    show_rating boolean DEFAULT false,
+    enable_quick_add boolean DEFAULT true,
+    social_facebook_link text DEFAULT ''::text,
+    social_instagram_link text DEFAULT ''::text,
+    social_youtube_link text DEFAULT ''::text,
+    social_tiktok_link text DEFAULT ''::text,
+    social_twitter_link text DEFAULT ''::text,
+    social_pinterest_link text DEFAULT ''::text,
+    social_snapchat_link text DEFAULT ''::text,
+    social_tumblr_link text DEFAULT ''::text,
+    social_vimeo_link text DEFAULT ''::text,
+    favicon_url text DEFAULT ''::text,
+    currency_code_enabled boolean DEFAULT true,
+    cart_type text DEFAULT 'drawer'::text,
+    predictive_search_enabled boolean DEFAULT true,
+    colors_background_light text DEFAULT '#FFFFFF'::text,
+    colors_background_dark text DEFAULT '#09090b'::text,
+    colors_text_light text DEFAULT '#121212'::text,
+    colors_text_dark text DEFAULT '#f8fafc'::text,
     CONSTRAINT single_row CHECK ((id = 1))
 );
 
@@ -6972,4 +7012,4 @@ ALTER EVENT TRIGGER pgrst_drop_watch OWNER TO supabase_admin;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict O6DE8YJbQS99aF6jPfM0JdzEjG0CHybGVcLeimOfDikbXPKUGeKrBXMfoYKASkt
+\unrestrict QCfCxRpN0VpSEsMuZwpDNtEt2v15K9VgZ5SJ0YQUH4TVmGx3DmXWpFMXjQccakg
