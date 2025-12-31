@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 @theme {
+  --font-sans: var(--font-body), "Inter", "sans-serif";
+  --font-mono: "Fira Code", "monospace";
   --color-background: var(--bg-primary);
   --color-foreground: var(--text-primary);
 
@@ -83,6 +85,12 @@
 @layer base {
   body {
     @apply bg-background text-foreground font-sans transition-colors duration-300;
+    font-family: var(--font-body), "Inter", sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-header), "Assistant", sans-serif;
+    font-weight: 700;
+    line-height: 1.2;
   }
   h1, h2, h3 {
     color: var(--accent);

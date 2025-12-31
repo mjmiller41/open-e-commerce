@@ -5,7 +5,9 @@
   "type": "module",
   "homepage": "https://mjmiller41.github.io/open-e-commerce",
   "scripts": {
+    "predev": "node scripts/manage-fonts.js",
     "dev": "vite",
+    "prebuild": "node scripts/manage-fonts.js",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",

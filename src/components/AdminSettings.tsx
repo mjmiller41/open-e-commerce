@@ -4,6 +4,7 @@ import { useStoreSettings } from "../context/StoreSettingsContext";
 import logger from "../lib/logger";
 import { SectionHeader } from "./ui/SectionHeader";
 import { SubSectionHeader } from "./ui/SubSectionHeader.tsx";
+import { AVAILABLE_FONTS } from "../constants/fonts";
 
 export function AdminSettings() {
 	const { settings, updateSettings, loading } = useStoreSettings();
@@ -29,8 +30,6 @@ export function AdminSettings() {
 		// Typography
 		type_header_font: "Assistant",
 		type_body_font: "Inter",
-		type_header_scale: 100,
-		type_body_scale: 100,
 
 		// Layout
 		page_width: 1200,
@@ -123,6 +122,8 @@ export function AdminSettings() {
 		return <div className="p-8 text-center text-muted-foreground">Loading settings...</div>;
 	}
 
+	const uniqueFonts = Array.from(new Set(AVAILABLE_FONTS.map(f => f.family))).sort();
+
 	return (
 		<div className="max-w-5xl">
 			<SectionHeader title="Store Settings">
@@ -191,23 +192,21 @@ export function AdminSettings() {
 						<div className="space-y-2">
 							<label className="text-sm font-medium">Header Font</label>
 							<select name="type_header_font" value={formData.type_header_font} onChange={handleChange} className="input">
-								<option value="Assistant">Assistant</option>
-								<option value="Playfair Display">Playfair Display</option>
-								<option value="Roboto">Roboto</option>
-								<option value="Open Sans">Open Sans</option>
+								{uniqueFonts.map(font => (
+									<option key={font} value={font}>{font}</option>
+								))}
+								<option value="sans-serif">System Sans</option>
 							</select>
 						</div>
 						<div className="space-y-2">
 							<label className="text-sm font-medium">Body Font</label>
 							<select name="type_body_font" value={formData.type_body_font} onChange={handleChange} className="input">
-								<option value="Inter">Inter</option>
-								<option value="Helvetica">Helvetica</option>
-								<option value="Arial">Arial</option>
+								{uniqueFonts.map(font => (
+									<option key={font} value={font}>{font}</option>
+								))}
 								<option value="sans-serif">System Sans</option>
 							</select>
 						</div>
-						<RangeInput label="Header Scale (%)" name="type_header_scale" value={formData.type_header_scale} min={50} max={200} step={5} onChange={handleChange} />
-						<RangeInput label="Body Scale (%)" name="type_body_scale" value={formData.type_body_scale} min={50} max={150} step={5} onChange={handleChange} />
 					</div>
 				</div>
 

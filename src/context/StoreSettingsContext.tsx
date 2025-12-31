@@ -2,6 +2,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { supabase } from "../lib/supabase";
 import logger from "../lib/logger";
+import { AVAILABLE_FONTS } from "../constants/fonts";
 
 export interface StoreSettings {
 	id: number;
@@ -25,8 +26,6 @@ export interface StoreSettings {
 	// Typography
 	type_header_font: string;
 	type_body_font: string;
-	type_header_scale: number;
-	type_body_scale: number;
 
 	// Layout
 	page_width: number;
@@ -79,6 +78,7 @@ const StoreSettingsContext = createContext<StoreSettingsContextType>({
 	refreshSettings: async () => { },
 });
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useStoreSettings = () => useContext(StoreSettingsContext);
 
 export function StoreSettingsProvider({ children }: { children: React.ReactNode }) {
@@ -116,9 +116,30 @@ export function StoreSettingsProvider({ children }: { children: React.ReactNode 
 			document.head.appendChild(styleEl);
 		}
 
+
+		// Generate Font Faces
+		const fontFaces = AVAILABLE_FONTS.map(font => {
+			const weight = font.name.toLowerCase().includes('bold') ? '700' : '400';
+			// Ensure leading slash but handle if base url has trailing slash
+			const baseUrl = import.meta.env.BASE_URL.endsWith('/')
+				? import.meta.env.BASE_URL
+				: `${import.meta.env.BASE_URL}/`;
+
+			return `
+				@font-face {
+					font-family: '${font.family}';
+					src: url('${baseUrl}fonts/${font.fileName}') format('woff2');
+					font-weight: ${weight};
+					font-style: normal;
+					font-display: swap;
+				}
+			`;
+		}).join('\n');
+
 		// Recommended Border Colors (Complimentary Neutrals to Blue Primary)
 		// Accent 1: Slate 500 (#64748b) - Structural Borders
 		// Accent 2: Slate 600 (#475569) - Active/Focus Borders (Rings)
+
 
 		const lightCss = `
 			:root {
@@ -135,6 +156,10 @@ export function StoreSettingsProvider({ children }: { children: React.ReactNode 
 
 				/* Accent 2: Focus Rings & Strong Borders */
 				--ring: ${s.colors_accent_2 || '#475569'};
+
+				/* Typography */
+				--font-header: '${s.type_header_font}', sans-serif;
+				--font-body: '${s.type_body_font}', sans-serif;
 			}
 		`;
 
@@ -150,7 +175,7 @@ export function StoreSettingsProvider({ children }: { children: React.ReactNode 
 			}
 		`;
 
-		styleEl.innerHTML = lightCss + darkCss;
+		styleEl.innerHTML = fontFaces + lightCss + darkCss;
 	};
 
 	const updateSettings = async (newSettings: Partial<StoreSettings>) => {
