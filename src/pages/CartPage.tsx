@@ -2,6 +2,8 @@ import { Trash2, ArrowRight, ShoppingBag } from 'lucide-react';
 import { QuantityControl } from '../components/QuantityControl';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/useCart';
+import { useStoreSettings } from '../context/StoreSettingsContext';
+import { formatCurrency } from '../lib/currency';
 import { useEffect, useState } from 'react';
 import { supabase, type Product } from '../lib/supabase';
 import logger from '../lib/logger';
@@ -16,6 +18,7 @@ import { PageHeader } from '../components/ui/PageHeader';
  */
 export function CartPage() {
 	const { cartItems, updateQuantity, removeFromCart } = useCart();
+	const { settings } = useStoreSettings();
 	const [products, setProducts] = useState<Map<number, Product>>(new Map());
 	const [loading, setLoading] = useState(true);
 	const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -117,7 +120,7 @@ export function CartPage() {
 									<h3 className="font-semibold text-lg group-hover:text-primary transition-colors">{product.name}</h3>
 								</Link>
 								<Link to={`/category/${product.category.split('>').map(s => encodeURIComponent(s.trim())).join('/')}`} className="text-sm text-muted-foreground">{product.category}</Link>
-								<div className="text-primary font-bold mt-1">${product.price.toFixed(2)}</div>
+								<div className="text-primary font-bold mt-1">{formatCurrency(product.price, settings)}</div>
 							</div>
 
 							<div className="flex flex-col items-end gap-4">
@@ -145,7 +148,7 @@ export function CartPage() {
 
 						<div className="flex justify-between mb-2 text-sm text-muted-foreground">
 							<span>Subtotal</span>
-							<span>${total.toFixed(2)}</span>
+							<span>{formatCurrency(total, settings)}</span>
 						</div>
 						<div className="flex justify-between mb-2 text-sm text-muted-foreground">
 							<span>Shipping</span>
@@ -158,7 +161,7 @@ export function CartPage() {
 
 						<div className="flex justify-between border-t border-border pt-4 mb-6 font-bold text-xl">
 							<span>Total</span>
-							<span className="text-primary">${total.toFixed(2)}</span>
+							<span className="text-primary">{formatCurrency(total, settings)}</span>
 						</div>
 
 						<button className="btn btn-primary w-full" onClick={() => setIsCheckoutOpen(true)}>

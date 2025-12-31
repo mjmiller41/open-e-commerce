@@ -31,6 +31,12 @@ export interface CartContextType {
   clearCart: () => void;
   /** The total number of items in the cart (sum of quantities). */
   cartCount: number;
+  /** Whether the cart drawer is currently open. */
+  isCartOpen: boolean;
+  /** Opens the cart drawer. */
+  openCart: () => void;
+  /** Closes the cart drawer. */
+  closeCart: () => void;
 }
 
 /**

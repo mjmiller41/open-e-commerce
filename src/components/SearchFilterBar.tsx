@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, SlidersHorizontal, X, ChevronRight, ChevronDown } from 'lucide-react';
 import { type CategoryNode } from '../lib/categoryUtils';
+import { supabase, type Product } from '../lib/supabase';
+import { Link } from 'react-router-dom';
+import { useStoreSettings } from '../context/StoreSettingsContext';
+import { formatCurrency } from '../lib/currency';
 
 interface SearchFilterBarProps {
 	onSearch: (searchTerm: string) => void;
@@ -25,16 +29,46 @@ export function SearchFilterBar({ onSearch, onFilterChange, onSortChange, catego
 	const [isCategoryOpen, setIsCategoryOpen] = useState(false);
 	const categoryDropdownRef = useRef<HTMLDivElement>(null);
 
+	// Predictive Search State
+	const [suggestions, setSuggestions] = useState<Partial<Product>[]>([]);
+	const [showSuggestions, setShowSuggestions] = useState(false);
+	const searchRef = useRef<HTMLDivElement>(null);
+	const { settings } = useStoreSettings();
+
 	// Debounce search
 	useEffect(() => {
 		const timeoutId = setTimeout(() => {
 			onSearch(searchTerm);
+
+			// Fetch suggestions if enabled
+			if (settings?.predictive_search_enabled && searchTerm.length > 2) {
+				fetchSuggestions(searchTerm);
+			} else {
+				setSuggestions([]);
+			}
 		}, 500);
 		return () => clearTimeout(timeoutId);
-	}, [searchTerm, onSearch]);
+	}, [searchTerm, onSearch, settings?.predictive_search_enabled]);
 
+	const fetchSuggestions = async (term: string) => {
+		const { data } = await supabase
+			.from('products')
+			.select('id, name, price, image, category')
+			.ilike('name', `%${term}%`)
+			.limit(5);
+
+		if (data) {
+			setSuggestions(data);
+			setShowSuggestions(true);
+		}
+	};
+
+	// Close suggestions on click outside
 	useEffect(() => {
 		function handleClickOutside(event: MouseEvent) {
+			if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+				setShowSuggestions(false);
+			}
 			if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target as Node)) {
 				setIsCategoryOpen(false);
 			}
@@ -125,15 +159,51 @@ export function SearchFilterBar({ onSearch, onFilterChange, onSortChange, catego
 		<div className="bg-card border border-border rounded-lg shadow-sm p-4 mb-8">
 			<div className="flex flex-col md:flex-row gap-4">
 				{/* Search Field */}
-				<div className="flex-1 relative">
+				<div className="flex-1 relative" ref={searchRef}>
 					<Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
 					<input
 						type="text"
 						placeholder="Search products..."
 						value={searchTerm}
-						onChange={(e) => setSearchTerm(e.target.value)}
+						onChange={(e) => {
+							setSearchTerm(e.target.value);
+							if (e.target.value.length <= 2) setShowSuggestions(false);
+						}}
+						onFocus={() => {
+							if (suggestions.length > 0) setShowSuggestions(true);
+						}}
 						className="w-full pl-9 pr-4 py-2 rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
 					/>
+
+					{/* Predictive Search Suggestions */}
+					{showSuggestions && suggestions.length > 0 && (
+						<div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-lg z-50 overflow-hidden">
+							<div className="p-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-muted/30">Suggestions</div>
+							{suggestions.map(product => (
+								<Link
+									key={product.id}
+									to={`/product/${product.id}`}
+									className="flex items-center gap-3 p-2 hover:bg-secondary/50 transition-colors border-b border-border/50 last:border-0"
+									onClick={() => setShowSuggestions(false)}
+								>
+									<div className="w-10 h-10 rounded bg-muted overflow-hidden shrink-0">
+										<img
+											src={product.image || `${import.meta.env.BASE_URL}logo.png`}
+											alt={product.name}
+											className="w-full h-full object-cover"
+										/>
+									</div>
+									<div className="flex-1 min-w-0">
+										<div className="font-medium truncate text-sm">{product.name}</div>
+										<div className="text-xs text-muted-foreground truncate">{product.category}</div>
+									</div>
+									<div className="font-semibold text-sm whitespace-nowrap">
+										{product.price !== undefined ? formatCurrency(product.price, settings) : ''}
+									</div>
+								</Link>
+							))}
+						</div>
+					)}
 				</div>
 
 				{/* Category Dropdown (Desktop) */}

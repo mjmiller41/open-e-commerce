@@ -3,6 +3,8 @@ import { ShoppingCart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { QuantityControl } from './QuantityControl';
 import { Badge } from './ui/Badge';
+import { useStoreSettings } from '../context/StoreSettingsContext';
+import { formatCurrency } from '../lib/currency';
 
 /**
  * Props for the ProductCard component.
@@ -33,6 +35,8 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 	const categoryUrl = categorySegments.length > 0
 		? `/category/${categorySegments.map(s => encodeURIComponent(s)).join('/')}`
 		: '#';
+
+	const { settings } = useStoreSettings();
 
 	return (
 		<div className="card flex flex-col h-full group hover:shadow-lg hover:border-accent/50 transition-all duration-300 relative">
@@ -115,7 +119,7 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 					<span className="text-xs text-muted-foreground">(0)</span>
 				</div>
 
-				<div className="font-bold text-xl mt-auto">${product.price.toFixed(2)}</div>
+				<div className="font-bold text-xl mt-auto">{formatCurrency(product.price, settings)}</div>
 
 				{/* Quick Add / Quantity - Controlled by CSS Variable (partially) */}
 				{/* We always show the "space" for it, but toggle visibility? Or remove from flow? 

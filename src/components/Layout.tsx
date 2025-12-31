@@ -6,6 +6,7 @@ import { useCart } from '../context/useCart';
 import { appConfig } from '../lib/config';
 import { useAuth } from '../context/AuthContext';
 import { useStoreSettings } from '../context/StoreSettingsContext';
+import { CartDrawer } from './CartDrawer';
 
 /**
  * The shared layout component for the application.
@@ -14,7 +15,7 @@ import { useStoreSettings } from '../context/StoreSettingsContext';
  * @returns The rendered layout structure.
  */
 export function Layout() {
-	const { cartCount } = useCart();
+	const { cartCount, openCart } = useCart();
 	const { user, role, isAdmin, signOut } = useAuth();
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 	const dropdownRef = useRef<HTMLDivElement>(null);
@@ -43,6 +44,7 @@ export function Layout() {
 	return (
 
 		<div className="flex flex-col min-h-screen">
+			<CartDrawer />
 			<header className="sticky top-0 z-50 bg-[var(--bg-header)] backdrop-blur-md border-b border-border transition-colors duration-300">
 				<div className="mx-auto px-4 h-16 flex items-center justify-between" style={{ maxWidth: 'var(--container-width, 1200px)' }}>
 					<Link to="/" className="flex items-center gap-2 text-primary hover:opacity-80 transition-opacity">
@@ -53,14 +55,29 @@ export function Layout() {
 					<div className="flex items-center gap-4">
 						<ThemeToggle />
 
-						<Link to="/cart" className="btn btn-ghost relative" aria-label="Cart">
-							<ShoppingCart size={20} />
-							{cartCount > 0 && (
-								<span className="absolute -top-1 -right-1 bg-primary text-primary-foreground w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold">
-									{cartCount}
-								</span>
-							)}
-						</Link>
+						{settings?.cart_type === 'drawer' ? (
+							<button
+								onClick={() => openCart()}
+								className="btn btn-ghost relative"
+								aria-label="Cart"
+							>
+								<ShoppingCart size={20} />
+								{cartCount > 0 && (
+									<span className="absolute -top-1 -right-1 bg-primary text-primary-foreground w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold">
+										{cartCount}
+									</span>
+								)}
+							</button>
+						) : (
+							<Link to="/cart" className="btn btn-ghost relative" aria-label="Cart">
+								<ShoppingCart size={20} />
+								{cartCount > 0 && (
+									<span className="absolute -top-1 -right-1 bg-primary text-primary-foreground w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold">
+										{cartCount}
+									</span>
+								)}
+							</Link>
+						)}
 
 						{user ? (
 							<div className="relative" ref={dropdownRef}>

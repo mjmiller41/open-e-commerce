@@ -1,6 +1,9 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import type { Product } from '../lib/supabase';
 import { CartContext, type CartItem } from './useCart';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from './ToastContext';
+import { useStoreSettings } from './StoreSettingsContext';
 
 const CART_STORAGE_KEY = 'open-ecommerce-cart';
 
@@ -18,6 +21,9 @@ export function CartProvider(props: { children: ReactNode }) {
 		const stored = localStorage.getItem(CART_STORAGE_KEY);
 		return stored ? JSON.parse(stored) : [];
 	});
+	const { settings } = useStoreSettings();
+	const { addToast } = useToast();
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
@@ -35,6 +41,14 @@ export function CartProvider(props: { children: ReactNode }) {
 			}
 			return [...prev, { id: crypto.randomUUID(), productId: product.id, quantity: 1, product }];
 		});
+
+		if (settings?.cart_type === 'drawer') {
+			setIsCartOpen(true);
+		} else if (settings?.cart_type === 'notification') {
+			addToast(`Added ${product.name} to cart`, 'success');
+		} else if (settings?.cart_type === 'page') {
+			navigate('/cart');
+		}
 	};
 
 	const updateQuantity = (productId: number, delta: number) => {
@@ -59,8 +73,12 @@ export function CartProvider(props: { children: ReactNode }) {
 
 	const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
+	const [isCartOpen, setIsCartOpen] = useState(false);
+	const openCart = () => setIsCartOpen(true);
+	const closeCart = () => setIsCartOpen(false);
+
 	return (
-		<CartContext.Provider value={{ cartItems, addToCart, updateQuantity, removeFromCart, clearCart, cartCount }}>
+		<CartContext.Provider value={{ cartItems, addToCart, updateQuantity, removeFromCart, clearCart, cartCount, isCartOpen, openCart, closeCart }}>
 			{children}
 		</CartContext.Provider>
 	);

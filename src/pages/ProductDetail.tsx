@@ -5,6 +5,8 @@ import { ShoppingCart, ArrowLeft, Package, Truck, ShieldCheck } from 'lucide-rea
 import { useEffect, useState } from 'react';
 import { QuantityControl } from '../components/QuantityControl';
 import { useCart } from '../context/useCart';
+import { useStoreSettings } from '../context/StoreSettingsContext';
+import { formatCurrency } from '../lib/currency';
 
 /**
  * The product detail page.
@@ -20,6 +22,7 @@ export function ProductDetail() {
 
 	const { cartItems, addToCart, updateQuantity, removeFromCart } = useCart();
 	const cartItem = cartItems.find(item => item.productId === productId);
+	const { settings } = useStoreSettings();
 
 
 
@@ -156,7 +159,7 @@ export function ProductDetail() {
 					<h2 className="text-4xl font-bold mb-4 leading-tight">{product.name}</h2>
 
 					<div className="flex items-baseline gap-4 mb-6">
-						<div className="text-3xl font-bold text-foreground">${product.price.toFixed(2)}</div>
+						<div className="text-3xl font-bold text-foreground">{formatCurrency(product.price, settings)}</div>
 						{product.on_hand > 0 ? (
 							<span className="text-green-600 dark:text-green-400 font-medium text-sm flex items-center gap-1">
 								<span className="w-2 h-2 rounded-full bg-current"></span>
