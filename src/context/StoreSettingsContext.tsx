@@ -200,6 +200,14 @@ export function StoreSettingsProvider({ children }: { children: React.ReactNode 
 		`;
 
 		styleEl.innerHTML = fontFaces + lightCss + darkCss;
+
+		// Apply Favicon
+		if (s.favicon_url) {
+			const iconLinks = document.querySelectorAll("link[rel*='icon']");
+			iconLinks.forEach((link) => {
+				(link as HTMLLinkElement).href = s.favicon_url;
+			});
+		}
 	};
 
 	const updateSettings = async (newSettings: Partial<StoreSettings>) => {
