@@ -9,27 +9,96 @@ export function AdminSettings() {
 		store_name: "",
 		support_email: "",
 		logo_url: "",
+
+		// Global Colors - Brand
 		primary_color: "#2563eb",
 		secondary_color: "#f8fafc",
+
+		// Global Colors - Theme
+		colors_background_light: "#FFFFFF",
+		colors_background_dark: "#09090b",
+		colors_text_light: "#121212",
+		colors_text_dark: "#f8fafc",
+		colors_solid_button_labels: "#FFFFFF",
+		colors_accent_1: "#000000",
+		colors_accent_2: "#334FB4",
+		gradient_background_1: "",
+
+		// Typography
+		type_header_font: "Assistant",
+		type_body_font: "Inter",
+		type_header_scale: 100,
+		type_body_scale: 100,
+
+		// Layout
+		page_width: 1200,
+		spacing_grid_horizontal: 8,
+		spacing_grid_vertical: 8,
+
+		// Buttons & Inputs
+		buttons_border_thickness: 1,
+		buttons_opacity: 100,
+		buttons_radius: 0,
+		buttons_shadow_opacity: 0,
+		buttons_shadow_horizontal_offset: 0,
+
+		// Product Card
+		image_ratio: "adapt",
+		show_secondary_image: true,
+		show_vendor: false,
+		show_rating: false,
+		enable_quick_add: true,
+
+		// Social Media
+		social_facebook_link: "",
+		social_instagram_link: "",
+		social_youtube_link: "",
+		social_tiktok_link: "",
+		social_twitter_link: "",
+		social_pinterest_link: "",
+		social_snapchat_link: "",
+		social_tumblr_link: "",
+		social_vimeo_link: "",
+
+		// Miscellaneous
+		favicon_url: "",
+		currency_code_enabled: true,
+		cart_type: "drawer",
+		predictive_search_enabled: true,
 	});
 	const [saving, setSaving] = useState(false);
 	const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
 	useEffect(() => {
 		if (settings) {
-			setFormData({
-				store_name: settings.store_name || "",
+			setFormData((prev) => ({
+				...prev,
+				...settings,
+				// Ensure nulls are handled for controlled inputs
 				support_email: settings.support_email || "",
 				logo_url: settings.logo_url || "",
-				primary_color: settings.primary_color || "#2563eb",
-				secondary_color: settings.secondary_color || "#f8fafc",
-			});
+				gradient_background_1: settings.gradient_background_1 || "",
+				favicon_url: settings.favicon_url || "",
+				social_facebook_link: settings.social_facebook_link || "",
+				social_instagram_link: settings.social_instagram_link || "",
+				social_youtube_link: settings.social_youtube_link || "",
+				social_tiktok_link: settings.social_tiktok_link || "",
+				social_twitter_link: settings.social_twitter_link || "",
+				social_pinterest_link: settings.social_pinterest_link || "",
+				social_snapchat_link: settings.social_snapchat_link || "",
+				social_tumblr_link: settings.social_tumblr_link || "",
+				social_vimeo_link: settings.social_vimeo_link || "",
+			}));
 		}
 	}, [settings]);
 
-	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const { name, value } = e.target;
-		setFormData((prev) => ({ ...prev, [name]: value }));
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+		const { name, value, type } = e.target;
+		setFormData((prev) => ({
+			...prev,
+			[name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked :
+				type === 'number' || type === 'range' ? Number(value) : value
+		}));
 	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
@@ -53,123 +122,180 @@ export function AdminSettings() {
 	}
 
 	return (
-		<div className="max-w-4xl">
+		<div className="max-w-5xl">
 			<div className="mb-6">
 				<h2 className="text-2xl font-bold tracking-tight">Store Settings</h2>
 				<p className="text-muted-foreground">Manage your store's branding and configuration.</p>
 			</div>
 
-			<form onSubmit={handleSubmit} className="space-y-8">
-				<div className="grid gap-6 md:grid-cols-2">
-					{/* General Settings */}
-					<div className="card p-6 space-y-4">
-						<h3 className="font-semibold text-lg border-b pb-2">General</h3>
+			<form onSubmit={handleSubmit} className="space-y-8 pb-20">
 
-						<div className="space-y-2">
-							<label className="text-sm font-medium">Store Name</label>
-							<input
-								type="text"
-								name="store_name"
-								value={formData.store_name}
-								onChange={handleChange}
-								className="input"
-								placeholder="My Awesome Store"
-								required
-							/>
-						</div>
+				<div className="card p-6 space-y-4">
+					<h3 className="font-semibold text-lg border-b pb-2">General Info</h3>
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<TextInput label="Store Name" name="store_name" value={formData.store_name} onChange={handleChange} required />
+						<TextInput label="Support Email" name="support_email" value={formData.support_email} onChange={handleChange} type="email" />
+						<TextInput label="Logo URL" name="logo_url" value={formData.logo_url} onChange={handleChange} />
+					</div>
+				</div>
 
-						<div className="space-y-2">
-							<label className="text-sm font-medium">Support Email</label>
-							<input
-								type="email"
-								name="support_email"
-								value={formData.support_email}
-								onChange={handleChange}
-								className="input"
-								placeholder="support@example.com"
-							/>
+				{/* 1. Global Colors */}
+				<div className="card p-6 space-y-6">
+					<h3 className="font-semibold text-lg border-b pb-2">Global Colors</h3>
+
+					{/* Brand Colors */}
+					<div className="space-y-4">
+						<h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Brand Identity</h4>
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<ColorInput label="Primary Color" name="primary_color" value={formData.primary_color} onChange={handleChange} />
+							<ColorInput label="Secondary Color" name="secondary_color" value={formData.secondary_color} onChange={handleChange} />
 						</div>
 					</div>
 
-					{/* Branding Settings */}
-					<div className="card p-6 space-y-4">
-						<h3 className="font-semibold text-lg border-b pb-2">Branding</h3>
-
-						<div className="space-y-2">
-							<label className="text-sm font-medium">Logo URL</label>
-							<div className="flex gap-2">
-								<input
-									type="text"
-									name="logo_url"
-									value={formData.logo_url}
-									onChange={handleChange}
-									className="input flex-1"
-									placeholder="https://example.com/logo.png"
-								/>
-								{formData.logo_url && (
-									<div className="w-10 h-10 border rounded bg-muted flex items-center justify-center overflow-hidden shrink-0">
-										<img src={formData.logo_url} alt="Logo Preview" className="w-full h-full object-contain" />
-									</div>
-								)}
-							</div>
-							<p className="text-xs text-muted-foreground">URL to your store logo (square or landscape recommended).</p>
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-6">
+						{/* Light Mode */}
+						<div className="space-y-4">
+							<h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Light Mode</h4>
+							<ColorInput label="Background" name="colors_background_light" value={formData.colors_background_light} onChange={handleChange} />
+							<ColorInput label="Text" name="colors_text_light" value={formData.colors_text_light} onChange={handleChange} />
 						</div>
 
-						<div className="grid grid-cols-2 gap-4">
-							<div className="space-y-2">
-								<label className="text-sm font-medium">Primary Color</label>
-								<div className="flex items-center gap-2">
-									<input
-										type="color"
-										name="primary_color"
-										value={/^#[0-9A-F]{6}$/i.test(formData.primary_color) ? formData.primary_color : "#000000"}
-										onChange={handleChange}
-										className="w-10 h-10 p-1 rounded cursor-pointer border border-input"
-										title="Choose color"
-									/>
-									<input
-										type="text"
-										name="primary_color"
-										value={formData.primary_color}
-										onChange={handleChange}
-										className="input font-mono"
-										placeholder="#000000 or blue"
-									/>
-								</div>
-							</div>
+						{/* Dark Mode */}
+						<div className="space-y-4">
+							<h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Dark Mode</h4>
+							<ColorInput label="Background" name="colors_background_dark" value={formData.colors_background_dark} onChange={handleChange} />
+							<ColorInput label="Text" name="colors_text_dark" value={formData.colors_text_dark} onChange={handleChange} />
+						</div>
+					</div>
 
+					{/* Theme Accents */}
+					<div className="space-y-4 pt-4 border-t">
+						<h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Theme Accents</h4>
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<ColorInput label="Accent 1" name="colors_accent_1" value={formData.colors_accent_1} onChange={handleChange} />
+							<ColorInput label="Accent 2" name="colors_accent_2" value={formData.colors_accent_2} onChange={handleChange} />
+							<ColorInput label="Solid Button Labels" name="colors_solid_button_labels" value={formData.colors_solid_button_labels} onChange={handleChange} />
 							<div className="space-y-2">
-								<label className="text-sm font-medium">Secondary Color</label>
-								<div className="flex items-center gap-2">
-									<input
-										type="color"
-										name="secondary_color"
-										value={/^#[0-9A-F]{6}$/i.test(formData.secondary_color) ? formData.secondary_color : "#000000"}
-										onChange={handleChange}
-										className="w-10 h-10 p-1 rounded cursor-pointer border border-input"
-										title="Choose color"
-									/>
-									<input
-										type="text"
-										name="secondary_color"
-										value={formData.secondary_color}
-										onChange={handleChange}
-										className="input font-mono"
-										placeholder="#000000 or red"
-									/>
-								</div>
+								<label className="text-sm font-medium">Gradient Background</label>
+								<input type="text" name="gradient_background_1" value={formData.gradient_background_1} onChange={handleChange} className="input" placeholder="linear-gradient(...)" />
 							</div>
 						</div>
 					</div>
 				</div>
 
-				{message && (
-					<div className={`p-4 rounded-md ${message.type === 'success' ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400' : 'bg-destructive/10 text-destructive'}`}>
-						{message.text}
+				{/* 2. Typography */}
+				<div className="card p-6 space-y-4">
+					<h3 className="font-semibold text-lg border-b pb-2">Typography</h3>
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div className="space-y-2">
+							<label className="text-sm font-medium">Header Font</label>
+							<select name="type_header_font" value={formData.type_header_font} onChange={handleChange} className="input">
+								<option value="Assistant">Assistant</option>
+								<option value="Playfair Display">Playfair Display</option>
+								<option value="Roboto">Roboto</option>
+								<option value="Open Sans">Open Sans</option>
+							</select>
+						</div>
+						<div className="space-y-2">
+							<label className="text-sm font-medium">Body Font</label>
+							<select name="type_body_font" value={formData.type_body_font} onChange={handleChange} className="input">
+								<option value="Inter">Inter</option>
+								<option value="Helvetica">Helvetica</option>
+								<option value="Arial">Arial</option>
+								<option value="sans-serif">System Sans</option>
+							</select>
+						</div>
+						<RangeInput label="Header Scale (%)" name="type_header_scale" value={formData.type_header_scale} min={50} max={200} step={5} onChange={handleChange} />
+						<RangeInput label="Body Scale (%)" name="type_body_scale" value={formData.type_body_scale} min={50} max={150} step={5} onChange={handleChange} />
 					</div>
-				)}
+				</div>
 
-				<div className="flex justify-end pt-4">
+				{/* 3. Layout */}
+				<div className="card p-6 space-y-4">
+					<h3 className="font-semibold text-lg border-b pb-2">Layout</h3>
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<RangeInput label="Page Width (px)" name="page_width" value={formData.page_width} min={800} max={1600} step={10} onChange={handleChange} />
+						<RangeInput label="Grid Spacing Horizontal (px)" name="spacing_grid_horizontal" value={formData.spacing_grid_horizontal} min={0} max={100} step={1} onChange={handleChange} />
+						<RangeInput label="Grid Spacing Vertical (px)" name="spacing_grid_vertical" value={formData.spacing_grid_vertical} min={0} max={100} step={1} onChange={handleChange} />
+					</div>
+				</div>
+
+				{/* 4. Buttons & Inputs */}
+				<div className="card p-6 space-y-4">
+					<h3 className="font-semibold text-lg border-b pb-2">Buttons & Inputs</h3>
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<RangeInput label="Border Thickness (px)" name="buttons_border_thickness" value={formData.buttons_border_thickness} min={0} max={10} step={1} onChange={handleChange} />
+						<RangeInput label="Opacity (%)" name="buttons_opacity" value={formData.buttons_opacity} min={0} max={100} step={5} onChange={handleChange} />
+						<RangeInput label="Corner Radius (px)" name="buttons_radius" value={formData.buttons_radius} min={0} max={40} step={1} onChange={handleChange} />
+						<RangeInput label="Shadow Opacity (%)" name="buttons_shadow_opacity" value={formData.buttons_shadow_opacity} min={0} max={100} step={5} onChange={handleChange} />
+						<RangeInput label="Shadow Offset X (px)" name="buttons_shadow_horizontal_offset" value={formData.buttons_shadow_horizontal_offset} min={-20} max={20} step={1} onChange={handleChange} />
+					</div>
+				</div>
+
+				{/* 5. Product Card */}
+				<div className="card p-6 space-y-4">
+					<h3 className="font-semibold text-lg border-b pb-2">Product Card</h3>
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div className="space-y-2">
+							<label className="text-sm font-medium">Image Ratio</label>
+							<select name="image_ratio" value={formData.image_ratio} onChange={handleChange} className="input">
+								<option value="adapt">Adapt to Image</option>
+								<option value="portrait">Portrait</option>
+								<option value="square">Square</option>
+							</select>
+						</div>
+						<div className="flex flex-col gap-2 pt-6">
+							<CheckboxInput label="Show Secondary Image on Hover" name="show_secondary_image" checked={formData.show_secondary_image} onChange={handleChange} />
+							<CheckboxInput label="Show Vendor" name="show_vendor" checked={formData.show_vendor} onChange={handleChange} />
+							<CheckboxInput label="Show Rating" name="show_rating" checked={formData.show_rating} onChange={handleChange} />
+							<CheckboxInput label="Enable Quick Add" name="enable_quick_add" checked={formData.enable_quick_add} onChange={handleChange} />
+						</div>
+					</div>
+				</div>
+
+				{/* 6. Social Media */}
+				<div className="card p-6 space-y-4">
+					<h3 className="font-semibold text-lg border-b pb-2">Social Media</h3>
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<TextInput label="Facebook Link" name="social_facebook_link" value={formData.social_facebook_link} onChange={handleChange} placeholder="https://facebook.com/..." />
+						<TextInput label="Instagram Link" name="social_instagram_link" value={formData.social_instagram_link} onChange={handleChange} placeholder="https://instagram.com/..." />
+						<TextInput label="YouTube Link" name="social_youtube_link" value={formData.social_youtube_link} onChange={handleChange} placeholder="https://youtube.com/..." />
+						<TextInput label="TikTok Link" name="social_tiktok_link" value={formData.social_tiktok_link} onChange={handleChange} placeholder="https://tiktok.com/..." />
+						<TextInput label="Twitter (X) Link" name="social_twitter_link" value={formData.social_twitter_link} onChange={handleChange} placeholder="https://twitter.com/..." />
+						<TextInput label="Pinterest Link" name="social_pinterest_link" value={formData.social_pinterest_link} onChange={handleChange} placeholder="https://pinterest.com/..." />
+					</div>
+				</div>
+
+				{/* 7. Miscellaneous */}
+				<div className="card p-6 space-y-4">
+					<h3 className="font-semibold text-lg border-b pb-2">Miscellaneous</h3>
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div className="space-y-2 md:col-span-2">
+							<label className="text-sm font-medium">Favicon URL</label>
+							<input type="text" name="favicon_url" value={formData.favicon_url} onChange={handleChange} className="input" placeholder="https://example.com/favicon.png" />
+						</div>
+						<div className="space-y-2">
+							<label className="text-sm font-medium">Cart Type</label>
+							<select name="cart_type" value={formData.cart_type} onChange={handleChange} className="input">
+								<option value="drawer">Drawer</option>
+								<option value="page">Page</option>
+								<option value="notification">Notification</option>
+							</select>
+						</div>
+						<div className="flex flex-col gap-2 pt-6">
+							<CheckboxInput label="Enable Currency Code" name="currency_code_enabled" checked={formData.currency_code_enabled} onChange={handleChange} />
+							<CheckboxInput label="Enable Predictive Search" name="predictive_search_enabled" checked={formData.predictive_search_enabled} onChange={handleChange} />
+						</div>
+					</div>
+				</div>
+
+				{/* Save Button */}
+				<div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t z-10 flex justify-end gap-4 max-w-[var(--container-width)] mx-auto">
+					{message && (
+						<div className={`px-4 py-2 rounded-md flex items-center ${message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+							{message.text}
+						</div>
+					)}
 					<button
 						type="submit"
 						disabled={saving}
@@ -179,6 +305,88 @@ export function AdminSettings() {
 					</button>
 				</div>
 			</form>
+		</div>
+	);
+}
+
+// Helper Components
+
+function ColorInput({ label, name, value, onChange }: { label: string, name: string, value: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) {
+	return (
+		<div className="space-y-2">
+			<label className="text-sm font-medium">{label}</label>
+			<div className="flex items-center gap-2">
+				<input
+					type="color"
+					name={name}
+					value={/^#[0-9A-F]{6}$/i.test(value) ? value : "#000000"}
+					onChange={onChange}
+					className="w-10 h-10 p-1 rounded cursor-pointer border border-input"
+					title="Choose color"
+				/>
+				<input
+					type="text"
+					name={name}
+					value={value}
+					onChange={onChange}
+					className="input font-mono"
+					placeholder="#000000"
+				/>
+			</div>
+		</div>
+	);
+}
+
+function RangeInput({ label, name, value, min, max, step, onChange }: { label: string, name: string, value: number, min: number, max: number, step: number, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) {
+	return (
+		<div className="space-y-2">
+			<div className="flex justify-between">
+				<label className="text-sm font-medium">{label}</label>
+				<span className="text-xs text-muted-foreground">{value}</span>
+			</div>
+			<input
+				type="range"
+				name={name}
+				value={value}
+				min={min}
+				max={max}
+				step={step}
+				onChange={onChange}
+				className="w-full"
+			/>
+		</div>
+	);
+}
+
+function CheckboxInput({ label, name, checked, onChange }: { label: string, name: string, checked: boolean, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) {
+	return (
+		<div className="flex items-center gap-2">
+			<input
+				type="checkbox"
+				id={name}
+				name={name}
+				checked={checked}
+				onChange={onChange}
+				className="w-4 h-4 rounded border-input"
+			/>
+			<label htmlFor={name} className="text-sm cursor-pointer select-none">{label}</label>
+		</div>
+	);
+}
+
+function TextInput({ label, name, value, onChange, placeholder, type = "text", required = false }: { label: string, name: string, value: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, placeholder?: string, type?: string, required?: boolean }) {
+	return (
+		<div className="space-y-2">
+			<label className="text-sm font-medium">{label}</label>
+			<input
+				type={type}
+				name={name}
+				value={value}
+				onChange={onChange}
+				className="input"
+				placeholder={placeholder}
+				required={required}
+			/>
 		</div>
 	);
 }

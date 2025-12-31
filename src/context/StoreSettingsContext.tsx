@@ -11,6 +11,58 @@ export interface StoreSettings {
 	secondary_color: string;
 	logo_url: string | null;
 	updated_at: string;
+
+	// Global Colors
+	colors_background_light: string;
+	colors_background_dark: string;
+	colors_text_light: string;
+	colors_text_dark: string;
+	colors_solid_button_labels: string;
+	colors_accent_1: string;
+	colors_accent_2: string;
+	gradient_background_1: string | null;
+
+	// Typography
+	type_header_font: string;
+	type_body_font: string;
+	type_header_scale: number;
+	type_body_scale: number;
+
+	// Layout
+	page_width: number;
+	spacing_grid_horizontal: number;
+	spacing_grid_vertical: number;
+
+	// Buttons & Inputs
+	buttons_border_thickness: number;
+	buttons_opacity: number;
+	buttons_radius: number;
+	buttons_shadow_opacity: number;
+	buttons_shadow_horizontal_offset: number;
+
+	// Product Card
+	image_ratio: string;
+	show_secondary_image: boolean;
+	show_vendor: boolean;
+	show_rating: boolean;
+	enable_quick_add: boolean;
+
+	// Social Media
+	social_facebook_link: string;
+	social_instagram_link: string;
+	social_youtube_link: string;
+	social_tiktok_link: string;
+	social_twitter_link: string;
+	social_pinterest_link: string;
+	social_snapchat_link: string;
+	social_tumblr_link: string;
+	social_vimeo_link: string;
+
+	// Miscellaneous
+	favicon_url: string;
+	currency_code_enabled: boolean;
+	cart_type: string;
+	predictive_search_enabled: boolean;
 }
 
 interface StoreSettingsContextType {
