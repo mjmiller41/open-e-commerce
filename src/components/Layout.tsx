@@ -44,7 +44,7 @@ export function Layout() {
 
 		<div className="flex flex-col min-h-screen">
 			<header className="sticky top-0 z-50 bg-[var(--bg-header)] backdrop-blur-md border-b border-border transition-colors duration-300">
-				<div className="container mx-auto px-4 h-16 flex items-center justify-between">
+				<div className="mx-auto px-4 h-16 flex items-center justify-between" style={{ maxWidth: 'var(--container-width, 1200px)' }}>
 					<Link to="/" className="flex items-center gap-2 text-primary hover:opacity-80 transition-opacity">
 						<img src={settings?.logo_url || "logo.png"} alt="Logo" className="w-8 h-8 object-contain" />
 						<h1 className="font-bold text-xl text-primary leading-none">{settings?.store_name || appConfig.siteTitle}</h1>
@@ -119,13 +119,13 @@ export function Layout() {
 			</header>
 
 			<main className="flex-1 py-8">
-				<div className="container mx-auto px-4">
+				<div className="mx-auto px-4" style={{ maxWidth: 'var(--container-width, 1200px)' }}>
 					<Outlet />
 				</div>
 			</main>
 
 			<footer className="mt-auto border-t border-border py-8 bg-muted text-muted-foreground text-center text-sm">
-				<div className="container mx-auto px-4">
+				<div className="mx-auto px-4" style={{ maxWidth: 'var(--container-width, 1200px)' }}>
 					<p>&copy; {new Date().getFullYear()} {appConfig.footer?.text || appConfig.siteTitle}</p>
 				</div>
 			</footer>

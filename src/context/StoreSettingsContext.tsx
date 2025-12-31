@@ -160,6 +160,11 @@ export function StoreSettingsProvider({ children }: { children: React.ReactNode 
 				/* Typography */
 				--font-header: '${s.type_header_font}', sans-serif;
 				--font-body: '${s.type_body_font}', sans-serif;
+
+				/* Layout */
+				--container-width: ${s.page_width}px;
+				--grid-spacing-horizontal: ${s.spacing_grid_horizontal}px;
+				--grid-spacing-vertical: ${s.spacing_grid_vertical}px;
 			}
 		`;
 
