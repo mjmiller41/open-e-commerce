@@ -46,7 +46,7 @@ export function AdminSettings() {
 		// Product Card
 		image_ratio: "adapt",
 		show_secondary_image: true,
-		show_vendor: false,
+		show_brand: false,
 		show_rating: false,
 		enable_quick_add: true,
 
@@ -248,7 +248,7 @@ export function AdminSettings() {
 						</div>
 						<div className="flex flex-col gap-2 pt-6">
 							<CheckboxInput label="Show Secondary Image on Hover" name="show_secondary_image" checked={formData.show_secondary_image} onChange={handleChange} />
-							<CheckboxInput label="Show Vendor" name="show_vendor" checked={formData.show_vendor} onChange={handleChange} />
+							<CheckboxInput label="Show Brand" name="show_brand" checked={formData.show_brand} onChange={handleChange} />
 							<CheckboxInput label="Show Rating" name="show_rating" checked={formData.show_rating} onChange={handleChange} />
 							<CheckboxInput label="Enable Quick Add" name="enable_quick_add" checked={formData.enable_quick_add} onChange={handleChange} />
 						</div>

@@ -89,7 +89,7 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 						{/* Vendor Display - Controlled by CSS Variable */}
 						<div
 							className="text-[10px] text-muted-foreground uppercase font-medium"
-							style={{ display: "var(--card-show-vendor, none)" }}
+							style={{ display: "var(--card-show-brand, none)" }}
 						>
 							{product.brand || "Brand"}
 						</div>

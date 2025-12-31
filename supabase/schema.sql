@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict w4bWNaaGUqqay8SegyuzbIVCQ5QDCURi83rAr4g5CeIx5UDQ1FwhtFaO8qzKspG
+\restrict NAxzZyrz5tdR50I3xZloxqt7cSDMmQzavfg6DREHl4xAebatgNNa1NMjvDhqCtU
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.7 (Ubuntu 17.7-3.pgdg24.04+1)
@@ -3388,7 +3388,7 @@ CREATE TABLE public.store_settings (
     buttons_shadow_horizontal_offset integer DEFAULT 0,
     image_ratio text DEFAULT 'adapt'::text,
     show_secondary_image boolean DEFAULT true,
-    show_vendor boolean DEFAULT false,
+    show_brand boolean DEFAULT false,
     show_rating boolean DEFAULT false,
     enable_quick_add boolean DEFAULT true,
     social_facebook_link text DEFAULT ''::text,
@@ -3408,6 +3408,7 @@ CREATE TABLE public.store_settings (
     colors_background_dark text DEFAULT '#09090b'::text,
     colors_text_light text DEFAULT '#121212'::text,
     colors_text_dark text DEFAULT '#f8fafc'::text,
+    social_github_link text DEFAULT ''::text,
     CONSTRAINT single_row CHECK ((id = 1))
 );
 
@@ -7012,4 +7013,4 @@ ALTER EVENT TRIGGER pgrst_drop_watch OWNER TO supabase_admin;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict w4bWNaaGUqqay8SegyuzbIVCQ5QDCURi83rAr4g5CeIx5UDQ1FwhtFaO8qzKspG
+\unrestrict NAxzZyrz5tdR50I3xZloxqt7cSDMmQzavfg6DREHl4xAebatgNNa1NMjvDhqCtU

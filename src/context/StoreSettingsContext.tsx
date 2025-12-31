@@ -42,7 +42,7 @@ export interface StoreSettings {
 	// Product Card
 	image_ratio: string;
 	show_secondary_image: boolean;
-	show_vendor: boolean;
+	show_brand: boolean;
 	show_rating: boolean;
 	enable_quick_add: boolean;
 
@@ -193,7 +193,7 @@ export function StoreSettingsProvider({ children }: { children: React.ReactNode 
 				/* Product Card */
 				--card-image-ratio: ${s.image_ratio === 'square' ? '1/1' : s.image_ratio === 'portrait' ? '3/4' : 'auto'};
 				--card-show-secondary-image: ${s.show_secondary_image ? '1' : '0'};
-				--card-show-vendor: ${s.show_vendor ? 'block' : 'none'};
+				--card-show-brand: ${s.show_brand ? 'block' : 'none'};
 				--card-show-rating: ${s.show_rating ? 'flex' : 'none'}; /* Using flex for stars alignment */
 				--card-show-quick-add: ${s.enable_quick_add ? 'block' : 'none'};
 			}
