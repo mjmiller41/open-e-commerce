@@ -109,19 +109,48 @@ export function StoreSettingsProvider({ children }: { children: React.ReactNode 
 	}, []);
 
 	const applyTheme = (s: StoreSettings) => {
-		const root = document.documentElement;
-		// Apply primary color
-		if (s.primary_color) {
-			root.style.setProperty("--accent", s.primary_color);
-			// We might want to calculate a hover state or keep it simple
-			// For now, let's just set accent. The hover variant might need manual adjustment or a CSS color-mix if supported.
-			// Basic hover approximation:
-			// root.style.setProperty("--accent-hover", s.primary_color); // Simplified
+		let styleEl = document.getElementById("store-theme-style");
+		if (!styleEl) {
+			styleEl = document.createElement("style");
+			styleEl.id = "store-theme-style";
+			document.head.appendChild(styleEl);
 		}
-		// Apply secondary color
-		if (s.secondary_color) {
-			root.style.setProperty("--brand-secondary", s.secondary_color);
-		}
+
+		// Recommended Border Colors (Complimentary Neutrals to Blue Primary)
+		// Accent 1: Slate 500 (#64748b) - Structural Borders
+		// Accent 2: Slate 600 (#475569) - Active/Focus Borders (Rings)
+
+		const lightCss = `
+			:root {
+				--accent: ${s.primary_color || '#2563eb'};
+				--brand-secondary: ${s.secondary_color || '#64748b'};
+				
+				--bg-primary: ${s.colors_background_light || '#ffffff'};
+				--text-primary: ${s.colors_text_light || '#0f172a'};
+				--accent-foreground: ${s.colors_solid_button_labels || '#ffffff'};
+
+				/* Accent 1: Main Borders */
+				--border: ${s.colors_accent_1 || '#64748b'};
+				--input: ${s.colors_accent_1 || '#64748b'};
+
+				/* Accent 2: Focus Rings & Strong Borders */
+				--ring: ${s.colors_accent_2 || '#475569'};
+			}
+		`;
+
+		const darkCss = `
+			[data-theme="dark"] {
+				--bg-primary: ${s.colors_background_dark || '#0f172a'};
+				--text-primary: ${s.colors_text_dark || '#f8fafc'};
+				
+				/* Dark Mode Border Adjustments (Optional: could map to same or standard dark border) */
+				--border: ${s.colors_accent_1 ? s.colors_accent_1 : '#334155'};
+				--input: ${s.colors_accent_1 ? s.colors_accent_1 : '#334155'};
+				--ring: ${s.colors_accent_2 ? s.colors_accent_2 : '#475569'};
+			}
+		`;
+
+		styleEl.innerHTML = lightCss + darkCss;
 	};
 
 	const updateSettings = async (newSettings: Partial<StoreSettings>) => {
