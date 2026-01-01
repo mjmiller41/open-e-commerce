@@ -12,6 +12,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "deploy": "node scripts/deploy.js",
+    "storage:push": "node scripts/push_storage.js",
     "db:export": "bash scripts/export_schema.sh"
   },
   "dependencies": {
