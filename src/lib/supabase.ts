@@ -14,6 +14,28 @@ if (!supabaseUrl || !supabaseAnonKey) {
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 /**
+ * Uploads a product image to the 'products' storage bucket.
+ * @param file - The file to upload.
+ * @returns The public URL of the uploaded image.
+ */
+export async function uploadProductImage(file: File): Promise<string> {
+  const fileName = `${Date.now()}_${file.name.replace(/\s+/g, "-")}`;
+  const { data, error } = await supabase.storage
+    .from("products")
+    .upload(fileName, file);
+
+  if (error) {
+    throw error;
+  }
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from("products").getPublicUrl(data.path);
+
+  return publicUrl;
+}
+
+/**
  * Represents a product in the e-commerce system.
  */
 export interface Product {

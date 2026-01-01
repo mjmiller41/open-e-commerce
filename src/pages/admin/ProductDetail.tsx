@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { supabase, type Product } from '../../lib/supabase';
+import { supabase, type Product, uploadProductImage } from '../../lib/supabase';
 import { ArrowLeft, Save, Trash2, Loader2, Image as ImageIcon, AlertCircle, ImageOff } from 'lucide-react';
 import logger from '../../lib/logger';
 import taxonomy from '../../data/taxonomy.json';
@@ -18,6 +18,7 @@ export function AdminProductDetail() {
 	const [suggestedSku, setSuggestedSku] = useState<string | null>(null);
 
 	const [saveSource, setSaveSource] = useState<'top' | 'bottom' | null>(null);
+	const [uploading, setUploading] = useState(false);
 
 	const [formData, setFormData] = useState<Partial<Product>>({
 		name: '',
@@ -165,6 +166,33 @@ export function AdminProductDetail() {
 			formData.variant || ''
 		);
 		setFormData(prev => ({ ...prev, sku: newSKU }));
+	};
+
+	const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		if (!e.target.files || e.target.files.length === 0) return;
+
+		setUploading(true);
+		try {
+			const file = e.target.files[0];
+			const url = await uploadProductImage(file);
+
+			// Add to images array and set as main image if none exists
+			const currentImages = formData.images || [];
+			const newImages = [...currentImages, url];
+
+			setFormData(prev => ({
+				...prev,
+				images: newImages,
+				image: prev.image || url
+			}));
+		} catch (err) {
+			logger.error('Error uploading image:', err);
+			setError('Failed to upload image. Please try again.');
+		} finally {
+			setUploading(false);
+			// Clear input
+			e.target.value = '';
+		}
 	};
 
 	if (loading) return <div className="p-8 text-center">Loading product...</div>;
@@ -402,6 +430,20 @@ export function AdminProductDetail() {
 						<ImageIcon size={18} /> Media
 					</h3>
 					<div className="space-y-4">
+						<div className="space-y-2">
+							<label className="text-sm font-medium">Upload Image</label>
+							<div className="flex gap-2">
+								<input
+									type="file"
+									accept="image/*"
+									className="input w-full p-1.5 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+									onChange={handleFileUpload}
+									disabled={uploading}
+								/>
+								{uploading && <Loader2 className="animate-spin text-muted-foreground my-auto" size={20} />}
+							</div>
+						</div>
+
 						<div className="space-y-2">
 							<div className="flex items-center justify-between">
 								<label className="text-sm font-medium">Image URLs (One per line)</label>
