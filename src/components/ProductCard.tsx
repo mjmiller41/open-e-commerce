@@ -5,6 +5,7 @@ import { QuantityControl } from './QuantityControl';
 import { Badge } from './ui/Badge';
 import { useStoreSettings } from '../context/StoreSettingsContext';
 import { formatCurrency } from '../lib/currency';
+import { resolveProductImage } from '../lib/utils';
 
 /**
  * Props for the ProductCard component.
@@ -47,7 +48,7 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 			>
 				{/* Primary Image */}
 				<img
-					src={product.images?.[0] || product.image || `${import.meta.env.BASE_URL}logo.png`}
+					src={resolveProductImage(product.images?.[0] || product.image)}
 					alt={product.name}
 					className="w-full h-full object-cover transition-all duration-500 mix-blend-multiply dark:mix-blend-normal group-hover:scale-105"
 					loading="lazy"
@@ -60,7 +61,7 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 				{/* Secondary Image (Absolute overlay) */}
 				{product.images && product.images.length > 1 && (
 					<img
-						src={product.images[1]}
+						src={resolveProductImage(product.images[1])}
 						alt={product.name}
 						className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 mix-blend-multiply dark:mix-blend-normal opacity-0 group-hover:opacity-100"
 						style={{ opacity: "calc(var(--card-show-secondary-image, 0) * 1)" } as React.CSSProperties}

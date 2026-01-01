@@ -5,6 +5,7 @@ import { checkSkuExists, getSuggestedSku } from '../lib/productService';
 import { X, Loader2 } from 'lucide-react';
 import logger from '../lib/logger';
 import taxonomy from '../assets/taxonomy.json';
+import { resolveProductImage } from '../lib/utils';
 
 interface ProductModalProps {
 	product?: Product | null;
@@ -395,7 +396,7 @@ export function ProductModal({ product, isOpen, onClose, onSave }: ProductModalP
 							<div className="flex gap-2 overflow-x-auto py-2">
 								{formData.images.map((url, i) => (
 									<div key={i} className="relative w-16 h-16 shrink-0 rounded border overflow-hidden">
-										<img src={url} alt="" className="w-full h-full object-cover" />
+										<img src={resolveProductImage(url)} alt="" className="w-full h-full object-cover" />
 									</div>
 								))}
 							</div>

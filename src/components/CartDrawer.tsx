@@ -6,6 +6,7 @@ import { formatCurrency } from '../lib/currency';
 import { useStoreSettings } from '../context/StoreSettingsContext';
 import { QuantityControl } from './QuantityControl';
 import { supabase, type Product } from '../lib/supabase';
+import { resolveProductImage } from '../lib/utils';
 
 export function CartDrawer() {
 	const { cartItems, isCartOpen, closeCart, updateQuantity, removeFromCart } = useCart();
@@ -93,7 +94,7 @@ export function CartDrawer() {
 							<div key={productId} className="flex gap-4 p-2 rounded-lg hover:bg-muted/30 transition-colors">
 								<div className="w-20 h-20 rounded-md bg-muted overflow-hidden shrink-0 border border-border">
 									<img
-										src={product.images?.[0] || product.image || `${import.meta.env.BASE_URL}logo.png`}
+										src={resolveProductImage(product.images?.[0] || product.image)}
 										alt={product.name}
 										className="w-full h-full object-cover"
 										onError={(e) => {

@@ -7,6 +7,7 @@ import { QuantityControl } from '../components/QuantityControl';
 import { useCart } from '../context/useCart';
 import { useStoreSettings } from '../context/StoreSettingsContext';
 import { formatCurrency } from '../lib/currency';
+import { resolveProductImage } from '../lib/utils';
 
 /**
  * The product detail page.
@@ -40,7 +41,7 @@ export function ProductDetail() {
 				logger.error('Error fetching product:', error);
 			} else {
 				setProduct(data);
-				setActiveImage(data.images?.[0] || data.image || `${import.meta.env.BASE_URL}logo.png`);
+				setActiveImage(data.images?.[0] || data.image || '');
 			}
 			setLoading(false);
 		}
@@ -69,7 +70,7 @@ export function ProductDetail() {
 		"@context": "https://schema.org/",
 		"@type": "Product",
 		"name": product.name,
-		"image": product.images && product.images.length > 0 ? product.images : [product.image],
+		"image": product.images && product.images.length > 0 ? product.images.map(i => resolveProductImage(i)) : [resolveProductImage(product.image)],
 		"description": product.description,
 		"sku": product.sku,
 		"mpn": product.mpn,
@@ -112,7 +113,7 @@ export function ProductDetail() {
 				<div className="space-y-4">
 					<div className="rounded-2xl bg-muted overflow-hidden aspect-square border border-border">
 						<img
-							src={activeImage || `${import.meta.env.BASE_URL}logo.png`}
+							src={resolveProductImage(activeImage)}
 							alt={product.name}
 							className="w-full h-full object-cover mix-blend-multiply dark:mix-blend-normal"
 							onError={(e) => {
@@ -130,7 +131,7 @@ export function ProductDetail() {
 									className={`relative w-24 h-24 rounded-lg overflow-hidden border-2 transition-all shrink-0 ${activeImage === img ? 'border-primary ring-2 ring-primary/20' : 'border-transparent hover:border-muted-foreground/50'}`}
 								>
 									<img
-										src={img}
+										src={resolveProductImage(img)}
 										alt={`${product.name} view ${idx + 1}`}
 										className="w-full h-full object-cover"
 										onError={(e) => {

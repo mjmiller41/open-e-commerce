@@ -9,6 +9,7 @@ import { supabase, type Product } from '../lib/supabase';
 import logger from '../lib/logger';
 import { CheckoutModal } from '../components/CheckoutModal';
 import { PageHeader } from '../components/ui/PageHeader';
+import { resolveProductImage } from '../lib/utils';
 /**
  * The shopping cart page.
  * Displays the list of items in the cart, allows quantity adjustment and removal,
@@ -105,7 +106,7 @@ export function CartPage() {
 						<div key={productId} className="card flex items-center gap-6 p-6">
 							<div className="w-24 h-24 rounded-lg bg-muted object-cover overflow-hidden shrink-0">
 								<img
-									src={product.image || `${import.meta.env.BASE_URL}logo.png`}
+									src={resolveProductImage(product.image)}
 									alt={product.name}
 									className="w-full h-full object-cover mix-blend-multiply dark:mix-blend-normal"
 									onError={(e) => {

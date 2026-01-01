@@ -10,6 +10,7 @@ import { Download, Upload } from 'lucide-react';
 import { Badge } from './ui/Badge';
 import { SectionHeader } from './ui/SectionHeader';
 import { SortableHeader } from './ui/SortableHeader';
+import { resolveProductImage } from '../lib/utils';
 
 // Internal component for handling sequential image fallback
 const ProductThumbnail = ({ product }: { product: Product }) => {
@@ -23,6 +24,8 @@ const ProductThumbnail = ({ product }: { product: Product }) => {
 		...(product.images || []),
 		product.image
 	].filter(Boolean) as string[];
+
+	const resolvedImages = allImages.map(img => resolveProductImage(img));
 
 	// If no images at all, show fallback immediately
 	if (allImages.length === 0) {
@@ -47,7 +50,7 @@ const ProductThumbnail = ({ product }: { product: Product }) => {
 
 	return (
 		<img
-			src={hasError ? `${import.meta.env.BASE_URL}logo.png` : allImages[currentImageIndex]}
+			src={hasError ? `${import.meta.env.BASE_URL}logo.png` : resolvedImages[currentImageIndex]}
 			alt={product.name}
 			className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
 			onError={handleError}

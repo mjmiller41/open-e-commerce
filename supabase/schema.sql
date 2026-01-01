@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict NAxzZyrz5tdR50I3xZloxqt7cSDMmQzavfg6DREHl4xAebatgNNa1NMjvDhqCtU
+\restrict HhBpf4cDO4kDOxgQ9VfXzMXuw9R0qV32NZ5V2IlvzzrZL2DE3WMMv46T9adUihA
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.7 (Ubuntu 17.7-3.pgdg24.04+1)
@@ -3543,6 +3543,24 @@ CREATE TABLE realtime.messages_2026_01_03 (
 ALTER TABLE realtime.messages_2026_01_03 OWNER TO supabase_admin;
 
 --
+-- Name: messages_2026_01_04; Type: TABLE; Schema: realtime; Owner: supabase_admin
+--
+
+CREATE TABLE realtime.messages_2026_01_04 (
+    topic text NOT NULL,
+    extension text NOT NULL,
+    payload jsonb,
+    event text,
+    private boolean DEFAULT false,
+    updated_at timestamp without time zone DEFAULT now() NOT NULL,
+    inserted_at timestamp without time zone DEFAULT now() NOT NULL,
+    id uuid DEFAULT gen_random_uuid() NOT NULL
+);
+
+
+ALTER TABLE realtime.messages_2026_01_04 OWNER TO supabase_admin;
+
+--
 -- Name: schema_migrations; Type: TABLE; Schema: realtime; Owner: supabase_admin
 --
 
@@ -3801,6 +3819,13 @@ ALTER TABLE ONLY realtime.messages ATTACH PARTITION realtime.messages_2026_01_02
 --
 
 ALTER TABLE ONLY realtime.messages ATTACH PARTITION realtime.messages_2026_01_03 FOR VALUES FROM ('2026-01-03 00:00:00') TO ('2026-01-04 00:00:00');
+
+
+--
+-- Name: messages_2026_01_04; Type: TABLE ATTACH; Schema: realtime; Owner: supabase_admin
+--
+
+ALTER TABLE ONLY realtime.messages ATTACH PARTITION realtime.messages_2026_01_04 FOR VALUES FROM ('2026-01-04 00:00:00') TO ('2026-01-05 00:00:00');
 
 
 --
@@ -4144,6 +4169,14 @@ ALTER TABLE ONLY realtime.messages_2026_01_02
 
 ALTER TABLE ONLY realtime.messages_2026_01_03
     ADD CONSTRAINT messages_2026_01_03_pkey PRIMARY KEY (id, inserted_at);
+
+
+--
+-- Name: messages_2026_01_04 messages_2026_01_04_pkey; Type: CONSTRAINT; Schema: realtime; Owner: supabase_admin
+--
+
+ALTER TABLE ONLY realtime.messages_2026_01_04
+    ADD CONSTRAINT messages_2026_01_04_pkey PRIMARY KEY (id, inserted_at);
 
 
 --
@@ -4698,6 +4731,13 @@ CREATE INDEX messages_2026_01_03_inserted_at_topic_idx ON realtime.messages_2026
 
 
 --
+-- Name: messages_2026_01_04_inserted_at_topic_idx; Type: INDEX; Schema: realtime; Owner: supabase_admin
+--
+
+CREATE INDEX messages_2026_01_04_inserted_at_topic_idx ON realtime.messages_2026_01_04 USING btree (inserted_at DESC, topic) WHERE ((extension = 'broadcast'::text) AND (private IS TRUE));
+
+
+--
 -- Name: subscription_subscription_id_entity_filters_key; Type: INDEX; Schema: realtime; Owner: supabase_admin
 --
 
@@ -4863,6 +4903,20 @@ ALTER INDEX realtime.messages_inserted_at_topic_index ATTACH PARTITION realtime.
 --
 
 ALTER INDEX realtime.messages_pkey ATTACH PARTITION realtime.messages_2026_01_03_pkey;
+
+
+--
+-- Name: messages_2026_01_04_inserted_at_topic_idx; Type: INDEX ATTACH; Schema: realtime; Owner: supabase_realtime_admin
+--
+
+ALTER INDEX realtime.messages_inserted_at_topic_index ATTACH PARTITION realtime.messages_2026_01_04_inserted_at_topic_idx;
+
+
+--
+-- Name: messages_2026_01_04_pkey; Type: INDEX ATTACH; Schema: realtime; Owner: supabase_realtime_admin
+--
+
+ALTER INDEX realtime.messages_pkey ATTACH PARTITION realtime.messages_2026_01_04_pkey;
 
 
 --
@@ -6597,6 +6651,14 @@ GRANT ALL ON TABLE realtime.messages_2026_01_03 TO dashboard_user;
 
 
 --
+-- Name: TABLE messages_2026_01_04; Type: ACL; Schema: realtime; Owner: supabase_admin
+--
+
+GRANT ALL ON TABLE realtime.messages_2026_01_04 TO postgres;
+GRANT ALL ON TABLE realtime.messages_2026_01_04 TO dashboard_user;
+
+
+--
 -- Name: TABLE schema_migrations; Type: ACL; Schema: realtime; Owner: supabase_admin
 --
 
@@ -7013,4 +7075,4 @@ ALTER EVENT TRIGGER pgrst_drop_watch OWNER TO supabase_admin;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict NAxzZyrz5tdR50I3xZloxqt7cSDMmQzavfg6DREHl4xAebatgNNa1NMjvDhqCtU
+\unrestrict HhBpf4cDO4kDOxgQ9VfXzMXuw9R0qV32NZ5V2IlvzzrZL2DE3WMMv46T9adUihA

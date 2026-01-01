@@ -6,6 +6,7 @@ import logger from '../lib/logger';
 import taxonomy from '../assets/taxonomy.json';
 import { generateSKU } from '../lib/skuGenerator';
 import { checkSkuExists, getSuggestedSku } from '../lib/productService';
+import { resolveProductImage } from '../lib/utils';
 
 export function AdminProductDetail() {
 	const { id } = useParams<{ id: string }>();
@@ -441,7 +442,7 @@ export function AdminProductDetail() {
 											</div>
 										) : (
 											<img
-												src={url}
+												src={resolveProductImage(url)}
 												alt=""
 												className="w-full h-full object-cover"
 												onError={() => {

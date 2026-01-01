@@ -5,6 +5,7 @@ import { supabase, type Product } from '../lib/supabase';
 import { Link } from 'react-router-dom';
 import { useStoreSettings } from '../context/StoreSettingsContext';
 import { formatCurrency } from '../lib/currency';
+import { resolveProductImage } from '../lib/utils';
 
 interface SearchFilterBarProps {
 	onSearch: (searchTerm: string) => void;
@@ -188,7 +189,7 @@ export function SearchFilterBar({ onSearch, onFilterChange, onSortChange, catego
 								>
 									<div className="w-10 h-10 rounded bg-muted overflow-hidden shrink-0">
 										<img
-											src={product.image || `${import.meta.env.BASE_URL}logo.png`}
+											src={resolveProductImage(product.image)}
 											alt={product.name}
 											className="w-full h-full object-cover"
 										/>
