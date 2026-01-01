@@ -6,14 +6,14 @@ import { CartPage } from './pages/CartPage';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 import { StoreSettingsProvider } from './context/StoreSettingsContext';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import AdminPage from './pages/AdminPage';
+import LoginPage from './pages/auth/LoginPage';
+import RegisterPage from './pages/auth/RegisterPage';
+import AdminPage from './pages/admin/Dashboard';
 import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import OrderDetailPage from './pages/OrderDetailPage';
-import { AdminProductDetail } from './pages/AdminProductDetail';
+import { AdminProductDetail } from './pages/admin/ProductDetail';
 import { ToastProvider } from './context/ToastContext';
 
 /**

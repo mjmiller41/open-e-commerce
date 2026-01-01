@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase, type Order, type Profile } from '../lib/supabase';
+import { supabase, type Order, type Profile } from '../../lib/supabase';
 import { X } from 'lucide-react';
-import logger from '../lib/logger';
-import { useSortableData } from '../hooks/useSortableData';
-import { Badge } from './ui/Badge';
-import { SectionHeader } from './ui/SectionHeader';
-import { SortableHeader } from './ui/SortableHeader';
+import logger from '../../lib/logger';
+import { useSortableData } from '../../hooks/useSortableData';
+import { Badge } from '../ui/Badge';
+import { SectionHeader } from '../ui/SectionHeader';
+import { SortableHeader } from '../ui/SortableHeader';
 
 export function AdminOrders() {
 	const [orders, setOrders] = useState<Order[]>([]);

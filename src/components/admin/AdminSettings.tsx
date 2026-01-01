@@ -1,10 +1,10 @@
 
 import { useState, useEffect } from "react";
-import { useStoreSettings } from "../context/StoreSettingsContext";
-import logger from "../lib/logger";
-import { SectionHeader } from "./ui/SectionHeader";
-import { SubSectionHeader } from "./ui/SubSectionHeader.tsx";
-import { AVAILABLE_FONTS } from "../constants/fonts";
+import { useStoreSettings } from "../../context/StoreSettingsContext";
+import logger from "../../lib/logger";
+import { SectionHeader } from "../ui/SectionHeader";
+import { SubSectionHeader } from "../ui/SubSectionHeader";
+import { AVAILABLE_FONTS } from "../../constants/fonts";
 
 export function AdminSettings() {
 	const { settings, updateSettings, loading } = useStoreSettings();

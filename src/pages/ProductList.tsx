@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase, type Product } from '../lib/supabase';
 import logger from '../lib/logger';
 import { ProductCard } from '../components/ProductCard';
-import { useCart } from '../context/useCart';
+import { useCart } from '../context/CartContext';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
 import { SearchFilterBar, type FilterState, type SortOption } from '../components/SearchFilterBar';

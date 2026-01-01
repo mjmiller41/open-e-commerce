@@ -1,9 +1,9 @@
 import { useSearchParams } from 'react-router-dom';
-import { AdminOrders } from '../components/AdminOrders';
-import { AdminCustomers } from '../components/AdminCustomers';
-import { AdminInventory } from '../components/AdminInventory';
-import { AdminSettings } from '../components/AdminSettings';
-import { AdminReviews } from '../components/reviews/AdminReviews';
+import { AdminOrders } from '../../components/admin/AdminOrders';
+import { AdminCustomers } from '../../components/admin/AdminCustomers';
+import { AdminInventory } from '../../components/admin/AdminInventory';
+import { AdminSettings } from '../../components/admin/AdminSettings';
+import { AdminReviews } from '../../components/reviews/AdminReviews';
 
 export default function AdminPage() {
 	const [searchParams, setSearchParams] = useSearchParams();

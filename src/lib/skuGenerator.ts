@@ -1,4 +1,4 @@
-import oedAbbreviationsRaw from "../assets/oed_abbreviations.json";
+import oedAbbreviationsRaw from "../data/oed_abbreviations.json";
 
 const oedAbbreviations = oedAbbreviationsRaw as Record<string, string>;
 

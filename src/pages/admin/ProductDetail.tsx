@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { supabase, type Product } from '../lib/supabase';
+import { supabase, type Product } from '../../lib/supabase';
 import { ArrowLeft, Save, Trash2, Loader2, Image as ImageIcon, AlertCircle, ImageOff } from 'lucide-react';
-import logger from '../lib/logger';
-import taxonomy from '../assets/taxonomy.json';
-import { generateSKU } from '../lib/skuGenerator';
-import { checkSkuExists, getSuggestedSku } from '../lib/productService';
-import { resolveProductImage } from '../lib/utils';
+import logger from '../../lib/logger';
+import taxonomy from '../../data/taxonomy.json';
+import { generateSKU } from '../../lib/skuGenerator';
+import { checkSkuExists, getSuggestedSku } from '../../lib/productService';
+import { resolveProductImage } from '../../lib/utils';
 
 export function AdminProductDetail() {
 	const { id } = useParams<{ id: string }>();

@@ -7,7 +7,7 @@ import { QuantityControl } from '../components/QuantityControl';
 import { ReviewList } from '../components/reviews/ReviewList';
 import { StarRating } from '../components/StarRating';
 import { useProductRating } from '../hooks/useProductRating';
-import { useCart } from '../context/useCart';
+import { useCart } from '../context/CartContext';
 import { useStoreSettings } from '../context/StoreSettingsContext';
 import { formatCurrency } from '../lib/currency';
 import { resolveProductImage } from '../lib/utils';

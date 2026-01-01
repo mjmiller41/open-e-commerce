@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { X, ShoppingBag } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useCart } from '../context/useCart';
+import { useCart } from '../context/CartContext';
 import { formatCurrency } from '../lib/currency';
 import { useStoreSettings } from '../context/StoreSettingsContext';
 import { QuantityControl } from './QuantityControl';

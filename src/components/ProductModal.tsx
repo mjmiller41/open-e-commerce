@@ -4,7 +4,7 @@ import { generateSKU } from '../lib/skuGenerator';
 import { checkSkuExists, getSuggestedSku } from '../lib/productService';
 import { X, Loader2 } from 'lucide-react';
 import logger from '../lib/logger';
-import taxonomy from '../assets/taxonomy.json';
+import taxonomy from '../data/taxonomy.json';
 import { resolveProductImage } from '../lib/utils';
 
 interface ProductModalProps {

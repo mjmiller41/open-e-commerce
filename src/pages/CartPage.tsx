@@ -1,7 +1,7 @@
 import { Trash2, ArrowRight, ShoppingBag } from 'lucide-react';
 import { QuantityControl } from '../components/QuantityControl';
 import { Link } from 'react-router-dom';
-import { useCart } from '../context/useCart';
+import { useCart } from '../context/CartContext';
 import { useStoreSettings } from '../context/StoreSettingsContext';
 import { formatCurrency } from '../lib/currency';
 import { useEffect, useState } from 'react';
