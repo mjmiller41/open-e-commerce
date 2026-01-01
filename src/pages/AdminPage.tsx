@@ -3,12 +3,13 @@ import { AdminOrders } from '../components/AdminOrders';
 import { AdminCustomers } from '../components/AdminCustomers';
 import { AdminInventory } from '../components/AdminInventory';
 import { AdminSettings } from '../components/AdminSettings';
+import { AdminReviews } from '../components/reviews/AdminReviews';
 
 export default function AdminPage() {
 	const [searchParams, setSearchParams] = useSearchParams();
 	const activeTab = searchParams.get('tab') || 'orders';
 
-	const handleTabChange = (tab: 'orders' | 'customers' | 'inventory' | 'settings') => {
+	const handleTabChange = (tab: 'orders' | 'customers' | 'inventory' | 'settings' | 'reviews') => {
 		setSearchParams({ tab });
 	};
 
@@ -46,6 +47,15 @@ export default function AdminPage() {
 						Inventory
 					</button>
 					<button
+						onClick={() => handleTabChange('reviews')}
+						className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'reviews'
+							? 'bg-background text-foreground shadow-sm'
+							: 'text-muted-foreground hover:text-foreground'
+							}`}
+					>
+						Reviews
+					</button>
+					<button
 						onClick={() => handleTabChange('settings')}
 						className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'settings'
 							? 'bg-background text-foreground shadow-sm'
@@ -61,6 +71,7 @@ export default function AdminPage() {
 				{activeTab === 'orders' && <AdminOrders />}
 				{activeTab === 'customers' && <AdminCustomers />}
 				{activeTab === 'inventory' && <AdminInventory />}
+				{activeTab === 'reviews' && <AdminReviews />}
 				{activeTab === 'settings' && <AdminSettings />}
 			</div>
 		</div>

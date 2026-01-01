@@ -48,7 +48,16 @@ export function Layout() {
 			<header className="sticky top-0 z-50 bg-[var(--bg-header)] backdrop-blur-md border-b border-border transition-colors duration-300">
 				<div className="mx-auto px-4 h-16 flex items-center justify-between" style={{ maxWidth: 'var(--container-width, 1200px)' }}>
 					<Link to="/" className="flex items-center gap-2 text-primary hover:opacity-80 transition-opacity">
-						<img src={settings?.logo_url || "logo.png"} alt="Logo" className="w-8 h-8 object-contain" />
+						<img
+							src={settings?.logo_url
+								? (settings.logo_url.startsWith('http') || settings.logo_url.startsWith('data:')
+									? settings.logo_url
+									: `${import.meta.env.BASE_URL}${settings.logo_url.replace(/^\//, '')}`)
+								: `${import.meta.env.BASE_URL}logo.png`
+							}
+							alt="Logo"
+							className="w-8 h-8 object-contain"
+						/>
 						<h1 className="font-bold text-xl text-primary leading-none">{settings?.store_name || appConfig.siteTitle}</h1>
 					</Link>
 

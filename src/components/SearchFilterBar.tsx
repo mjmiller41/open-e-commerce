@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { useStoreSettings } from '../context/StoreSettingsContext';
 import { formatCurrency } from '../lib/currency';
 import { resolveProductImage } from '../lib/utils';
+import { StarRating } from './StarRating';
 
 interface SearchFilterBarProps {
 	onSearch: (searchTerm: string) => void;
@@ -22,6 +23,11 @@ export interface FilterState {
 
 export type SortOption = 'name_asc' | 'price_asc' | 'price_desc' | 'newest';
 
+interface Suggestion extends Partial<Product> {
+	rating?: number;
+	review_count?: number;
+}
+
 export function SearchFilterBar({ onSearch, onFilterChange, onSortChange, categories = [] }: SearchFilterBarProps) {
 	const [searchTerm, setSearchTerm] = useState('');
 	const [filters, setFilters] = useState<FilterState>({ minPrice: '', maxPrice: '', category: '' });
@@ -31,7 +37,7 @@ export function SearchFilterBar({ onSearch, onFilterChange, onSortChange, catego
 	const categoryDropdownRef = useRef<HTMLDivElement>(null);
 
 	// Predictive Search State
-	const [suggestions, setSuggestions] = useState<Partial<Product>[]>([]);
+	const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
 	const [showSuggestions, setShowSuggestions] = useState(false);
 	const searchRef = useRef<HTMLDivElement>(null);
 	const { settings } = useStoreSettings();
@@ -59,7 +65,14 @@ export function SearchFilterBar({ onSearch, onFilterChange, onSortChange, catego
 			.limit(5);
 
 		if (data) {
-			setSuggestions(data);
+			const enhancedData = await Promise.all(
+				data.map(async (p) => {
+					const { data: rating } = await supabase.rpc('get_product_average_rating', { p_id: p.id });
+					const { data: count } = await supabase.rpc('get_product_review_count', { p_id: p.id });
+					return { ...p, rating: rating || 0, review_count: count || 0 };
+				})
+			);
+			setSuggestions(enhancedData);
 			setShowSuggestions(true);
 		}
 	};
@@ -197,6 +210,15 @@ export function SearchFilterBar({ onSearch, onFilterChange, onSortChange, catego
 									<div className="flex-1 min-w-0">
 										<div className="font-medium truncate text-sm">{product.name}</div>
 										<div className="text-xs text-muted-foreground truncate">{product.category}</div>
+										{/* Rating in Suggestion */}
+										{product.rating !== undefined && (
+											<div className="flex items-center gap-1 mt-0.5">
+												<div className="flex text-yellow-500 transform scale-75 origin-left">
+													<StarRating rating={product.rating} size={12} />
+												</div>
+												<span className="text-[10px] text-muted-foreground">({product.review_count})</span>
+											</div>
+										)}
 									</div>
 									<div className="font-semibold text-sm whitespace-nowrap">
 										{product.price !== undefined ? formatCurrency(product.price, settings) : ''}
@@ -216,13 +238,13 @@ export function SearchFilterBar({ onSearch, onFilterChange, onSortChange, catego
 						<span className="truncate max-w-[120px]">
 							{filters.category ? filters.category.split(' > ').pop() : 'All Categories'}
 						</span>
-						<ChevronDown size={14} className={`transition - transform ${isCategoryOpen ? 'rotate-180' : ''} `} />
+						<ChevronDown size={14} className={`transition-transform ${isCategoryOpen ? 'rotate-180' : ''}`} />
 					</button>
 
 					{isCategoryOpen && (
 						<div className="absolute top-full right-0 mt-2 min-w-[16rem] w-max max-w-[80vw] bg-card border border-border rounded-lg shadow-lg py-2 z-50 max-h-[300px] overflow-y-auto">
 							<div
-								className={`px - 4 py - 2 hover: bg - secondary cursor - pointer border - b border - border ${filters.category === '' ? 'bg-secondary/50 font-medium' : ''} `}
+								className={`px-4 py-2 hover:bg-secondary cursor-pointer border-b border-border ${filters.category === '' ? 'bg-secondary/50 font-medium' : ''}`}
 								onClick={() => { handleFilterChange('category', ''); setIsCategoryOpen(false); }}
 							>
 								All Categories
@@ -324,9 +346,6 @@ export function SearchFilterBar({ onSearch, onFilterChange, onSortChange, catego
 									))}
 								</React.Fragment>
 							))}
-							{/* Note: Simplified mobile view (only 1 level deep for standard select) 
-								If deeper nesting is needed, a custom mobile menu is better, but this suffices for "Electronics > Keyboards" 
-							*/}
 						</select>
 					</div>
 

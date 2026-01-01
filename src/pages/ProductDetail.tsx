@@ -4,6 +4,9 @@ import logger from '../lib/logger';
 import { ShoppingCart, ArrowLeft, Package, Truck, ShieldCheck } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { QuantityControl } from '../components/QuantityControl';
+import { ReviewList } from '../components/reviews/ReviewList';
+import { StarRating } from '../components/StarRating';
+import { useProductRating } from '../hooks/useProductRating';
 import { useCart } from '../context/useCart';
 import { useStoreSettings } from '../context/StoreSettingsContext';
 import { formatCurrency } from '../lib/currency';
@@ -24,6 +27,7 @@ export function ProductDetail() {
 	const { cartItems, addToCart, updateQuantity, removeFromCart } = useCart();
 	const cartItem = cartItems.find(item => item.productId === productId);
 	const { settings } = useStoreSettings();
+	const { rating, count } = useProductRating(productId);
 
 
 
@@ -161,6 +165,15 @@ export function ProductDetail() {
 
 					<div className="flex items-baseline gap-4 mb-6">
 						<div className="text-3xl font-bold text-foreground">{formatCurrency(product.price, settings)}</div>
+
+						{/* Rating Summary */}
+						<div className="flex items-center gap-2 border-l border-border pl-4">
+							<StarRating rating={rating} size={18} />
+							<a href="#reviews" className="text-sm font-medium hover:underline text-muted-foreground">
+								{rating.toFixed(1)} ({count} reviews)
+							</a>
+						</div>
+
 						{product.on_hand > 0 ? (
 							<span className="text-green-600 dark:text-green-400 font-medium text-sm flex items-center gap-1">
 								<span className="w-2 h-2 rounded-full bg-current"></span>
@@ -273,6 +286,10 @@ export function ProductDetail() {
 						</div>
 					</div>
 				</div>
+			</div>
+
+			<div className="mt-16 pt-16 border-t border-border">
+				<ReviewList productId={productId} hideWriteButton={true} />
 			</div>
 		</div>
 	);

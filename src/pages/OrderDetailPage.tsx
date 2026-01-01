@@ -1,19 +1,33 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { supabase, type Order, type OrderItem } from "../lib/supabase";
 import logger from "../lib/logger";
 import { Badge } from "../components/ui/Badge";
 import { PageHeader } from "../components/ui/PageHeader";
+import { resolveProductImage } from "../lib/utils";
+import { ReviewForm } from "../components/reviews/ReviewForm";
+import { X } from "lucide-react";
+
+// Extend OrderItem locally to include product image from join
+interface ExtendedOrderItem extends OrderItem {
+	products?: {
+		image: string | null;
+	};
+}
 
 export default function OrderDetailPage() {
 	const { id } = useParams();
 	const { user, role } = useAuth();
 	const navigate = useNavigate();
 	const [order, setOrder] = useState<Order | null>(null);
-	const [items, setItems] = useState<OrderItem[]>([]);
+	const [items, setItems] = useState<ExtendedOrderItem[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [errorMsg, setErrorMsg] = useState("");
+
+	// Review Modal State
+	const [reviewModalOpen, setReviewModalOpen] = useState(false);
+	const [selectedItemForReview, setSelectedItemForReview] = useState<{ productId: number; productName: string } | null>(null);
 
 	useEffect(() => {
 		if (!id) return;
@@ -43,14 +57,15 @@ export default function OrderDetailPage() {
 
 				setOrder(orderData);
 
-				// 3. Fetch Order Items
+				// 3. Fetch Order Items with Product Image
 				const { data: itemsData, error: itemsError } = await supabase
 					.from("order_items")
-					.select("*")
+					.select("*, products(image)")
 					.eq("order_id", id);
 
 				if (itemsError) throw itemsError;
-				setItems(itemsData || []);
+				// Safely cast or assume structure based on query
+				setItems((itemsData as unknown as ExtendedOrderItem[]) || []);
 			} catch (err: unknown) {
 				logger.error("Error fetching order details:", err);
 				setErrorMsg((err as Error).message || "Failed to load order details.");
@@ -78,6 +93,11 @@ export default function OrderDetailPage() {
 		}
 	};
 
+	const handleOpenReview = (item: ExtendedOrderItem) => {
+		setSelectedItemForReview({ productId: item.product_id, productName: item.product_name });
+		setReviewModalOpen(true);
+	};
+
 	if (loading) return <div className="text-center p-8">Loading order details...</div>;
 
 	if (errorMsg) {
@@ -92,6 +112,8 @@ export default function OrderDetailPage() {
 	}
 
 	if (!order) return null;
+
+	const isOwner = user?.id === order.user_id;
 
 	return (
 		<div className="max-w-4xl mx-auto animate-in fade-in duration-500 py-8 px-4">
@@ -140,21 +162,39 @@ export default function OrderDetailPage() {
 						</div>
 						<div className="divide-y divide-border">
 							{items.map((item) => (
-								<div key={item.id} className="p-4 flex items-center justify-between">
+								<div key={item.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 									<div className="flex items-center gap-4">
-										{/* Placeholder for image if we had one in order_item join, or fetch separately. 
-                                 For now, just name and quantity. order_items has product_name.
-                             */}
-										<div className="h-12 w-12 bg-secondary rounded flex items-center justify-center text-xs text-muted-foreground">
-											Img
+										<div className="h-16 w-16 bg-secondary rounded overflow-hidden flex-shrink-0 border border-border">
+											<img
+												src={resolveProductImage(item.products?.image)}
+												alt={item.product_name}
+												className="w-full h-full object-cover"
+											/>
 										</div>
 										<div>
-											<h4 className="font-medium text-foreground">{item.product_name}</h4>
-											<div className="text-sm text-muted-foreground">Qty: {item.quantity}</div>
+											<Link
+												to={`/product/${item.product_id}`}
+												className="font-medium text-foreground hover:underline hover:text-primary transition-colors block"
+											>
+												{item.product_name}
+											</Link>
+											<div className="text-sm text-muted-foreground mt-1">Qty: {item.quantity} × ${item.price.toFixed(2)}</div>
 										</div>
 									</div>
-									<div className="font-medium">
-										${(item.price * item.quantity).toFixed(2)}
+									<div className="flex items-center gap-4 justify-between sm:justify-end w-full sm:w-auto">
+										<div className="font-bold">
+											${(item.price * item.quantity).toFixed(2)}
+										</div>
+
+										{/* Write Review Button - Only for Owner and if Owner matches */}
+										{isOwner && (
+											<button
+												onClick={() => handleOpenReview(item)}
+												className="btn btn-sm btn-primary"
+											>
+												Write Review
+											</button>
+										)}
 									</div>
 								</div>
 							))}
@@ -207,6 +247,36 @@ export default function OrderDetailPage() {
 					</div>
 				</div>
 			</div>
+
+			{/* Review Modal */}
+			{reviewModalOpen && selectedItemForReview && order && (
+				<div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+					<div className="bg-card w-full max-w-lg rounded-lg shadow-xl border border-border p-6 relative animate-in zoom-in-95 duration-200">
+						<button
+							onClick={() => setReviewModalOpen(false)}
+							className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
+						>
+							<X size={20} />
+						</button>
+
+						<h3 className="text-xl font-bold mb-4">Write a Review</h3>
+						<p className="text-sm text-muted-foreground mb-6">
+							Sharing your thoughts on <span className="font-medium text-foreground">{selectedItemForReview.productName}</span>
+						</p>
+
+						<ReviewForm
+							productId={selectedItemForReview.productId}
+							userId={user?.id || ''}
+							orderId={order.id}
+							onReviewSubmitted={() => {
+								setReviewModalOpen(false);
+								alert("Review submitted successfully!");
+							}}
+							onCancel={() => setReviewModalOpen(false)}
+						/>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }

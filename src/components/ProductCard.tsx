@@ -6,6 +6,8 @@ import { Badge } from './ui/Badge';
 import { useStoreSettings } from '../context/StoreSettingsContext';
 import { formatCurrency } from '../lib/currency';
 import { resolveProductImage } from '../lib/utils';
+import { useProductRating } from '../hooks/useProductRating';
+import { StarRating } from './StarRating';
 
 /**
  * Props for the ProductCard component.
@@ -38,6 +40,7 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 		: '#';
 
 	const { settings } = useStoreSettings();
+	const { rating, count } = useProductRating(product.id);
 
 	return (
 		<div className="card flex flex-col h-full group hover:shadow-lg hover:border-accent/50 transition-all duration-300 relative">
@@ -108,16 +111,15 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 					</h3>
 				</Link>
 
-				{/* Rating Placeholder - Controlled by CSS Variable */}
+				{/* Rating Display */}
 				<div
-					className="items-center gap-1 mb-2"
-					style={{ display: "var(--card-show-rating, none)" }}
+					className="flex items-center gap-1 mb-2 h-4"
+					style={{ display: "var(--card-show-rating, flex)" }}
 				>
-					{/* Mock Stars for visual confirmation if no rating data exists yet */}
 					<div className="flex text-yellow-400 text-xs">
-						{'★'.repeat(5)}
+						<StarRating rating={rating} size={14} />
 					</div>
-					<span className="text-xs text-muted-foreground">(0)</span>
+					<span className="text-xs text-muted-foreground">({count})</span>
 				</div>
 
 				<div className="font-bold text-xl mt-auto">{formatCurrency(product.price, settings)}</div>

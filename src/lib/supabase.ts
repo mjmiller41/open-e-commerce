@@ -85,3 +85,20 @@ export interface Address {
   is_default: boolean;
   created_at: string;
 }
+
+export interface Review {
+  id: number;
+  user_id: string;
+  product_id: number;
+  order_id: number;
+  rating: number;
+  comment: string | null;
+  status: "pending" | "approved" | "rejected";
+  created_at: string;
+  profiles?: {
+    full_name: string | null;
+  };
+  products?: {
+    name: string;
+  };
+}
