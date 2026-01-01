@@ -4,7 +4,7 @@ SET session_replication_role = replica;
 -- PostgreSQL database dump
 --
 
--- \restrict cZYE2w9I7XIgCrbmggQhzf0w3xcl7nnxChTXxROgS9JF10aIhvGcOUmzdGlsIlK
+-- \restrict E8h7yBHj4HWgcNSZH7bSNONAHmUjVjk6kVV6h4wN356tZkjU1BQPq09UrkBVcGI
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 17.6
@@ -25,6 +25,10 @@ SET row_security = off;
 -- Data for Name: audit_log_entries; Type: TABLE DATA; Schema: auth; Owner: supabase_auth_admin
 --
 
+INSERT INTO "auth"."audit_log_entries" ("instance_id", "id", "payload", "created_at", "ip_address") VALUES
+	('00000000-0000-0000-0000-000000000000', '2dc89deb-6c31-44c8-ab4a-ead98c28ac0b', '{"action":"login","actor_id":"9da600a0-9286-415c-bf65-c2691675c778","actor_name":"Michael J Miller","actor_username":"michael.joseph.miller@gmail.com","actor_via_sso":false,"log_type":"account","traits":{"provider":"email"}}', '2026-01-01 21:37:18.67744+00', ''),
+	('00000000-0000-0000-0000-000000000000', 'cd6e147e-d03c-48ce-9e6b-c8c8202dfb89', '{"action":"token_refreshed","actor_id":"9da600a0-9286-415c-bf65-c2691675c778","actor_name":"Michael J Miller","actor_username":"michael.joseph.miller@gmail.com","actor_via_sso":false,"log_type":"token"}', '2026-01-01 22:36:25.17902+00', ''),
+	('00000000-0000-0000-0000-000000000000', '0b05e2f6-3861-4776-a5ea-78e39f0b02b3', '{"action":"token_revoked","actor_id":"9da600a0-9286-415c-bf65-c2691675c778","actor_name":"Michael J Miller","actor_username":"michael.joseph.miller@gmail.com","actor_via_sso":false,"log_type":"token"}', '2026-01-01 22:36:25.181232+00', '');
 
 
 --
@@ -40,7 +44,7 @@ SET row_security = off;
 INSERT INTO "auth"."users" ("instance_id", "id", "aud", "role", "email", "encrypted_password", "email_confirmed_at", "invited_at", "confirmation_token", "confirmation_sent_at", "recovery_token", "recovery_sent_at", "email_change_token_new", "email_change", "email_change_sent_at", "last_sign_in_at", "raw_app_meta_data", "raw_user_meta_data", "is_super_admin", "created_at", "updated_at", "phone", "phone_confirmed_at", "phone_change", "phone_change_token", "phone_change_sent_at", "email_change_token_current", "email_change_confirm_status", "banned_until", "reauthentication_token", "reauthentication_sent_at", "is_sso_user", "deleted_at", "is_anonymous") VALUES
 	('00000000-0000-0000-0000-000000000000', 'b8fc3e8b-04af-4d14-b7ae-41eaa1456140', 'authenticated', 'authenticated', 'jsmith@gmail.com', '$2a$10$xWWwsCLScIbG8XPSindfH.d5dnf5T5csfNJsa5B7wDDJ5gKW84osC', '2025-12-28 18:27:34.429977+00', NULL, '73b63bc5c9f5058555d304b1e2682024a6b620116e481c508379b80f', '2025-12-28 15:32:14.779341+00', '', NULL, '', 'mjm091969@gmail.com', '2025-12-29 19:51:27.105265+00', '2025-12-29 19:50:32.782379+00', '{"provider": "email", "providers": ["email"]}', '{"sub": "b8fc3e8b-04af-4d14-b7ae-41eaa1456140", "email": "jsmith@gmail.com", "full_name": "Joe Smith", "email_verified": false, "phone_verified": false}', NULL, '2025-12-28 15:32:14.768129+00', '2025-12-29 19:52:17.873824+00', NULL, NULL, '', '', NULL, '771b16fedabfb88c65c7df46a8aee33da010fc5711937451917de858', 1, NULL, '', NULL, false, NULL, false),
 	('00000000-0000-0000-0000-000000000000', '19c4f789-6c2e-48cd-96c2-781912c030a9', 'authenticated', 'authenticated', 'mjm091969@gmail.com', '$2a$10$6Y2pt7atMor9JpcPrspq6.XWROConqvEH0ZaB7kHXIiDpbLDJEIty', '2025-12-29 20:56:36.8105+00', NULL, '', '2025-12-29 20:56:27.829716+00', '', NULL, '', '', NULL, '2026-01-01 17:08:45.311229+00', '{"provider": "email", "providers": ["email"]}', '{"sub": "19c4f789-6c2e-48cd-96c2-781912c030a9", "email": "mjm091969@gmail.com", "full_name": "mjm091969", "email_verified": true, "phone_verified": false}', NULL, '2025-12-29 20:56:27.786998+00', '2026-01-01 17:08:45.315094+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false),
-	('00000000-0000-0000-0000-000000000000', '9da600a0-9286-415c-bf65-c2691675c778', 'authenticated', 'authenticated', 'michael.joseph.miller@gmail.com', '$2a$10$KQJChDSj9QC/XUGYh6q6wuFZPufmy1nP84cBnOpgHqxQ1IC739R0m', '2025-12-27 17:05:03.694053+00', NULL, '', '2025-12-27 17:04:31.610737+00', '', NULL, '', '', NULL, '2026-01-01 17:22:39.594594+00', '{"provider": "email", "providers": ["email"]}', '{"sub": "9da600a0-9286-415c-bf65-c2691675c778", "email": "michael.joseph.miller@gmail.com", "full_name": "Michael J Miller", "email_verified": true, "phone_verified": false}', NULL, '2025-12-27 17:04:31.553129+00', '2026-01-01 20:42:23.767963+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false);
+	('00000000-0000-0000-0000-000000000000', '9da600a0-9286-415c-bf65-c2691675c778', 'authenticated', 'authenticated', 'michael.joseph.miller@gmail.com', '$2a$10$KQJChDSj9QC/XUGYh6q6wuFZPufmy1nP84cBnOpgHqxQ1IC739R0m', '2025-12-27 17:05:03.694053+00', NULL, '', '2025-12-27 17:04:31.610737+00', '', NULL, '', '', NULL, '2026-01-01 21:37:18.679728+00', '{"provider": "email", "providers": ["email"]}', '{"sub": "9da600a0-9286-415c-bf65-c2691675c778", "email": "michael.joseph.miller@gmail.com", "full_name": "Michael J Miller", "email_verified": true, "phone_verified": false}', NULL, '2025-12-27 17:04:31.553129+00', '2026-01-01 22:36:25.185554+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false);
 
 
 --
@@ -70,7 +74,8 @@ INSERT INTO "auth"."identities" ("provider_id", "user_id", "identity_data", "pro
 --
 
 INSERT INTO "auth"."sessions" ("id", "user_id", "created_at", "updated_at", "factor_id", "aal", "not_after", "refreshed_at", "user_agent", "ip", "tag", "oauth_client_id", "refresh_token_hmac_key", "refresh_token_counter", "scopes") VALUES
-	('74ff52a6-3474-4f9e-92af-c56968568cd5', '9da600a0-9286-415c-bf65-c2691675c778', '2026-01-01 17:22:39.596919+00', '2026-01-01 20:42:23.790515+00', NULL, 'aal1', NULL, '2026-01-01 20:42:23.789166', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '172.56.99.7', NULL, NULL, NULL, NULL, NULL);
+	('74ff52a6-3474-4f9e-92af-c56968568cd5', '9da600a0-9286-415c-bf65-c2691675c778', '2026-01-01 17:22:39.596919+00', '2026-01-01 20:42:23.790515+00', NULL, 'aal1', NULL, '2026-01-01 20:42:23.789166', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '172.56.99.7', NULL, NULL, NULL, NULL, NULL),
+	('a9fdd83f-fa97-4fff-99f2-772839c96d20', '9da600a0-9286-415c-bf65-c2691675c778', '2026-01-01 21:37:18.679844+00', '2026-01-01 22:36:25.18814+00', NULL, 'aal1', NULL, '2026-01-01 22:36:25.188068', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '172.18.0.1', NULL, NULL, NULL, NULL, NULL);
 
 
 --
@@ -78,7 +83,8 @@ INSERT INTO "auth"."sessions" ("id", "user_id", "created_at", "updated_at", "fac
 --
 
 INSERT INTO "auth"."mfa_amr_claims" ("session_id", "created_at", "updated_at", "authentication_method", "id") VALUES
-	('74ff52a6-3474-4f9e-92af-c56968568cd5', '2026-01-01 17:22:39.684995+00', '2026-01-01 17:22:39.684995+00', 'password', '06962553-16db-487e-978b-437bbb7117df');
+	('74ff52a6-3474-4f9e-92af-c56968568cd5', '2026-01-01 17:22:39.684995+00', '2026-01-01 17:22:39.684995+00', 'password', '06962553-16db-487e-978b-437bbb7117df'),
+	('a9fdd83f-fa97-4fff-99f2-772839c96d20', '2026-01-01 21:37:18.685749+00', '2026-01-01 21:37:18.685749+00', 'password', '5baa09a0-1d80-42e3-b697-b7cd7c150633');
 
 
 --
@@ -128,7 +134,9 @@ INSERT INTO "auth"."refresh_tokens" ("instance_id", "id", "token", "user_id", "r
 	('00000000-0000-0000-0000-000000000000', 112, 'meaenskemode', '9da600a0-9286-415c-bf65-c2691675c778', true, '2026-01-01 17:22:39.639981+00', '2026-01-01 18:21:18.530745+00', NULL, '74ff52a6-3474-4f9e-92af-c56968568cd5'),
 	('00000000-0000-0000-0000-000000000000', 113, 'h2hdqzr3ybvu', '9da600a0-9286-415c-bf65-c2691675c778', true, '2026-01-01 18:21:18.557813+00', '2026-01-01 19:43:14.578444+00', 'meaenskemode', '74ff52a6-3474-4f9e-92af-c56968568cd5'),
 	('00000000-0000-0000-0000-000000000000', 114, 'cbetnsa6aka3', '9da600a0-9286-415c-bf65-c2691675c778', true, '2026-01-01 19:43:14.597899+00', '2026-01-01 20:42:23.735918+00', 'h2hdqzr3ybvu', '74ff52a6-3474-4f9e-92af-c56968568cd5'),
-	('00000000-0000-0000-0000-000000000000', 115, 'jczcxr6w4d2h', '9da600a0-9286-415c-bf65-c2691675c778', false, '2026-01-01 20:42:23.755757+00', '2026-01-01 20:42:23.755757+00', 'cbetnsa6aka3', '74ff52a6-3474-4f9e-92af-c56968568cd5');
+	('00000000-0000-0000-0000-000000000000', 115, 'jczcxr6w4d2h', '9da600a0-9286-415c-bf65-c2691675c778', false, '2026-01-01 20:42:23.755757+00', '2026-01-01 20:42:23.755757+00', 'cbetnsa6aka3', '74ff52a6-3474-4f9e-92af-c56968568cd5'),
+	('00000000-0000-0000-0000-000000000000', 116, '657ekvh663n5', '9da600a0-9286-415c-bf65-c2691675c778', true, '2026-01-01 21:37:18.681687+00', '2026-01-01 22:36:25.18212+00', NULL, 'a9fdd83f-fa97-4fff-99f2-772839c96d20'),
+	('00000000-0000-0000-0000-000000000000', 117, 'o74iel7fzueg', '9da600a0-9286-415c-bf65-c2691675c778', false, '2026-01-01 22:36:25.183891+00', '2026-01-01 22:36:25.183891+00', '657ekvh663n5', 'a9fdd83f-fa97-4fff-99f2-772839c96d20');
 
 
 --
@@ -189,21 +197,21 @@ INSERT INTO "public"."orders" ("id", "user_id", "status", "total_amount", "shipp
 --
 
 INSERT INTO "public"."products" ("id", "name", "price", "description", "image", "category", "on_hand", "images", "cost", "sku", "tags", "weight", "product_type", "brand", "gtin", "mpn", "condition", "status", "variant") VALUES
-	(34, 'Summit 2 Person Tent', 89.99, 'Lightweight and durable 2-person tent perfect for backpacking and camping. Features waterproof fly and easy setup.', 'summit-2-person-tent-34.jpg', 'Sports & Outdoors > Outdoor Recreation > Camping & Hiking > Tents', 25, '{summit-2-person-tent-34.jpg}', 45.00, 'TNT-TRL-SMM', '{camping,outdoor,tent,hiking}', 2.5, 'Outdoor Gear', 'TrailBlazer', NULL, 'TB-TNT-2P', 'new', 'active', NULL),
-	(36, 'Tower of Fun Cat Tree', 129.99, 'Multi-level cat tree with scratching posts, hammocks, and condos. Keeps your feline friend entertained for hours.', 'tower-of-fun-cat-tree-36.jpg', 'Animals & Pet Supplies > Cat Supplies > Cat Furniture > Cat Trees', 15, '{tower-of-fun-cat-tree-36.jpg}', 65.00, 'TRS-PRP-TOW', '{cat,pet,furniture,"scratching post"}', 15.0, 'Pet Supplies', 'PurrPalace', NULL, 'PP-CT-TOF', 'new', 'active', NULL),
-	(40, 'Aviator Classic Sunglasses', 149.00, 'Timeless aviator style sunglasses with polarized lenses for UV protection. Metal frame with comfortable nose pads.', 'aviator-classic-sunglasses-40.jpg', 'Apparel & Accessories > Clothing Accessories > Sunglasses', 50, '{aviator-classic-sunglasses-40.jpg}', 55.00, 'SNG-SNS-AVT', '{sunglasses,fashion,accessories,summer}', 0.1, 'Accessories', 'SunShade', NULL, 'SS-AVI-CLS', 'new', 'active', NULL),
-	(39, 'Acrylic Paint Set', 34.99, 'Complete set of 24 vibrant acrylic colors. perfect for beginners and professional artists alike.', 'acrylic-paint-set-39.jpg', 'Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Kits', 40, '{acrylic-paint-set-39.jpg}', 12, 'ART-CRT-ACR', '{art,paint,acrylic,hobby}', 1, 'Arts & Crafts', 'CreativeSoul', NULL, 'CS-APS-24', 'new', 'active', NULL),
-	(12, 'Organic Cotton T-Shirt', 25.00, 'Classic fit t-shirt made from 100% organic cotton. Pre-shrunk and durable.', 'organic-cotton-t-shirt-12.jpg', 'Apparel & Accessories > Clothing > Shirts & Tops', 100, '{organic-cotton-t-shirt-12.jpg}', 8.50, 'TSHIRT-ORG-003', '{organic,cotton,clothing}', 0.3, 'Apparel', 'EcoWear', NULL, 'EW-TS003', 'new', 'active', NULL),
-	(15, 'Mechanical Gaming Keyboard', 89.99, 'RGB backlit mechanical keyboard with blue switches. Certified refurbished with new keycaps.', 'mechanical-gaming-keyboard-15.jpg', 'Electronics > Electronics Accessories > Computer Components > Input Devices > Keyboards', 8, '{mechanical-gaming-keyboard-15.jpg}', 40.00, 'KYB-MECH-RGB-REF', '{gaming,keyboard,rgb}', 1.2, 'Electronics', 'ClickyTech', NULL, 'CT-K100-REF', 'refurbished', 'active', NULL),
-	(14, 'Vintage Leather Camera Bag', 145, 'Handcrafted from genuine full-grain leather, this camera bag ages beautifully. Fits one DSLR body and two lenses.', 'vintage-leather-camera-bag-14.jpg', 'Cameras & Optics > Camera & Optic Accessories > Camera Parts & Accessories > Camera Bags & Cases', 15, '{vintage-leather-camera-bag-14.jpg}', 60, 'CMRA-ARTLGCY-VNTLTHRBG-TAN', '{leather,camera,vintage}', 2.5, 'Accessories', 'ArtisanLegacy', NULL, 'AL-CB100', 'new', 'active', 'Tan'),
-	(45, 'Eco Grip Yoga Mat', 45.00, 'Sustainable natural rubber yoga mat with superior grip and cushioning. Non-toxic and eco-friendly.', 'eco-grip-yoga-mat-45.jpg', 'Sports & Outdoors > Exercise & Fitness > Yoga > Mats', 60, '{eco-grip-yoga-mat-45.jpg}', 18.00, 'MTS-ZNF-EC', '{yoga,fitness,eco-friendly,exercise}', 1.2, 'Fitness Accessories', 'ZenFlex', NULL, 'ZF-YM-ECO', 'new', 'active', NULL),
-	(47, 'Mesh Back Task Chair', 199.99, 'Ergonomic office chair with breathable mesh back and adjustable lumbar support. Ideal for long work sessions.', 'mesh-back-task-chair-47.jpg', 'Furniture > Office Furniture > Chairs > Task Chairs', 30, '{mesh-back-task-chair-47.jpg}', 90.00, 'CHR-ERG-MSH', '{office,furniture,chair,ergonomic}', 12.0, 'Furniture', 'ErgoWork', NULL, 'EW-MBC-001', 'new', 'active', NULL),
-	(48, 'Insulated Steel Bottle', 24.99, 'Double-wall vacuum insulated stainless steel water bottle. Keeps drinks cold for 24 hours or hot for 12.', 'insulated-steel-bottle.png', 'Home & Garden > Kitchen & Dining > Food & Beverage Carriers > Water Bottles', 100, '{insulated-steel-bottle.png}', 8, 'WTR-HYD-INS', '{"water bottle",hydration,insulated,travel}', 0.4, 'Kitchenware', 'HydroFlow', NULL, 'HF-ISB-500', 'new', 'active', NULL),
-	(28, 'Premium Wireless Headphones', 299.99, 'Experience crystal clear sound with our latest noise-cancelling headphones. Featuring 30-hour battery life and plush ear cushions for all-day comfort.', 'premium-wireless-headphones-28.jpg', 'Electronics > Audio > Audio Components > Headphones & Headsets > Headphones', 50, '{premium-wireless-headphones-28.jpg}', 150, 'HDPH-NC-001', '{audio,wireless,headphones}', 0.8, 'Electronics', 'SoundMax', '00012345678905', 'SM-NC300', 'new', 'active', NULL),
-	(29, 'Smart Coffee Maker', 189.99, 'WiFi enabled coffee maker. Schedule your brew from your phone. (Currently Out of Stock)', 'smart-coffee-maker-29.jpg', 'Home & Garden > Kitchen & Dining > Kitchen Appliances > Coffee Makers & Espresso Machines', 0, '{smart-coffee-maker-29.jpg}', 95, 'COF-SMRT-005', '{coffee,"smart home",wifi}', 5, 'Home Appliance', 'BrewSmart', '00098765432101', 'BS-CM500', 'new', 'active', NULL),
-	(51, 'Ceramic Planter Pot', 19.99, 'Minimalist ceramic planter with drainage hole and saucer. Perfect for indoor plants and succulents.', 'ceramic-planter-pot-51.jpg', 'Home & Garden > Lawn & Garden > Gardening > Pots & Planters', 75, '{ceramic-planter-pot-51.jpg}', 6.50, 'PTS-GRN-CRM', '{garden,planter,"home decor",indoor}', 0.8, 'Gardening', 'GreenThumb', NULL, 'GT-CPP-MED', 'new', 'active', NULL),
-	(52, 'Strategy Master Board Game', 29.99, 'A classic game of strategy and skill. Challenge your friends and family to a battle of wits.', 'strategy-master-board-game-52.jpg', 'Toys & Games > Games > Board Games', 35, '{strategy-master-board-game-52.jpg}', 10.00, 'GMS-FML-STR', '{"board game",toys,family,strategy}', 1.5, 'Toys & Games', 'FamilyFun', NULL, 'FF-SMBG-01', 'new', 'active', NULL),
-	(53, 'Sonic Clean Toothbrush', 59.99, 'Advanced sonic technology for a deep clean. Rechargeable battery, 3 modes, and 2 minute timer.', 'sonic-clean-toothbrush.png', 'Health & Beauty > Personal Care > Oral Care > Toothbrushes', 45, '{sonic-clean-toothbrush.png}', 25, 'TTH-SML-SNC', '{health,beauty,dental,toothbrush}', 0.3, 'Personal Care', 'SmileBright', NULL, 'SB-SCT-200', 'new', 'active', NULL);
+	(39, 'Acrylic Paint Set', 34.99, 'Complete set of 24 vibrant acrylic colors. perfect for beginners and professional artists alike.', '1767303667535_acrylic-paint-set-39.jpg', 'Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Kits', 40, '{1767303667535_acrylic-paint-set-39.jpg}', 12, 'ART-CRT-ACR', '{art,paint,acrylic,hobby}', 1, 'Arts & Crafts', 'CreativeSoul', NULL, 'CS-APS-24', 'new', 'active', NULL),
+	(40, 'Aviator Classic Sunglasses', 149, 'Timeless aviator style sunglasses with polarized lenses for UV protection. Metal frame with comfortable nose pads.', '1767303734076_aviator-classic-sunglasses-40.jpg', 'Apparel & Accessories > Clothing Accessories > Sunglasses', 50, '{1767303734076_aviator-classic-sunglasses-40.jpg}', 55, 'SNG-SNS-AVT', '{sunglasses,fashion,accessories,summer}', 0.1, 'Accessories', 'SunShade', NULL, 'SS-AVI-CLS', 'new', 'active', NULL),
+	(51, 'Ceramic Planter Pot', 19.99, 'Minimalist ceramic planter with drainage hole and saucer. Perfect for indoor plants and succulents.', '1767303783358_ceramic-planter-pot-51.jpg', 'Home & Garden > Lawn & Garden > Gardening > Pots & Planters', 75, '{1767303783358_ceramic-planter-pot-51.jpg}', 6.5, 'PTS-GRN-CRM', '{garden,planter,"home decor",indoor}', 0.8, 'Gardening', 'GreenThumb', NULL, 'GT-CPP-MED', 'new', 'active', NULL),
+	(45, 'Eco Grip Yoga Mat', 45, 'Sustainable natural rubber yoga mat with superior grip and cushioning. Non-toxic and eco-friendly.', '1767303812124_eco-grip-yoga-mat-45.jpg', 'Sports & Outdoors > Exercise & Fitness > Yoga > Mats', 60, '{1767303812124_eco-grip-yoga-mat-45.jpg}', 18, 'MTS-ZNF-EC', '{yoga,fitness,eco-friendly,exercise}', 1.2, 'Fitness Accessories', 'ZenFlex', NULL, 'ZF-YM-ECO', 'new', 'active', NULL),
+	(15, 'Mechanical Gaming Keyboard', 89.99, 'RGB backlit mechanical keyboard with blue switches. Certified refurbished with new keycaps.', '1767303854925_mechanical-gaming-keyboard-15.jpg', 'Electronics > Electronics Accessories > Computer Components > Input Devices > Keyboards', 8, '{1767303854925_mechanical-gaming-keyboard-15.jpg}', 40, 'KYB-MECH-RGB-REF', '{gaming,keyboard,rgb}', 1.2, 'Electronics', 'ClickyTech', NULL, 'CT-K100-REF', 'refurbished', 'active', NULL),
+	(47, 'Mesh Back Task Chair', 199.99, 'Ergonomic office chair with breathable mesh back and adjustable lumbar support. Ideal for long work sessions.', '1767303872384_mesh-back-task-chair-47.jpg', 'Furniture > Office Furniture > Chairs > Task Chairs', 30, '{1767303872384_mesh-back-task-chair-47.jpg}', 90, 'CHR-ERG-MSH', '{office,furniture,chair,ergonomic}', 12, 'Furniture', 'ErgoWork', NULL, 'EW-MBC-001', 'new', 'active', NULL),
+	(12, 'Organic Cotton T-Shirt', 25, 'Classic fit t-shirt made from 100% organic cotton. Pre-shrunk and durable.', '1767303898382_organic-cotton-t-shirt-12.jpg', 'Apparel & Accessories > Clothing > Shirts & Tops', 100, '{1767303898382_organic-cotton-t-shirt-12.jpg}', 8.5, 'TSHIRT-ORG-003', '{organic,cotton,clothing}', 0.3, 'Apparel', 'EcoWear', NULL, 'EW-TS003', 'new', 'active', NULL),
+	(29, 'Smart Coffee Maker', 189.99, 'WiFi enabled coffee maker. Schedule your brew from your phone. (Currently Out of Stock)', '1767303940337_smart-coffee-maker-29.jpg', 'Home & Garden > Kitchen & Dining > Kitchen Appliances > Coffee Makers & Espresso Machines', 0, '{1767303940337_smart-coffee-maker-29.jpg}', 95, 'COF-SMRT-005', '{coffee,"smart home",wifi}', 5, 'Home Appliance', 'BrewSmart', '00098765432101', 'BS-CM500', 'new', 'active', NULL),
+	(53, 'Sonic Clean Toothbrush', 59.99, 'Advanced sonic technology for a deep clean. Rechargeable battery, 3 modes, and 2 minute timer.', '1767303962270_sonic-clean-toothbrush.png', 'Health & Beauty > Personal Care > Oral Care > Toothbrushes', 45, '{1767303962270_sonic-clean-toothbrush.png}', 25, 'TTH-SML-SNC', '{health,beauty,dental,toothbrush}', 0.3, 'Personal Care', 'SmileBright', NULL, 'SB-SCT-200', 'new', 'active', NULL),
+	(52, 'Strategy Master Board Game', 29.99, 'A classic game of strategy and skill. Challenge your friends and family to a battle of wits.', '1767303981819_strategy-master-board-game-52.jpg', 'Toys & Games > Games > Board Games', 35, '{1767303981819_strategy-master-board-game-52.jpg}', 10, 'GMS-FML-STR', '{"board game",toys,family,strategy}', 1.5, 'Toys & Games', 'FamilyFun', NULL, 'FF-SMBG-01', 'new', 'active', NULL),
+	(36, 'Tower of Fun Cat Tree', 129.99, 'Multi-level cat tree with scratching posts, hammocks, and condos. Keeps your feline friend entertained for hours.', '1767304021945_tower-of-fun-cat-tree-36.jpg', 'Animals & Pet Supplies > Cat Supplies > Cat Furniture > Cat Trees', 15, '{1767304021945_tower-of-fun-cat-tree-36.jpg}', 65, 'TRS-PRP-TOW', '{cat,pet,furniture,"scratching post"}', 15, 'Pet Supplies', 'PurrPalace', NULL, 'PP-CT-TOF', 'new', 'active', NULL),
+	(14, 'Vintage Leather Camera Bag', 145, 'Handcrafted from genuine full-grain leather, this camera bag ages beautifully. Fits one DSLR body and two lenses.', '1767304041190_vintage-leather-camera-bag-14.jpg', 'Cameras & Optics > Camera & Optic Accessories > Camera Parts & Accessories > Camera Bags & Cases', 15, '{1767304041190_vintage-leather-camera-bag-14.jpg}', 60, 'CMRA-ARTLGCY-VNTLTHRBG-TAN', '{leather,camera,vintage}', 2.5, 'Accessories', 'ArtisanLegacy', NULL, 'AL-CB100', 'new', 'active', 'Tan'),
+	(48, 'Insulated Steel Bottle', 24.99, 'Double-wall vacuum insulated stainless steel water bottle. Keeps drinks cold for 24 hours or hot for 12.', '1767303829009_insulated-steel-bottle.png', 'Home & Garden > Kitchen & Dining > Food & Beverage Carriers > Water Bottles', 100, '{1767303829009_insulated-steel-bottle.png}', 8, 'WTR-HYD-INS', '{"water bottle",hydration,insulated,travel}', 0.4, 'Kitchenware', 'HydroFlow', NULL, 'HF-ISB-500', 'new', 'active', NULL),
+	(28, 'Premium Wireless Headphones', 299.99, 'Experience crystal clear sound with our latest noise-cancelling headphones. Featuring 30-hour battery life and plush ear cushions for all-day comfort.', '1767303919806_premium-wireless-headphones-28.jpg', 'Electronics > Audio > Audio Components > Headphones & Headsets > Headphones', 50, '{1767303919806_premium-wireless-headphones-28.jpg}', 150, 'HDPH-NC-001', '{audio,wireless,headphones}', 0.8, 'Electronics', 'SoundMax', '00012345678905', 'SM-NC300', 'new', 'active', NULL),
+	(34, 'Summit 2 Person Tent', 89.99, 'Lightweight and durable 2-person tent perfect for backpacking and camping. Features waterproof fly and easy setup.', '1767304002453_summit-2-person-tent-34.jpg', 'Sports & Outdoors > Outdoor Recreation > Camping & Hiking > Tents', 25, '{1767304002453_summit-2-person-tent-34.jpg}', 45, 'TNT-TRL-SMM', '{camping,outdoor,tent,hiking}', 2.5, 'Outdoor Gear', 'TrailBlazer', NULL, 'TB-TNT-2P', 'new', 'active', NULL);
 
 
 --
@@ -237,58 +245,10 @@ INSERT INTO "public"."store_settings" ("id", "store_name", "support_email", "pri
 
 
 --
--- Data for Name: buckets; Type: TABLE DATA; Schema: storage; Owner: supabase_storage_admin
---
-
-
-
---
--- Data for Name: buckets_analytics; Type: TABLE DATA; Schema: storage; Owner: supabase_storage_admin
---
-
-
-
---
--- Data for Name: buckets_vectors; Type: TABLE DATA; Schema: storage; Owner: supabase_storage_admin
---
-
-
-
---
--- Data for Name: objects; Type: TABLE DATA; Schema: storage; Owner: supabase_storage_admin
---
-
-
-
---
--- Data for Name: prefixes; Type: TABLE DATA; Schema: storage; Owner: supabase_storage_admin
---
-
-
-
---
--- Data for Name: s3_multipart_uploads; Type: TABLE DATA; Schema: storage; Owner: supabase_storage_admin
---
-
-
-
---
--- Data for Name: s3_multipart_uploads_parts; Type: TABLE DATA; Schema: storage; Owner: supabase_storage_admin
---
-
-
-
---
--- Data for Name: vector_indexes; Type: TABLE DATA; Schema: storage; Owner: supabase_storage_admin
---
-
-
-
---
 -- Name: refresh_tokens_id_seq; Type: SEQUENCE SET; Schema: auth; Owner: supabase_auth_admin
 --
 
-SELECT pg_catalog.setval('"auth"."refresh_tokens_id_seq"', 115, true);
+SELECT pg_catalog.setval('"auth"."refresh_tokens_id_seq"', 117, true);
 
 
 --
@@ -323,6 +283,6 @@ SELECT pg_catalog.setval('"public"."reviews_id_seq"', 4, true);
 -- PostgreSQL database dump complete
 --
 
--- \unrestrict cZYE2w9I7XIgCrbmggQhzf0w3xcl7nnxChTXxROgS9JF10aIhvGcOUmzdGlsIlK
+-- \unrestrict E8h7yBHj4HWgcNSZH7bSNONAHmUjVjk6kVV6h4wN356tZkjU1BQPq09UrkBVcGI
 
 RESET ALL;
