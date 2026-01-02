@@ -3,13 +3,14 @@ import { AdminOrders } from '../../components/features/admin/AdminOrders';
 import { AdminCustomers } from '../../components/features/admin/AdminCustomers';
 import { AdminInventory } from '../../components/features/admin/AdminInventory';
 import { AdminSettings } from '../../components/features/admin/AdminSettings';
+import { AdminImages } from '../../components/features/admin/AdminImages';
 import { AdminReviews } from '../../components/features/reviews/AdminReviews';
 
 export default function AdminPage() {
 	const [searchParams, setSearchParams] = useSearchParams();
 	const activeTab = searchParams.get('tab') || 'orders';
 
-	const handleTabChange = (tab: 'orders' | 'customers' | 'inventory' | 'settings' | 'reviews') => {
+	const handleTabChange = (tab: 'orders' | 'customers' | 'inventory' | 'settings' | 'reviews' | 'images') => {
 		setSearchParams({ tab });
 	};
 
@@ -56,6 +57,15 @@ export default function AdminPage() {
 						Reviews
 					</button>
 					<button
+						onClick={() => handleTabChange('images')}
+						className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'images'
+							? 'bg-background text-foreground shadow-sm'
+							: 'text-muted-foreground hover:text-foreground'
+							}`}
+					>
+						Images
+					</button>
+					<button
 						onClick={() => handleTabChange('settings')}
 						className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'settings'
 							? 'bg-background text-foreground shadow-sm'
@@ -72,6 +82,7 @@ export default function AdminPage() {
 				{activeTab === 'customers' && <AdminCustomers />}
 				{activeTab === 'inventory' && <AdminInventory />}
 				{activeTab === 'reviews' && <AdminReviews />}
+				{activeTab === 'images' && <AdminImages />}
 				{activeTab === 'settings' && <AdminSettings />}
 			</div>
 		</div>
