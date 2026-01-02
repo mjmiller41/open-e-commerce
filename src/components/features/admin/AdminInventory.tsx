@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase, type Product } from '../../lib/supabase';
+import { supabase, type Product } from '../../../lib/supabase';
 import { Plus, Search, Edit2, Trash2, Package, Minus, X } from 'lucide-react';
-import logger from '../../lib/logger';
-import { ProductModal } from '../ProductModal';
-import { useSortableData } from '../../hooks/useSortableData';
+import logger from '../../../lib/logger';
+import { ProductModal } from '../products/ProductModal';
+import { useSortableData } from '../../../hooks/useSortableData';
 import Papa from 'papaparse';
 import { Download, Upload } from 'lucide-react';
-import { Badge } from '../ui/Badge';
-import { SectionHeader } from '../ui/SectionHeader';
-import { SortableHeader } from '../ui/SortableHeader';
-import { resolveProductImage } from '../../lib/utils';
+import { Badge } from '../../common/Badge';
+import { SectionHeader } from '../../common/SectionHeader';
+import { SortableHeader } from '../../common/SortableHeader';
+import { resolveProductImage } from '../../../lib/utils';
 
 // Internal component for handling sequential image fallback
 const ProductThumbnail = ({ product }: { product: Product }) => {

@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, User, ChevronDown, Facebook, Instagram, Twitter, Youtube, Pin, Ghost, Video, Type, Github } from 'lucide-react';
-import { ThemeToggle } from './ThemeToggle';
-import { useCart } from '../context/CartContext';
-import { appConfig } from '../lib/config';
-import { useAuth } from '../context/AuthContext';
-import { useStoreSettings } from '../context/StoreSettingsContext';
-import { CartDrawer } from './CartDrawer';
+import { ThemeToggle } from '../common/ThemeToggle';
+import { useCart } from '../../context/CartContext';
+import { appConfig } from '../../lib/config';
+import { useAuth } from '../../context/AuthContext';
+import { useStoreSettings } from '../../context/StoreSettingsContext';
+import { CartDrawer } from '../features/cart/CartDrawer';
 
 /**
  * The shared layout component for the application.

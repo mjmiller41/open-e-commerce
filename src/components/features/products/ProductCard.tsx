@@ -1,13 +1,13 @@
-import { type Product } from '../lib/supabase';
+import { type Product } from '../../../lib/supabase';
 import { ShoppingCart } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { QuantityControl } from './QuantityControl';
-import { Badge } from './ui/Badge';
-import { useStoreSettings } from '../context/StoreSettingsContext';
-import { formatCurrency } from '../lib/currency';
-import { resolveProductImage } from '../lib/utils';
-import { useProductRating } from '../hooks/useProductRating';
-import { StarRating } from './StarRating';
+import { QuantityControl } from '../../common/QuantityControl';
+import { Badge } from '../../common/Badge';
+import { useStoreSettings } from '../../../context/StoreSettingsContext';
+import { formatCurrency } from '../../../lib/currency';
+import { resolveProductImage } from '../../../lib/utils';
+import { useProductRating } from '../../../hooks/useProductRating';
+import { StarRating } from '../../common/StarRating';
 
 /**
  * Props for the ProductCard component.

@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { supabase, type Order, type OrderItem } from "../lib/supabase";
-import logger from "../lib/logger";
-import { Badge } from "../components/ui/Badge";
-import { PageHeader } from "../components/ui/PageHeader";
-import { resolveProductImage } from "../lib/utils";
-import { ReviewForm } from "../components/reviews/ReviewForm";
+import { useAuth } from "../../context/AuthContext";
+import { supabase, type Order, type OrderItem } from "../../lib/supabase";
+import logger from "../../lib/logger";
+import { Badge } from "../../components/common/Badge";
+import { PageHeader } from "../../components/common/PageHeader";
+import { resolveProductImage } from "../../lib/utils";
+import { ReviewForm } from "../../components/features/reviews/ReviewForm";
 import { X } from "lucide-react";
 
 // Extend OrderItem locally to include product image from join

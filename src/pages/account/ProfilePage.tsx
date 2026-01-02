@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { supabase, type Order, type Profile, type Address } from "../lib/supabase";
-import AddressForm, { type AddressData } from "../components/AddressForm";
-import logger from "../lib/logger";
-import { Badge } from "../components/ui/Badge";
-import { PageHeader } from "../components/ui/PageHeader";
-import { SectionHeader } from "../components/ui/SectionHeader";
+import { useAuth } from "../../context/AuthContext";
+import { supabase, type Order, type Profile, type Address } from "../../lib/supabase";
+import AddressForm, { type AddressData } from "../../components/common/AddressForm";
+import logger from "../../lib/logger";
+import { Badge } from "../../components/common/Badge";
+import { PageHeader } from "../../components/common/PageHeader";
+import { SectionHeader } from "../../components/common/SectionHeader";
 
 export default function ProfilePage() {
 	const { id } = useParams();

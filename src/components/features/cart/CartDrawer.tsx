@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { X, ShoppingBag } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
-import { formatCurrency } from '../lib/currency';
-import { useStoreSettings } from '../context/StoreSettingsContext';
-import { QuantityControl } from './QuantityControl';
-import { supabase, type Product } from '../lib/supabase';
-import { resolveProductImage } from '../lib/utils';
+import { useCart } from '../../../context/CartContext';
+import { formatCurrency } from '../../../lib/currency';
+import { useStoreSettings } from '../../../context/StoreSettingsContext';
+import { QuantityControl } from '../../common/QuantityControl';
+import { supabase, type Product } from '../../../lib/supabase';
+import { resolveProductImage } from '../../../lib/utils';
 
 export function CartDrawer() {
 	const { cartItems, isCartOpen, closeCart, updateQuantity, removeFromCart } = useCart();

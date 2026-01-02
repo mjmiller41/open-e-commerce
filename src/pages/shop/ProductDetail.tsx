@@ -1,16 +1,16 @@
 import { useParams, Link } from 'react-router-dom';
-import { supabase, type Product } from '../lib/supabase';
-import logger from '../lib/logger';
+import { supabase, type Product } from '../../lib/supabase';
+import logger from '../../lib/logger';
 import { ShoppingCart, ArrowLeft, Package, Truck, ShieldCheck } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { QuantityControl } from '../components/QuantityControl';
-import { ReviewList } from '../components/reviews/ReviewList';
-import { StarRating } from '../components/StarRating';
-import { useProductRating } from '../hooks/useProductRating';
-import { useCart } from '../context/CartContext';
-import { useStoreSettings } from '../context/StoreSettingsContext';
-import { formatCurrency } from '../lib/currency';
-import { resolveProductImage } from '../lib/utils';
+import { QuantityControl } from '../../components/common/QuantityControl';
+import { ReviewList } from '../../components/features/reviews/ReviewList';
+import { StarRating } from '../../components/common/StarRating';
+import { useProductRating } from '../../hooks/useProductRating';
+import { useCart } from '../../context/CartContext';
+import { useStoreSettings } from '../../context/StoreSettingsContext';
+import { formatCurrency } from '../../lib/currency';
+import { resolveProductImage } from '../../lib/utils';
 
 /**
  * The product detail page.

@@ -1,11 +1,11 @@
 
 import { useEffect, useState, useCallback } from 'react';
-import { supabase, type Review } from '../../lib/supabase';
+import { supabase, type Review } from '../../../lib/supabase';
 import { type User } from '@supabase/supabase-js';
-import { StarRating } from '../StarRating';
+import { StarRating } from '../../common/StarRating';
 import { ReviewForm } from './ReviewForm';
 import { formatDistanceToNow } from 'date-fns';
-import logger from '../../lib/logger';
+import logger from '../../../lib/logger';
 import { MessageSquare } from 'lucide-react';
 
 interface ReviewListProps {

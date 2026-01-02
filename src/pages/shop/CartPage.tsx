@@ -1,15 +1,15 @@
 import { Trash2, ArrowRight, ShoppingBag } from 'lucide-react';
-import { QuantityControl } from '../components/QuantityControl';
+import { QuantityControl } from '../../components/common/QuantityControl';
 import { Link } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
-import { useStoreSettings } from '../context/StoreSettingsContext';
-import { formatCurrency } from '../lib/currency';
+import { useCart } from '../../context/CartContext';
+import { useStoreSettings } from '../../context/StoreSettingsContext';
+import { formatCurrency } from '../../lib/currency';
 import { useEffect, useState } from 'react';
-import { supabase, type Product } from '../lib/supabase';
-import logger from '../lib/logger';
-import { CheckoutModal } from '../components/CheckoutModal';
-import { PageHeader } from '../components/ui/PageHeader';
-import { resolveProductImage } from '../lib/utils';
+import { supabase, type Product } from '../../lib/supabase';
+import logger from '../../lib/logger';
+import { CheckoutModal } from '../../components/features/checkout/CheckoutModal';
+import { PageHeader } from '../../components/common/PageHeader';
+import { resolveProductImage } from '../../lib/utils';
 /**
  * The shopping cart page.
  * Displays the list of items in the cart, allows quantity adjustment and removal,

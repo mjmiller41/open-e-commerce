@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { validateAddress } from '../lib/googleAddress';
-import AddressValidationModal from './AddressValidationModal';
-import logger from '../lib/logger';
+import { validateAddress } from '../../lib/googleAddress';
+import AddressValidationModal from '../features/checkout/AddressValidationModal';
+import logger from '../../lib/logger';
 
 export interface AddressData {
 	address_line1: string;

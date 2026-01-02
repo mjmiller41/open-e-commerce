@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { supabase, type Product, uploadProductImageCustomName } from '../lib/supabase';
-import { generateSKU } from '../lib/skuGenerator';
-import { checkSkuExists, getSuggestedSku } from '../lib/productService';
+import { supabase, type Product, uploadProductImageCustomName } from '../../../lib/supabase';
+import { generateSKU } from '../../../lib/skuGenerator';
+import { checkSkuExists, getSuggestedSku } from '../../../lib/productService';
 import { X, Loader2, Upload, Image as ImageIcon } from 'lucide-react';
-import logger from '../lib/logger';
-import taxonomy from '../data/taxonomy.json';
-import { resolveProductImage } from '../lib/utils';
+import logger from '../../../lib/logger';
+import taxonomy from '../../../data/taxonomy.json';
+import { resolveProductImage } from '../../../lib/utils';
 
 interface ProductModalProps {
 	product?: Product | null;

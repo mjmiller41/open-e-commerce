@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { supabase, type Product } from '../lib/supabase';
-import logger from '../lib/logger';
-import { ProductCard } from '../components/ProductCard';
-import { useCart } from '../context/CartContext';
+import { supabase, type Product } from '../../lib/supabase';
+import logger from '../../lib/logger';
+import { ProductCard } from '../../components/features/products/ProductCard';
+import { useCart } from '../../context/CartContext';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
-import { SearchFilterBar, type FilterState, type SortOption } from '../components/SearchFilterBar';
-import { fetchCategories, buildCategoryTree, type CategoryNode } from '../lib/categoryUtils';
+import { SearchFilterBar, type FilterState, type SortOption } from '../../components/features/products/SearchFilterBar';
+import { fetchCategories, buildCategoryTree, type CategoryNode } from '../../lib/categoryUtils';
 
 /**
  * The product listing page (Home page).

@@ -1,8 +1,8 @@
 
 import { useState } from 'react';
-import { supabase } from '../../lib/supabase';
-import { StarRating } from '../StarRating';
-import logger from '../../lib/logger';
+import { supabase } from '../../../lib/supabase';
+import { StarRating } from '../../common/StarRating';
+import logger from '../../../lib/logger';
 import { Send } from 'lucide-react';
 
 interface ReviewFormProps {

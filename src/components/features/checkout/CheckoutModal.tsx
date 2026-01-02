@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
-import type { Address } from '../lib/supabase';
-import { useAuth } from '../context/AuthContext';
-import { useCart } from '../context/CartContext';
-import logger from '../lib/logger';
-import AddressForm from './AddressForm';
+import { supabase } from '../../../lib/supabase';
+import type { Address } from '../../../lib/supabase';
+import { useAuth } from '../../../context/AuthContext';
+import { useCart } from '../../../context/CartContext';
+import logger from '../../../lib/logger';
+import AddressForm from '../../common/AddressForm';
 
 interface CheckoutModalProps {
 	isOpen: boolean;

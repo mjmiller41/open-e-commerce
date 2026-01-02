@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, SlidersHorizontal, X, ChevronRight, ChevronDown } from 'lucide-react';
-import { type CategoryNode } from '../lib/categoryUtils';
-import { supabase, type Product } from '../lib/supabase';
+import { type CategoryNode } from '../../../lib/categoryUtils';
+import { supabase, type Product } from '../../../lib/supabase';
 import { Link } from 'react-router-dom';
-import { useStoreSettings } from '../context/StoreSettingsContext';
-import { formatCurrency } from '../lib/currency';
-import { resolveProductImage } from '../lib/utils';
-import { StarRating } from './StarRating';
+import { useStoreSettings } from '../../../context/StoreSettingsContext';
+import { formatCurrency } from '../../../lib/currency';
+import { resolveProductImage } from '../../../lib/utils';
+import { StarRating } from '../../common/StarRating';
 
 interface SearchFilterBarProps {
 	onSearch: (searchTerm: string) => void;

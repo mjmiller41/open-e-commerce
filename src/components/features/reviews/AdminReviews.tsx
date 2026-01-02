@@ -1,8 +1,8 @@
 
 import { useEffect, useState, useCallback } from 'react';
-import { supabase, type Review } from '../../lib/supabase';
-import { StarRating } from '../StarRating';
-import logger from '../../lib/logger';
+import { supabase, type Review } from '../../../lib/supabase';
+import { StarRating } from '../../common/StarRating';
+import logger from '../../../lib/logger';
 import { Check, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 

@@ -1,18 +1,18 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Layout } from './components/Layout';
-import { ProductList } from './pages/ProductList';
-import { ProductDetail } from './pages/ProductDetail';
-import { CartPage } from './pages/CartPage';
+import { Layout } from './components/layout/Layout';
+import { ProductList } from './pages/shop/ProductList';
+import { ProductDetail } from './pages/shop/ProductDetail';
+import { CartPage } from './pages/shop/CartPage';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 import { StoreSettingsProvider } from './context/StoreSettingsContext';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import AdminPage from './pages/admin/Dashboard';
-import ProfilePage from './pages/ProfilePage';
-import ProtectedRoute from './components/ProtectedRoute';
-import ErrorBoundary from './components/ErrorBoundary';
-import OrderDetailPage from './pages/OrderDetailPage';
+import ProfilePage from './pages/account/ProfilePage';
+import ProtectedRoute from './components/features/auth/ProtectedRoute';
+import ErrorBoundary from './components/common/ErrorBoundary';
+import OrderDetailPage from './pages/account/OrderDetailPage';
 import { AdminProductDetail } from './pages/admin/ProductDetail';
 import { ToastProvider } from './context/ToastContext';
 

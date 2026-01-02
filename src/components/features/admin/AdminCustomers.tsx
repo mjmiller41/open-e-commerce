@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase, type Profile } from '../../lib/supabase';
-import logger from '../../lib/logger';
-import { useAuth } from '../../context/AuthContext';
+import { supabase, type Profile } from '../../../lib/supabase';
+import logger from '../../../lib/logger';
+import { useAuth } from '../../../context/AuthContext';
 import { X } from 'lucide-react';
-import { useSortableData } from '../../hooks/useSortableData';
-import { Badge } from '../ui/Badge';
-import { SectionHeader } from '../ui/SectionHeader';
-import { SortableHeader } from '../ui/SortableHeader';
+import { useSortableData } from '../../../hooks/useSortableData';
+import { Badge } from '../../common/Badge';
+import { SectionHeader } from '../../common/SectionHeader';
+import { SortableHeader } from '../../common/SortableHeader';
 
 export function AdminCustomers() {
 	const { isAdmin } = useAuth();
