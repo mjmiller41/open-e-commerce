@@ -42,8 +42,6 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 	const { settings } = useStoreSettings();
 	const { rating, count } = useProductRating(product.id);
 
-	console.log(resolveProductImage(product.images?.[0] || product.image))
-
 	return (
 		<div className="card flex flex-col h-full group hover:shadow-lg hover:border-accent/50 transition-all duration-300 relative">
 			<Link
@@ -52,7 +50,6 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 				style={{ aspectRatio: "var(--card-image-ratio, auto)" } as React.CSSProperties}
 			>
 				{/* Primary Image */}
-				<div>{resolveProductImage(product.images?.[0] || product.image)}</div>
 				<img
 					src={resolveProductImage(product.images?.[0] || product.image)}
 					alt={product.name}
