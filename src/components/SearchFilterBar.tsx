@@ -60,7 +60,7 @@ export function SearchFilterBar({ onSearch, onFilterChange, onSortChange, catego
 	const fetchSuggestions = async (term: string) => {
 		const { data } = await supabase
 			.from('products')
-			.select('id, name, price, image, category')
+			.select('id, name, price, images, category')
 			.ilike('name', `%${term}%`)
 			.limit(5);
 
@@ -202,7 +202,7 @@ export function SearchFilterBar({ onSearch, onFilterChange, onSortChange, catego
 								>
 									<div className="w-10 h-10 rounded bg-muted overflow-hidden shrink-0">
 										<img
-											src={resolveProductImage(product.image)}
+											src={resolveProductImage(product.images?.[0])}
 											alt={product.name}
 											className="w-full h-full object-cover"
 										/>

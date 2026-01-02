@@ -45,7 +45,7 @@ export function ProductDetail() {
 				logger.error('Error fetching product:', error);
 			} else {
 				setProduct(data);
-				setActiveImage(data.images?.[0] || data.image || '');
+				setActiveImage(data.images?.[0] || '');
 			}
 			setLoading(false);
 		}
@@ -74,7 +74,7 @@ export function ProductDetail() {
 		"@context": "https://schema.org/",
 		"@type": "Product",
 		"name": product.name,
-		"image": product.images && product.images.length > 0 ? product.images.map(i => resolveProductImage(i)) : [resolveProductImage(product.image)],
+		"image": product.images && product.images.length > 0 ? product.images.map(i => resolveProductImage(i)) : [],
 		"description": product.description,
 		"sku": product.sku,
 		"mpn": product.mpn,

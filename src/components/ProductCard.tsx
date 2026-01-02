@@ -51,7 +51,7 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 			>
 				{/* Primary Image */}
 				<img
-					src={resolveProductImage(product.images?.[0] || product.image)}
+					src={resolveProductImage(product.images?.[0])}
 					alt={product.name}
 					className="w-full h-full object-cover transition-all duration-500 mix-blend-multiply dark:mix-blend-normal group-hover:scale-105"
 					loading="lazy"

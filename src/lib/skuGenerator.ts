@@ -1,26 +1,15 @@
-import oedAbbreviationsRaw from "../data/oed_abbreviations.json";
-
-const oedAbbreviations = oedAbbreviationsRaw as Record<string, string>;
-
 /**
- * Helper to look up an abbreviation in the OED list.
- * If found, returns the abbreviation in uppercase without periods.
- * If not found, returns the first 3 characters in uppercase.
+ * Helper to return the abbreviation in uppercase without periods.
+ * returns the first 5 consonants in uppercase.
  */
 export function getAbbreviation(word: string): string {
   if (!word) return "";
 
   const cleanWord = word.trim().toLowerCase();
 
-  // Check OED list
-  if (oedAbbreviations[cleanWord]) {
-    return oedAbbreviations[cleanWord].replace(/\./g, "").toUpperCase();
-  }
-
-  // Consonant Skeleton Fallback
   // 1. Start with the first character (always kept).
   // 2. Append all subsequent consonants.
-  // 3. Take the first 3 characters of the result.
+  // 3. Take the first 5 characters of the result.
 
   // Remove non-alphanumeric chars first just in case
   const alphanumeric = cleanWord.replace(/[^a-z0-9]/g, "");
@@ -39,8 +28,8 @@ export function getAbbreviation(word: string): string {
     }
   }
 
-  // Combine and truncate to 3 characters
-  return (firstChar + uniqueConsonants).substring(0, 3);
+  // Combine and truncate to 5 characters
+  return (firstChar + uniqueConsonants).substring(0, 5);
 }
 
 /**

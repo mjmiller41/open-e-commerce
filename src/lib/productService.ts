@@ -41,6 +41,7 @@ export async function getSuggestedSku(baseSku: string): Promise<string> {
 
   const formatSku = (root: string, n: number) =>
     `${root}-${n.toString().padStart(3, "0")}`;
+
   let candidate = formatSku(rootSku, counter);
 
   while (await checkSkuExists(candidate)) {

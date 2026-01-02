@@ -19,10 +19,9 @@ const ProductThumbnail = ({ product }: { product: Product }) => {
 
 
 
-	// Construct list of all possible images: [images array] + [legacy image field]
+	// Construct list of all possible images: [images array]
 	const allImages = [
-		...(product.images || []),
-		product.image
+		...(product.images || [])
 	].filter(Boolean) as string[];
 
 	const resolvedImages = allImages.map(img => resolveProductImage(img));

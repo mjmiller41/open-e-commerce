@@ -15,35 +15,15 @@ export function cn(...inputs: ClassValue[]) {
  * If null/undefined, returns the default placeholder.
  */
 export function resolveProductImage(
-  imagePath: string | null | undefined
+  filename: string | null | undefined
 ): string {
   const baseUrl = import.meta.env.BASE_URL;
-  console.log("imagePath:", imagePath);
-  if (!imagePath) return `${baseUrl}logo.png`;
-  if (imagePath.startsWith("http")) return imagePath; // Legacy remote URLs
 
-  // Clean filename if it contains the legacy local path prefix
-  let filename = imagePath;
-  if (imagePath.startsWith("/images/products/")) {
-    filename = imagePath.replace("/images/products/", "");
-  } else if (imagePath.startsWith("images/products/")) {
-    filename = imagePath.replace("images/products/", "");
-  }
+  if (!filename) return `${baseUrl}logo.png`;
+  if (filename.startsWith("http")) return filename; // Legacy remote URLs
 
-  // Use (Remote) Supabase Storage in Production
-  if (import.meta.env.PROD) {
-    const { data } = supabase.storage.from("products").getPublicUrl(filename);
-    return data.publicUrl;
-  }
-
-  // Development: Use local public folder
-  // Check if it already has the base prefix
-  if (imagePath.startsWith(baseUrl)) return imagePath;
-
-  // Handle paths that might have been hardcoded relative to root
-  if (imagePath.startsWith("/images/products/")) {
-    return `${baseUrl}${imagePath.slice(1)}`;
-  }
-
-  return `${baseUrl}images/products/${imagePath}`;
+  // Use (Local or Remote) Supabase Storage
+  // The URL is determined by the VITE_SUPABASE_URL environment variable used to initialize the supabase client
+  const { data } = supabase.storage.from("products").getPublicUrl(filename);
+  return data.publicUrl;
 }

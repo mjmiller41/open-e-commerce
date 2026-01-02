@@ -13,6 +13,7 @@ import { X } from "lucide-react";
 interface ExtendedOrderItem extends OrderItem {
 	products?: {
 		image: string | null;
+		images: string[] | null;
 	};
 }
 
@@ -60,7 +61,7 @@ export default function OrderDetailPage() {
 				// 3. Fetch Order Items with Product Image
 				const { data: itemsData, error: itemsError } = await supabase
 					.from("order_items")
-					.select("*, products(image)")
+					.select("*, products(image, images)")
 					.eq("order_id", id);
 
 				if (itemsError) throw itemsError;
@@ -166,7 +167,7 @@ export default function OrderDetailPage() {
 									<div className="flex items-center gap-4">
 										<div className="h-16 w-16 bg-secondary rounded overflow-hidden flex-shrink-0 border border-border">
 											<img
-												src={resolveProductImage(item.products?.image)}
+												src={resolveProductImage(item.products?.images?.[0] || item.products?.image)}
 												alt={item.product_name}
 												className="w-full h-full object-cover"
 											/>

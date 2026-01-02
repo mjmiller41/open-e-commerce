@@ -94,7 +94,7 @@ export function CartDrawer() {
 							<div key={productId} className="flex gap-4 p-2 rounded-lg hover:bg-muted/30 transition-colors">
 								<div className="w-20 h-20 rounded-md bg-muted overflow-hidden shrink-0 border border-border">
 									<img
-										src={resolveProductImage(product.images?.[0] || product.image)}
+										src={resolveProductImage(product.images?.[0])}
 										alt={product.name}
 										className="w-full h-full object-cover"
 										onError={(e) => {

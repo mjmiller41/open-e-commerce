@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -7,11 +7,30 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error("Missing Supabase environment variables");
 }
 
+declare global {
+  interface Window {
+    _supabase: SupabaseClient;
+  }
+}
+
 /**
  * The Supabase client instance using environment variables for configuration.
  * Throws an error if required environment variables are missing.
+ * Uses a singleton pattern in development to handle HMR correctly.
  */
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = (() => {
+  if (import.meta.env.DEV && window._supabase) {
+    return window._supabase;
+  }
+
+  const client = createClient(supabaseUrl, supabaseAnonKey);
+
+  if (import.meta.env.DEV) {
+    window._supabase = client;
+  }
+
+  return client;
+})();
 
 /**
  * Uploads a product image to the 'products' storage bucket.
@@ -20,6 +39,30 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
  */
 export async function uploadProductImage(file: File): Promise<string> {
   const fileName = `${Date.now()}_${file.name.replace(/\s+/g, "-")}`;
+  const { data, error } = await supabase.storage
+    .from("products")
+    .upload(fileName, file);
+
+  if (error) {
+    throw error;
+  }
+
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from("products").getPublicUrl(data.path);
+
+  return publicUrl;
+}
+/**
+ * Uploads a product image to the 'products' storage bucket with a custom filename.
+ * @param file - The file to upload.
+ * @param fileName - The desired path/filename in storage.
+ * @returns The public URL of the uploaded image.
+ */
+export async function uploadProductImageCustomName(
+  file: File,
+  fileName: string
+): Promise<string> {
   const { data, error } = await supabase.storage
     .from("products")
     .upload(fileName, file);

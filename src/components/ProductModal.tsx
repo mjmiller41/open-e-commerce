@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { supabase, type Product } from '../lib/supabase';
+import { supabase, type Product, uploadProductImageCustomName } from '../lib/supabase';
 import { generateSKU } from '../lib/skuGenerator';
 import { checkSkuExists, getSuggestedSku } from '../lib/productService';
-import { X, Loader2 } from 'lucide-react';
+import { X, Loader2, Upload, Image as ImageIcon } from 'lucide-react';
 import logger from '../lib/logger';
 import taxonomy from '../data/taxonomy.json';
 import { resolveProductImage } from '../lib/utils';
@@ -38,6 +38,7 @@ export function ProductModal({ product, isOpen, onClose, onSave }: ProductModalP
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [suggestedSku, setSuggestedSku] = useState<string | null>(null);
+	const [pendingFiles, setPendingFiles] = useState<File[]>([]);
 
 	useEffect(() => {
 		if (product) {
@@ -48,7 +49,7 @@ export function ProductModal({ product, isOpen, onClose, onSave }: ProductModalP
 				description: '',
 				price: 0,
 				category: '',
-				image: '',
+				image: '', // Deprecated but kept for type compatibility
 				images: [], // Init array
 				on_hand: 0,
 				cost: 0,
@@ -64,6 +65,7 @@ export function ProductModal({ product, isOpen, onClose, onSave }: ProductModalP
 				status: 'draft'
 			});
 		}
+		setPendingFiles([]);
 		setError(null);
 		setSuggestedSku(null);
 		setVisibleCategoriesCount(10);
@@ -83,12 +85,13 @@ export function ProductModal({ product, isOpen, onClose, onSave }: ProductModalP
 
 	const handleGenerateSKU = () => {
 		const newSKU = generateSKU(
-			formData.category || '',
-			formData.brand || '',
-			formData.name || '',
-			formData.variant || ''
+			formData.category || 'UNKNOWN',
+			formData.brand || 'UNKNOWN',
+			formData.name || 'UNKNOWN',
+			formData.variant || 'UNKNOWN'
 		);
 		setFormData(prev => ({ ...prev, sku: newSKU }));
+		return newSKU;
 	};
 
 	if (!isOpen) return null;
@@ -100,31 +103,72 @@ export function ProductModal({ product, isOpen, onClose, onSave }: ProductModalP
 		setSuggestedSku(null);
 
 		try {
-			if (formData.sku) {
+			let currentSku = formData.sku;
+
+			// Auto-generate SKU if empty
+			if (!currentSku) {
+				currentSku = handleGenerateSKU();
+				console.log('Generated SKU:', currentSku);
+			}
+
+			console.log('Current SKU:', currentSku);
+
+			if (currentSku) {
 				const excludeId = product?.id;
-				const exists = await checkSkuExists(formData.sku, excludeId);
+				const exists = await checkSkuExists(currentSku, excludeId);
 				if (exists) {
-					const suggestion = await getSuggestedSku(formData.sku);
+					const suggestion = await getSuggestedSku(currentSku);
 					setSuggestedSku(suggestion);
-					throw new Error(`SKU "${formData.sku}" already exists.`);
+					throw new Error(`SKU "${currentSku}" already exists.`);
 				}
 			}
 
-			if (product && product.id) {
-				// Update existing product
+			let productId = product?.id;
+			const submissionData = { ...formData, sku: currentSku };
+
+			// Step 1: Create or Update initial product data (WITHOUT new images first)
+			// We need the ID for filename generation
+			if (productId) {
 				const { error: updateError } = await supabase
 					.from('products')
-					.update(formData)
-					.eq('id', product.id);
-
+					.update(submissionData)
+					.eq('id', productId);
 				if (updateError) throw updateError;
 			} else {
-				// Create new product
-				const { error: insertError } = await supabase
+				const { data: newProduct, error: insertError } = await supabase
 					.from('products')
-					.insert([formData]);
-
+					.insert([submissionData])
+					.select('id')
+					.single();
 				if (insertError) throw insertError;
+				productId = newProduct.id;
+			}
+
+			// Step 2: Upload Files if any
+			if (pendingFiles.length > 0 && productId) {
+				const uploadedUrls: string[] = [];
+				const existingImageCount = formData.images?.length || 0;
+
+				for (let i = 0; i < pendingFiles.length; i++) {
+					const file = pendingFiles[i];
+					const ext = file.name.split('.').pop();
+					const cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/\s+/g, "-");
+					const sequenceNo = existingImageCount + i + 1;
+					const fileName = `${cleanName}-${productId}-${sequenceNo}.${ext}`;
+
+					const url = await uploadProductImageCustomName(file, fileName);
+					uploadedUrls.push(url);
+				}
+
+				// Step 3: Update product with new image URLs
+				const allImages = [...(formData.images || []), ...uploadedUrls];
+
+				const { error: finalUpdateError } = await supabase
+					.from('products')
+					.update({ images: allImages })
+					.eq('id', productId);
+
+				if (finalUpdateError) throw finalUpdateError;
 			}
 
 			onSave();
@@ -380,27 +424,118 @@ export function ProductModal({ product, isOpen, onClose, onSave }: ProductModalP
 						</div>
 					</div>
 
-					<div className="space-y-2">
-						<label className="text-sm font-medium">Image URLs (one per line)</label>
-						<textarea
-							className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-							value={formData.images?.join('\n') || ''}
-							onChange={e => {
-								const val = e.target.value;
-								const urls = val.split('\n').map(s => s.trim()).filter(Boolean);
-								setFormData({ ...formData, images: urls, image: urls[0] || '' });
-							}}
-							placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"
-						/>
+					<div className="space-y-4">
+						<label className="text-sm font-medium">Product Images</label>
+
+						{/* Existing Images */}
 						{formData.images && formData.images.length > 0 && (
-							<div className="flex gap-2 overflow-x-auto py-2">
-								{formData.images.map((url, i) => (
-									<div key={i} className="relative w-16 h-16 shrink-0 rounded border overflow-hidden">
-										<img src={resolveProductImage(url)} alt="" className="w-full h-full object-cover" />
-									</div>
-								))}
+							<div className="space-y-2">
+								<h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Existing Images</h4>
+								<div className="grid grid-cols-4 sm:grid-cols-5 gap-4">
+									{formData.images.map((url, i) => (
+										<div key={`${url}-${i}`} className="relative group aspect-square rounded-lg border overflow-hidden bg-muted">
+											<img
+												src={resolveProductImage(url)}
+												alt=""
+												className="w-full h-full object-cover"
+											/>
+											<button
+												type="button"
+												onClick={() => {
+													const newImages = [...(formData.images || [])];
+													newImages.splice(i, 1);
+													setFormData({ ...formData, images: newImages });
+												}}
+												className="absolute top-1 right-1 p-1 bg-destructive text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+												title="Remove image"
+											>
+												<X size={12} />
+											</button>
+										</div>
+									))}
+								</div>
 							</div>
 						)}
+
+						{/* New File Upload */}
+						<div className="space-y-2">
+							<h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Add New Images</h4>
+
+							{/* Drag & Drop Area */}
+							<div
+								onDragOver={(e) => {
+									e.preventDefault();
+									e.stopPropagation();
+									e.currentTarget.classList.add('border-primary', 'bg-primary/5');
+								}}
+								onDragLeave={(e) => {
+									e.preventDefault();
+									e.stopPropagation();
+									e.currentTarget.classList.remove('border-primary', 'bg-primary/5');
+								}}
+								onDrop={(e) => {
+									e.preventDefault();
+									e.stopPropagation();
+									e.currentTarget.classList.remove('border-primary', 'bg-primary/5');
+									if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+										const newFiles = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
+										setPendingFiles(prev => [...prev, ...newFiles]);
+									}
+								}}
+								className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer bg-muted/5"
+							>
+								<input
+									type="file"
+									multiple
+									accept="image/*"
+									className="hidden"
+									id="file-upload"
+									onChange={(e) => {
+										const fileList = e.currentTarget.files;
+										if (fileList && fileList.length > 0) {
+											const newFiles = Array.from(fileList);
+											setPendingFiles(prev => [...prev, ...newFiles]);
+											e.currentTarget.value = ''; // Reset so same file can be selected again
+										}
+									}}
+								/>
+								<label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center gap-2">
+									<div className="p-3 bg-secondary rounded-full text-muted-foreground">
+										<Upload size={24} />
+									</div>
+									<div className="space-y-1">
+										<p className="font-medium text-sm">Click to upload or drag and drop</p>
+										<p className="text-xs text-muted-foreground">SVG, PNG, JPG or GIF (max 5MB)</p>
+									</div>
+								</label>
+							</div>
+
+							{/* Pending Files List */}
+							{pendingFiles.length > 0 && (
+								<div className="space-y-2 mt-4">
+									{pendingFiles.map((file, i) => (
+										<div key={`${file.name}-${i}`} className="flex items-center justify-between p-3 bg-card border border-border rounded-md shadow-sm">
+											<div className="flex items-center gap-3 overflow-hidden">
+												<div className="w-10 h-10 rounded bg-muted flex items-center justify-center shrink-0">
+													<ImageIcon size={18} className="text-muted-foreground" />
+												</div>
+												<div className="min-w-0">
+													<p className="text-sm font-medium truncate">{file.name}</p>
+													<p className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(1)} KB</p>
+												</div>
+											</div>
+											<button
+												type="button"
+												onClick={() => setPendingFiles(prev => prev.filter((_, idx) => idx !== i))}
+												className="p-1.5 text-muted-foreground hover:text-destructive transition-colors"
+											>
+												<X size={16} />
+											</button>
+										</div>
+									))}
+								</div>
+							)}
+						</div>
 					</div>
 
 					<div className="space-y-2">

@@ -106,7 +106,7 @@ export function CartPage() {
 						<div key={productId} className="card flex items-center gap-6 p-6">
 							<div className="w-24 h-24 rounded-lg bg-muted object-cover overflow-hidden shrink-0">
 								<img
-									src={resolveProductImage(product.image)}
+									src={resolveProductImage(product.images?.[0])}
 									alt={product.name}
 									className="w-full h-full object-cover mix-blend-multiply dark:mix-blend-normal"
 									onError={(e) => {
