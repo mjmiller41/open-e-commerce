@@ -20,7 +20,7 @@ export function ProductModal({ product, isOpen, onClose, onSave }: ProductModalP
 		description: '',
 		price: 0,
 		category: '',
-		image: '',
+
 		images: [],
 		on_hand: 0,
 		cost: 0,
@@ -49,7 +49,7 @@ export function ProductModal({ product, isOpen, onClose, onSave }: ProductModalP
 				description: '',
 				price: 0,
 				category: '',
-				image: '', // Deprecated but kept for type compatibility
+
 				images: [], // Init array
 				on_hand: 0,
 				cost: 0,

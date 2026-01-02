@@ -89,8 +89,6 @@ export interface Product {
   name: string;
   price: number;
   description: string;
-  /** @deprecated use images instead */
-  image: string;
   images: string[];
   category: string;
   on_hand: number;

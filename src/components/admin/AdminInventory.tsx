@@ -170,7 +170,7 @@ export function AdminInventory() {
 		filteredProducts,
 		{ key: 'name', direction: 'ascending' },
 		{
-			image: (p) => p.images?.[0] || p.image || '',
+			image: (p) => p.images?.[0] || '',
 			images_count: (p) => p.images?.length || 0,
 			tags_string: (p) => p.tags?.join(', ') || ''
 		}
@@ -214,7 +214,7 @@ export function AdminInventory() {
 			brand: p.brand,
 			description: p.description,
 			status: p.status,
-			image: p.image || p.images?.[0] || '',
+			image: p.images?.[0] || '',
 			images: p.images?.join('|'),
 			weight: p.weight,
 			gtin: p.gtin,
@@ -290,8 +290,8 @@ export function AdminInventory() {
 							brand: row.brand || undefined,
 							description: row.description || '',
 							status: (row.status as Product['status']) || 'draft',
-							image: row.image || undefined,
-							images: row.images ? row.images.split('|') : [],
+							// Map legacy image column to images array if needed
+							images: row.images ? row.images.split('|') : (row.image ? [row.image] : []),
 							weight: row.weight ? parseFloat(row.weight) : undefined,
 							gtin: row.gtin || undefined,
 							mpn: row.mpn || undefined,
@@ -530,7 +530,7 @@ export function AdminInventory() {
 								<tr key={product.id} className="hover:bg-muted/30 transition-colors">
 									<td className="px-4 py-3">
 										<Link to={`/admin/product/${product.id}`} className="block w-10 h-10 rounded-md bg-muted overflow-hidden shrink-0 group">
-											<ProductThumbnail key={`${product.id}-${product.images?.length || 0}-${product.image || ''}`} product={product} />
+											<ProductThumbnail key={`${product.id}-${product.images?.length || 0}`} product={product} />
 										</Link>
 									</td>
 									<td className="px-4 py-3 font-medium text-foreground max-w-[200px]">

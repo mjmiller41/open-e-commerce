@@ -25,7 +25,7 @@ export function AdminProductDetail() {
 		description: '',
 		price: 0,
 		category: '',
-		image: '',
+
 		images: [],
 		on_hand: 0,
 		cost: 0,
@@ -183,7 +183,6 @@ export function AdminProductDetail() {
 			setFormData(prev => ({
 				...prev,
 				images: newImages,
-				image: prev.image || url
 			}));
 		} catch (err) {
 			logger.error('Error uploading image:', err);
@@ -460,7 +459,7 @@ export function AdminProductDetail() {
 								value={formData.images?.join('\n') || ''}
 								onChange={e => {
 									const urls = e.target.value.split('\n').map(s => s.trim()).filter(Boolean);
-									setFormData({ ...formData, images: urls, image: urls[0] || '' });
+									setFormData({ ...formData, images: urls });
 								}}
 							/>
 							{brokenImageIndices.size > 0 && (
