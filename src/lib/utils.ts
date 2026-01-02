@@ -18,6 +18,7 @@ export function resolveProductImage(
   imagePath: string | null | undefined
 ): string {
   const baseUrl = import.meta.env.BASE_URL;
+  console.log("imagePath:", imagePath);
   if (!imagePath) return `${baseUrl}logo.png`;
   if (imagePath.startsWith("http")) return imagePath; // Legacy remote URLs
 
