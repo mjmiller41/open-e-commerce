@@ -35,6 +35,11 @@ export function ProductList() {
 	const [sortOption, setSortOption] = useState<SortOption>('newest');
 	const [categories, setCategories] = useState<CategoryNode[]>([]);
 
+	// Pagination State
+	const [page, setPage] = useState(1);
+	const PRODUCTS_PER_PAGE = 12;
+	const [totalCount, setTotalCount] = useState(0);
+
 	useEffect(() => {
 		async function loadCategories() {
 			const rawCategories = await fetchCategories();
@@ -44,10 +49,16 @@ export function ProductList() {
 		loadCategories();
 	}, []);
 
+	// useEffect(() => {
+	// 	setPage(1);
+	// }, [categoryPath, searchTerm, filters, sortOption]);
+
 	useEffect(() => {
 		async function fetchProducts() {
 			setLoading(true);
-			let query = supabase.from('products').select('*').eq('status', 'active');
+
+			// Start building the query
+			let query = supabase.from('products').select('*', { count: 'exact' }).eq('status', 'active');
 
 			// If URL has a category path, it takes precedence as the "base" context, 
 			// but we can refine it further with the local filter or override it.
@@ -100,17 +111,22 @@ export function ProductList() {
 				query = query.order('id', { ascending: false });
 			}
 
+			// Apply Pagination
+			const from = (page - 1) * PRODUCTS_PER_PAGE;
+			const to = from + PRODUCTS_PER_PAGE - 1;
+			query = query.range(from, to);
 
-			const { data, error } = await query;
+			const { data, count, error } = await query;
 			if (error) {
 				logger.error('Error fetching products:', error);
 			} else {
 				setProducts(data);
+				setTotalCount(count || 0);
 			}
 			setLoading(false);
 		}
 		fetchProducts();
-	}, [categoryPath, searchTerm, filters, sortOption]);
+	}, [categoryPath, searchTerm, filters, sortOption, page]);
 
 	// Generate breadcrumbs
 	const renderBreadcrumbs = () => {
@@ -151,6 +167,8 @@ export function ProductList() {
 		? decodeURIComponent(categoryPath.split('/').pop() || 'Category')
 		: 'Welcome to Open E-Commerce';
 
+	const totalPages = Math.ceil(totalCount / PRODUCTS_PER_PAGE);
+
 	return (
 		<div className="animate-in fade-in duration-700">
 			{renderBreadcrumbs()}
@@ -167,9 +185,9 @@ export function ProductList() {
 			</div>
 
 			<SearchFilterBar
-				onSearch={setSearchTerm}
-				onFilterChange={setFilters}
-				onSortChange={setSortOption}
+				onSearch={(term) => { setSearchTerm(term); setPage(1); }}
+				onFilterChange={(newFilters) => { setFilters(newFilters); setPage(1); }}
+				onSortChange={(sort) => { setSortOption(sort); setPage(1); }}
 				categories={categories}
 			/>
 
@@ -187,18 +205,44 @@ export function ProductList() {
 					</p>
 				</div>
 			) : (
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-[var(--grid-spacing-horizontal)] gap-y-[var(--grid-spacing-vertical)]">
-					{products.map(product => (
-						<ProductCard
-							key={product.id}
-							product={product}
-							cartQuantity={cartMap.get(product.id!) || 0}
-							onAddToCart={addToCart}
-							onUpdateQuantity={updateQuantity}
-							onRemoveFromCart={removeFromCart}
-						/>
-					))}
-				</div>
+				<>
+					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-[var(--grid-spacing-horizontal)] gap-y-[var(--grid-spacing-vertical)] mb-8">
+						{products.map((product, index) => (
+							<ProductCard
+								key={product.id}
+								product={product}
+								cartQuantity={cartMap.get(product.id!) || 0}
+								onAddToCart={addToCart}
+								onUpdateQuantity={updateQuantity}
+								onRemoveFromCart={removeFromCart}
+								priority={index < 2} // First 2 products load eagerly
+							/>
+						))}
+					</div>
+
+					{/* Pagination Controls */}
+					{totalPages > 1 && (
+						<div className="flex justify-center items-center gap-4 mt-8 pb-8">
+							<button
+								onClick={() => setPage(p => Math.max(1, p - 1))}
+								disabled={page === 1}
+								className="px-4 py-2 text-sm font-medium border border-input rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
+							>
+								Previous
+							</button>
+							<span className="text-sm text-muted-foreground">
+								Page {page} of {totalPages}
+							</span>
+							<button
+								onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+								disabled={page === totalPages}
+								className="px-4 py-2 text-sm font-medium border border-input rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
+							>
+								Next
+							</button>
+						</div>
+					)}
+				</>
 			)}
 		</div>
 	);

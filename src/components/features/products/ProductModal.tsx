@@ -435,9 +435,10 @@ export function ProductModal({ product, isOpen, onClose, onSave }: ProductModalP
 									{formData.images.map((url, i) => (
 										<div key={`${url}-${i}`} className="relative group aspect-square rounded-lg border overflow-hidden bg-muted">
 											<img
-												src={resolveProductImage(url)}
+												src={resolveProductImage(url, { width: 1200 })}
 												alt=""
 												className="w-full h-full object-cover"
+												loading="lazy"
 											/>
 											<button
 												type="button"

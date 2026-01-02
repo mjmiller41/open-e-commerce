@@ -23,6 +23,8 @@ interface ProductCardProps {
 	onUpdateQuantity: (productId: number, delta: number) => void;
 	/** Callback to remove the product from the cart. */
 	onRemoveFromCart: (productId: number) => void;
+	/** Whether this card is high priority (e.g. above the fold) for loading. triggers eager loading. */
+	priority?: boolean;
 }
 
 /**
@@ -32,7 +34,7 @@ interface ProductCardProps {
  * @param props - The component props.
  * @returns The rendered product card.
  */
-export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuantity, onRemoveFromCart }: ProductCardProps) {
+export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuantity, onRemoveFromCart, priority = false }: ProductCardProps) {
 	const categorySegments = product.category ? product.category.split('>').map(s => s.trim()) : [];
 	const leafCategory = categorySegments.length > 0 ? categorySegments[categorySegments.length - 1] : product.category;
 	const categoryUrl = categorySegments.length > 0
@@ -51,10 +53,10 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 			>
 				{/* Primary Image */}
 				<img
-					src={resolveProductImage(product.images?.[0])}
+					src={resolveProductImage(product.images?.[0], { width: 500 })}
 					alt={product.name}
 					className="w-full h-full object-cover transition-all duration-500 mix-blend-multiply dark:mix-blend-normal group-hover:scale-105"
-					loading="lazy"
+					loading={priority ? "eager" : "lazy"}
 					onError={(e) => {
 						e.currentTarget.src = `${import.meta.env.BASE_URL}logo.png`;
 						e.currentTarget.onerror = null;
@@ -64,7 +66,7 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 				{/* Secondary Image (Absolute overlay) */}
 				{product.images && product.images.length > 1 && (
 					<img
-						src={resolveProductImage(product.images[1])}
+						src={resolveProductImage(product.images[1], { width: 500 })}
 						alt={product.name}
 						className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 mix-blend-multiply dark:mix-blend-normal opacity-0 group-hover:opacity-100"
 						style={{ opacity: "calc(var(--card-show-secondary-image, 0) * 1)" } as React.CSSProperties}
