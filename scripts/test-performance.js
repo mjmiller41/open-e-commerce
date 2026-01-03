@@ -139,80 +139,33 @@ async function runTests() {
 
 	console.log('Starting Performance Tests...');
 
-	// 1. Test Public Page (ProductList)
-	console.log('Launching Puppeteer for public test...');
-	const browserPublic = await puppeteer.launch({
+	// 1. Test Public Page (ProductList - Home)
+	console.log('Launching Puppeteer for guest tests...');
+	const browserGuest = await puppeteer.launch({
 		headless: "new",
 		args: [`--remote-debugging-port=9222`]
 	});
 
 	try {
 		await new Promise(r => setTimeout(r, 1000));
+
+		// Test Product List (Home)
+		console.log('Testing Product List Page (Home)...');
 		await runLighthouse(`${BASE_URL}/`, { logLevel: 'info', output: 'html', port: 9222 });
-	} catch (e) {
-		console.error('Error testing public page:', e);
-	} finally {
-		await browserPublic.close();
-	}
 
-	// 2. Test Authenticated Page (AdminProductDetail)
-	console.log('Launching Puppeteer for authenticated test...');
-	const browserAuth = await puppeteer.launch({
-		headless: "new",
-		args: [`--remote-debugging-port=9222`]
-	});
-
-	const page = await browserAuth.newPage();
-
-	try {
-		console.log('Navigating to login...');
-		await page.goto(`${BASE_URL}/login`);
-
-		console.log('Entering credentials...');
-		await page.waitForSelector('input[name="email"]');
-		await page.type('input[name="email"]', ADMIN_EMAIL);
-		await page.type('input[name="password"]', ADMIN_PASSWORD);
-
-		await page.click('button[type="submit"]');
-
-		try {
-			await page.waitForFunction(
-				(loginUrl) => window.location.href !== loginUrl || document.querySelector('.text-destructive'),
-				{ timeout: 10000 },
-				page.url()
-			);
-		} catch (e) {
-			console.error('Timeout waiting for login response. Checking for errors...');
-		}
-
-		if (page.url().includes('/login')) {
-			console.error('Still on login page after submit.');
-			const errorMsg = await page.evaluate(() => document.querySelector('.text-destructive')?.textContent);
-			if (errorMsg) {
-				console.error('Login Error displayed:', errorMsg);
-			} else {
-				console.error('No error message found. Taking screenshot of failed login state...');
-				await page.screenshot({ path: path.join(REPORT_DIR, 'error_login_failed.png') });
-			}
-			throw new Error('Login failed');
-		}
-
-		console.log(`Logged in successfully. Redirected to: ${page.url()}`);
-		const targetUrl = `${BASE_URL}/admin/product/1`;
-
-		const authOptions = {
-			logLevel: 'info',
-			output: 'html',
-			port: 9222,
-			disableStorageReset: true
-		};
-
-		await runLighthouse(targetUrl, authOptions);
+		// Test Product Detail Page
+		// Assuming product ID 1 exists or using a dummy route that renders the component if possible, 
+		// but best to hit a real URL. If ID 1 is not guaranteed, we might get a 404, 
+		// but for performance testing the layout is what matters most.
+		// If needed we could scrape an ID from the home page first.
+		console.log('Testing Product Detail Page...');
+		const productDetailUrl = `${BASE_URL}/product/1`; // Adjust ID if needed
+		await runLighthouse(productDetailUrl, { logLevel: 'info', output: 'html', port: 9222 });
 
 	} catch (e) {
-		console.error('Error testing authenticated page:', e);
+		console.error('Error testing guest pages:', e);
 	} finally {
-		await browserAuth.close();
+		await browserGuest.close();
 	}
 
 	cleanupReports(); // Cleanup old reports

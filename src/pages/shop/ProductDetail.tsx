@@ -117,9 +117,10 @@ export function ProductDetail() {
 				<div className="space-y-4">
 					<div className="rounded-2xl bg-muted overflow-hidden aspect-square border border-border">
 						<img
-							src={resolveProductImage(activeImage)}
+							src={resolveProductImage(activeImage, { width: 1200, height: 1200, resize: 'contain' })}
 							alt={product.name}
 							className="w-full h-full object-cover mix-blend-multiply dark:mix-blend-normal"
+							loading="eager"
 							onError={(e) => {
 								e.currentTarget.src = `${import.meta.env.BASE_URL}logo.png`;
 								e.currentTarget.onerror = null;
@@ -135,9 +136,10 @@ export function ProductDetail() {
 									className={`relative w-24 h-24 rounded-lg overflow-hidden border-2 transition-all shrink-0 ${activeImage === img ? 'border-primary ring-2 ring-primary/20' : 'border-transparent hover:border-muted-foreground/50'}`}
 								>
 									<img
-										src={resolveProductImage(img)}
+										src={resolveProductImage(img, { width: 150, height: 150, resize: 'contain' })}
 										alt={`${product.name} view ${idx + 1}`}
 										className="w-full h-full object-cover"
+										loading="lazy"
 										onError={(e) => {
 											e.currentTarget.src = `${import.meta.env.BASE_URL}logo.png`;
 											e.currentTarget.onerror = null;

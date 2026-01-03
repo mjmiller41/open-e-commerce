@@ -3,7 +3,6 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase, type Product, uploadProductImage } from '../../lib/supabase';
 import { ArrowLeft, Save, Trash2, Loader2, Image as ImageIcon, AlertCircle, ImageOff } from 'lucide-react';
 import logger from '../../lib/logger';
-import taxonomy from '../../data/taxonomy.json';
 import { generateSKU } from '../../lib/skuGenerator';
 import { checkSkuExists, getSuggestedSku } from '../../lib/productService';
 import { resolveProductImage } from '../../lib/utils';
@@ -39,6 +38,13 @@ export function AdminProductDetail() {
 		status: 'active',
 		variant: ''
 	});
+
+	const [taxonomy, setTaxonomy] = useState<string[]>([]);
+	useEffect(() => {
+		import('../../data/taxonomy.json').then((mod) => {
+			setTaxonomy(mod.default);
+		});
+	}, []);
 
 	const [visibleCategoriesCount, setVisibleCategoriesCount] = useState(10);
 

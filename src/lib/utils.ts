@@ -35,6 +35,7 @@ export function resolveProductImage(
           width: options.width,
           height: options.height,
           resize: options.resize,
+          format: "webp" as any,
         }
       : undefined,
   });

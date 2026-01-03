@@ -4,7 +4,6 @@ import { generateSKU } from '../../../lib/skuGenerator';
 import { checkSkuExists, getSuggestedSku } from '../../../lib/productService';
 import { X, Loader2, Upload, Image as ImageIcon } from 'lucide-react';
 import logger from '../../../lib/logger';
-import taxonomy from '../../../data/taxonomy.json';
 import { resolveProductImage } from '../../../lib/utils';
 
 interface ProductModalProps {
@@ -70,6 +69,15 @@ export function ProductModal({ product, isOpen, onClose, onSave }: ProductModalP
 		setSuggestedSku(null);
 		setVisibleCategoriesCount(10);
 	}, [product, isOpen]);
+
+	const [taxonomy, setTaxonomy] = useState<string[]>([]);
+	useEffect(() => {
+		if (isOpen) {
+			import('../../../data/taxonomy.json').then((mod) => {
+				setTaxonomy(mod.default);
+			});
+		}
+	}, [isOpen]);
 
 	const [visibleCategoriesCount, setVisibleCategoriesCount] = useState(10);
 	const filteredCategories = taxonomy

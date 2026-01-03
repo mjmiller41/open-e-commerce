@@ -55,6 +55,8 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 				<img
 					src={resolveProductImage(product.images?.[0], { width: 500, height: 500, resize: 'contain' })}
 					alt={product.name}
+					width={500}
+					height={500}
 					className="w-full h-full object-cover p-4 transition-all duration-500 mix-blend-multiply dark:mix-blend-normal group-hover:scale-105"
 					loading={priority ? "eager" : "lazy"}
 					onError={(e) => {
@@ -68,6 +70,8 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 					<img
 						src={resolveProductImage(product.images[1], { width: 500, height: 500, resize: 'contain' })}
 						alt={product.name}
+						width={500}
+						height={500}
 						className="absolute inset-0 w-full h-full object-cover p-4 transition-opacity duration-500 mix-blend-multiply dark:mix-blend-normal opacity-0 group-hover:opacity-100"
 						style={{ opacity: "calc(var(--card-show-secondary-image, 0) * 1)" } as React.CSSProperties}
 						loading="lazy"
