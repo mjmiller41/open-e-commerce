@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { supabase, type Product } from '../../lib/supabase';
 import logger from '../../lib/logger';
 import { ProductCard } from '../../components/features/products/ProductCard';
 import { useCart } from '../../context/CartContext';
 import { useParams, Link } from 'react-router-dom';
-import { ChevronRight, Home } from 'lucide-react';
+import { ChevronRight, Home, ArrowUp } from 'lucide-react';
 import { SearchFilterBar, type FilterState, type SortOption } from '../../components/features/products/SearchFilterBar';
 import { fetchCategories, buildCategoryTree, type CategoryNode } from '../../lib/categoryUtils';
 
@@ -18,17 +18,12 @@ import { fetchCategories, buildCategoryTree, type CategoryNode } from '../../lib
 export function ProductList() {
 	const [products, setProducts] = useState<Product[] | null>(null);
 	const [loading, setLoading] = useState(true);
+	const [hasMore, setHasMore] = useState(false);
 	const { cartItems, addToCart, updateQuantity, removeFromCart } = useCart();
 	const params = useParams();
-	// 'category' is the fixed part of the route, '*' is the wildcard part captured by react-router
-	// However, in our route definition we'll likely use "category/*" so the param name for the wildcard might vary 
-	// dependent on how we define it in App.tsx. 
-	// If we define path="category/*", the param dict key is "*".
 	const categoryPath = params['*'];
 
 	const cartMap = new Map(cartItems.map(item => [item.productId, item.quantity]));
-
-	// ... imports remain the same, just adding the new component ...
 
 	const [searchTerm, setSearchTerm] = useState('');
 	const [filters, setFilters] = useState<FilterState>({ minPrice: '', maxPrice: '', category: '' });
@@ -37,8 +32,19 @@ export function ProductList() {
 
 	// Pagination State
 	const [page, setPage] = useState(1);
-	const PRODUCTS_PER_PAGE = 12;
-	const [totalCount, setTotalCount] = useState(0);
+	const PRODUCTS_PER_PAGE = 9;
+
+	// Ref for the sentinel element
+	const observerTarget = useRef<HTMLDivElement>(null);
+
+	// Track previous category for reset
+	const [prevCategory, setPrevCategory] = useState(categoryPath);
+	if (categoryPath !== prevCategory) {
+		setPrevCategory(categoryPath);
+		setPage(1);
+		setProducts([]);
+		setLoading(true);
+	}
 
 	useEffect(() => {
 		async function loadCategories() {
@@ -49,9 +55,10 @@ export function ProductList() {
 		loadCategories();
 	}, []);
 
-	// useEffect(() => {
-	// 	setPage(1);
-	// }, [categoryPath, searchTerm, filters, sortOption]);
+	// Removed useEffect that resets page on filters change as it caused render loops. 
+	// Filter changes are now handled in SearchFilterBar callbacks.
+	// Category changes are handled by the render-time check above.
+
 
 	useEffect(() => {
 		async function fetchProducts() {
@@ -59,13 +66,6 @@ export function ProductList() {
 
 			// Start building the query
 			let query = supabase.from('products').select('*', { count: 'exact' }).eq('status', 'active');
-
-			// If URL has a category path, it takes precedence as the "base" context, 
-			// but we can refine it further with the local filter or override it.
-			// Given user request for "Local Filter", we treat the dropdown as an additional filter.
-			// However, usually detailed filters refine the broader context.
-			// IF filter.category is set, use that.
-			// IF NOT, use URL category.
 
 			let activeCategoryIdentifier = filters.category;
 			if (!activeCategoryIdentifier && categoryPath) {
@@ -78,7 +78,6 @@ export function ProductList() {
 			}
 
 			if (searchTerm) {
-				// Search in name or description
 				query = query.or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
 			}
 
@@ -106,12 +105,11 @@ export function ProductList() {
 					break;
 			}
 
-			// Apply fallback sort if specific sort wasn't applied effectively (though the switch covers it)
+			// Apply fallback sort
 			if (sortOption === 'newest') {
 				query = query.order('id', { ascending: false });
 			}
 
-			// Apply Pagination
 			const from = (page - 1) * PRODUCTS_PER_PAGE;
 			const to = from + PRODUCTS_PER_PAGE - 1;
 			query = query.range(from, to);
@@ -120,15 +118,65 @@ export function ProductList() {
 			if (error) {
 				logger.error('Error fetching products:', error);
 			} else {
-				setProducts(data);
-				setTotalCount(count || 0);
+				if (page === 1) {
+					setProducts(data);
+				} else {
+					setProducts(prev => (prev ? [...prev, ...data] : data));
+				}
+
+				// Check if there are more products to load
+				if (count !== null) {
+					setHasMore(to < count - 1);
+				}
 			}
 			setLoading(false);
 		}
 		fetchProducts();
-	}, [categoryPath, searchTerm, filters, sortOption, page]);
+	}, [page, categoryPath, searchTerm, filters, sortOption]);
 
-	// Generate breadcrumbs
+	// Intersection Observer for infinite scroll
+	useEffect(() => {
+		const observer = new IntersectionObserver(
+			entries => {
+				if (entries[0].isIntersecting && hasMore && !loading) {
+					setPage(prev => prev + 1);
+				}
+			},
+			{ threshold: 0.1 }
+		);
+
+		const currentTarget = observerTarget.current;
+		if (currentTarget) {
+			observer.observe(currentTarget);
+		}
+
+		return () => {
+			if (currentTarget) {
+				observer.unobserve(currentTarget);
+			}
+		};
+	}, [hasMore, loading]);
+
+	// Back to Top Button Logic
+	const [showScrollTop, setShowScrollTop] = useState(false);
+
+	useEffect(() => {
+		const handleScroll = () => {
+			if (window.scrollY > 300) {
+				setShowScrollTop(true);
+			} else {
+				setShowScrollTop(false);
+			}
+		};
+
+		window.addEventListener('scroll', handleScroll);
+		return () => window.removeEventListener('scroll', handleScroll);
+	}, []);
+
+	const scrollToTop = () => {
+		window.scrollTo({ top: 0, behavior: 'smooth' });
+	};
+
 	const renderBreadcrumbs = () => {
 		if (!categoryPath) return null;
 
@@ -167,8 +215,6 @@ export function ProductList() {
 		? decodeURIComponent(categoryPath.split('/').pop() || 'Category')
 		: 'Welcome to Open E-Commerce';
 
-	const totalPages = Math.ceil(totalCount / PRODUCTS_PER_PAGE);
-
 	return (
 		<div className="animate-in fade-in duration-700">
 			{renderBreadcrumbs()}
@@ -185,20 +231,47 @@ export function ProductList() {
 			</div>
 
 			<SearchFilterBar
-				onSearch={(term) => { setSearchTerm(term); setPage(1); }}
-				onFilterChange={(newFilters) => { setFilters(newFilters); setPage(1); }}
-				onSortChange={(sort) => { setSortOption(sort); setPage(1); }}
+				onSearch={(term) => {
+					if (term !== searchTerm) {
+						setSearchTerm(term);
+						setPage(1);
+						setProducts([]);
+						setLoading(true);
+					}
+				}}
+				onFilterChange={(newFilters) => {
+					// Simple shallow check for filter changes
+					const isDifferent =
+						newFilters.category !== filters.category ||
+						newFilters.minPrice !== filters.minPrice ||
+						newFilters.maxPrice !== filters.maxPrice;
+
+					if (isDifferent) {
+						setFilters(newFilters);
+						setPage(1);
+						setProducts([]);
+						setLoading(true);
+					}
+				}}
+				onSortChange={(sort) => {
+					if (sort !== sortOption) {
+						setSortOption(sort);
+						setPage(1);
+						setProducts([]);
+						setLoading(true);
+					}
+				}}
 				categories={categories}
 			/>
 
-			{loading ? (
+			{loading && page === 1 ? (
 				<div className="text-center py-16">
 					<div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" role="status">
 						<span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">Loading...</span>
 					</div>
 					<p className="mt-4 text-muted-foreground">Loading products...</p>
 				</div>
-			) : !products || products.length === 0 ? (
+			) : !products || (products.length === 0 && !loading) ? (
 				<div className="text-center py-16 px-4 border border-dashed border-border rounded-lg">
 					<p style={{ marginBottom: '1rem' }}>
 						No products found {categoryPath ? 'in this category' : 'in the database'}.
@@ -209,38 +282,33 @@ export function ProductList() {
 					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-[var(--grid-spacing-horizontal)] gap-y-[var(--grid-spacing-vertical)] mb-8">
 						{products.map((product, index) => (
 							<ProductCard
-								key={product.id}
+								key={`${product.id}-${index}`} // Fallback uniqueness
 								product={product}
 								cartQuantity={cartMap.get(product.id!) || 0}
 								onAddToCart={addToCart}
 								onUpdateQuantity={updateQuantity}
 								onRemoveFromCart={removeFromCart}
-								priority={index < 2} // First 2 products load eagerly
+								priority={index < 2}
 							/>
 						))}
 					</div>
 
-					{/* Pagination Controls */}
-					{totalPages > 1 && (
-						<div className="flex justify-center items-center gap-4 mt-8 pb-8">
-							<button
-								onClick={() => setPage(p => Math.max(1, p - 1))}
-								disabled={page === 1}
-								className="px-4 py-2 text-sm font-medium border border-input rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
-							>
-								Previous
-							</button>
-							<span className="text-sm text-muted-foreground">
-								Page {page} of {totalPages}
-							</span>
-							<button
-								onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-								disabled={page === totalPages}
-								className="px-4 py-2 text-sm font-medium border border-input rounded-md hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
-							>
-								Next
-							</button>
-						</div>
+					{/* Sentinel element for infinite scroll */}
+					<div ref={observerTarget} className="h-10 w-full flex justify-center items-center mt-4">
+						{loading && page > 1 && (
+							<div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-solid border-primary border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]" />
+						)}
+					</div>
+
+					{/* Back to Top Button */}
+					{showScrollTop && (
+						<button
+							onClick={scrollToTop}
+							className="fixed bottom-8 right-8 p-3 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-all duration-300 z-50 animate-in fade-in slide-in-from-bottom-4"
+							aria-label="Scroll to top"
+						>
+							<ArrowUp size={24} />
+						</button>
 					)}
 				</>
 			)}

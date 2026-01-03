@@ -48,14 +48,14 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 		<div className="card flex flex-col h-full group hover:shadow-lg hover:border-accent/50 transition-all duration-300 relative">
 			<Link
 				to={`/product/${product.id}`}
-				className="relative bg-muted overflow-hidden block"
+				className="relative bg-white dark:bg-muted overflow-hidden block"
 				style={{ aspectRatio: "var(--card-image-ratio, auto)" } as React.CSSProperties}
 			>
 				{/* Primary Image */}
 				<img
-					src={resolveProductImage(product.images?.[0], { width: 500 })}
+					src={resolveProductImage(product.images?.[0], { width: 500, height: 500, resize: 'contain' })}
 					alt={product.name}
-					className="w-full h-full object-cover transition-all duration-500 mix-blend-multiply dark:mix-blend-normal group-hover:scale-105"
+					className="w-full h-full object-cover p-4 transition-all duration-500 mix-blend-multiply dark:mix-blend-normal group-hover:scale-105"
 					loading={priority ? "eager" : "lazy"}
 					onError={(e) => {
 						e.currentTarget.src = `${import.meta.env.BASE_URL}logo.png`;
@@ -66,9 +66,9 @@ export function ProductCard({ product, cartQuantity, onAddToCart, onUpdateQuanti
 				{/* Secondary Image (Absolute overlay) */}
 				{product.images && product.images.length > 1 && (
 					<img
-						src={resolveProductImage(product.images[1], { width: 500 })}
+						src={resolveProductImage(product.images[1], { width: 500, height: 500, resize: 'contain' })}
 						alt={product.name}
-						className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 mix-blend-multiply dark:mix-blend-normal opacity-0 group-hover:opacity-100"
+						className="absolute inset-0 w-full h-full object-cover p-4 transition-opacity duration-500 mix-blend-multiply dark:mix-blend-normal opacity-0 group-hover:opacity-100"
 						style={{ opacity: "calc(var(--card-show-secondary-image, 0) * 1)" } as React.CSSProperties}
 						loading="lazy"
 					/>
